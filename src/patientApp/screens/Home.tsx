@@ -117,7 +117,7 @@ export default function PatientAppHome() {
     comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages),
   ].join(' ') : '';
   const recentGoals = [...(linked?.coaching.weekly_goals ?? [])].sort((a, b) => Number(b.week) - Number(a.week)).slice(0, 4);
-  const goalLabel = (goal?: string | null) => goal ? goal.charAt(0).toUpperCase() + goal.slice(1) : '—';
+  const goalLabel = (goal?: string | number | null) => { const text = goal == null ? '' : String(goal); return text ? text.charAt(0).toUpperCase() + text.slice(1) : '—'; };
   const coachingText = recentGoals.map((goal) => `${goalLabel(goal.goal)}: ${patientGoalStatus(goal.goal_met, messages)}`).join('. ');
   const wearableSource = linked ? substitute(messages.linkedWearableSource, { id: String(linked.wearable.person_id) }) : '';
   const coachingSource = linked ? substitute(messages.linkedCoachingSource, { id: linked.coaching.participant_id }) : '';
