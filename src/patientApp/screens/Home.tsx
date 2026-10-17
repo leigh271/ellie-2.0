@@ -116,7 +116,9 @@ export default function PatientAppHome() {
     }),
     comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages),
   ].join(' ') : '';
-  const coachingText = linked?.coaching.weekly_goals.map((goal) => `${goal.goal}: ${patientGoalStatus(goal.goal_met, messages)}`).join('. ') ?? '';
+  const recentGoals = [...(linked?.coaching.weekly_goals ?? [])].sort((a, b) => Number(b.week) - Number(a.week)).slice(0, 4);
+  const goalLabel = (goal?: string | null) => goal ? goal.charAt(0).toUpperCase() + goal.slice(1) : '—';
+  const coachingText = recentGoals.map((goal) => `${goalLabel(goal.goal)}: ${patientGoalStatus(goal.goal_met, messages)}`).join('. ');
   const wearableSource = linked ? substitute(messages.linkedWearableSource, { id: String(linked.wearable.person_id) }) : '';
   const coachingSource = linked ? substitute(messages.linkedCoachingSource, { id: linked.coaching.participant_id }) : '';
 
@@ -162,8 +164,8 @@ export default function PatientAppHome() {
       <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
     </AppCard>}
     {linked && <AppCard title={messages.coachingGoalsHeading} text={`${coachingText} ${coachingSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-coaching-goals">
-      {linked.coaching.weekly_goals.map((goal, index) => <div className="patient-app-goal-row" key={`${goal.week}-${goal.topic}-${index}`}>
-        <span>{goal.goal ?? '—'}</span><span className="patient-app-status">{patientGoalStatus(goal.goal_met, messages)}</span>
+      {recentGoals.map((goal, index) => <div className="patient-app-goal-row" key={`${goal.week}-${goal.topic}-${index}`}>
+        <span>{goalLabel(goal.goal)}</span><span className="patient-app-status">{patientGoalStatus(goal.goal_met, messages)}</span>
       </div>)}
       <p className="patient-app-caption">{coachingSource}</p>
       <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
