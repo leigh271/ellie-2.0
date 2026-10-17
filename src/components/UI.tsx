@@ -82,12 +82,13 @@ export function ErrorState({ message, retry }: { message: string; retry?: () => 
 }
 
 export type TrendItem = Record<string, string | number | null>;
-export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date' }: {
+export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date', formatValue }: {
   data: TrendItem[];
   lines: Array<{ key: string; label: string; color?: string; dashed?: boolean }>;
   baseline?: number;
   height?: number;
   xKey?: string;
+  formatValue?: (value: number) => string;
 }) {
   return (
     <div className="chart" style={{ height }}>
@@ -95,8 +96,8 @@ export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date' 
         <ComposedChart data={data} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}>
           <CartesianGrid stroke="#f3e8ed" vertical={false} />
           <XAxis dataKey={xKey} tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-          <YAxis tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} width={48} />
-          <Tooltip contentStyle={{ borderRadius: 12, borderColor: '#f1e6ec', fontSize: 12 }} />
+          <YAxis tickFormatter={formatValue} tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} width={48} />
+          <Tooltip formatter={formatValue ? (value) => formatValue(Number(value)) : undefined} contentStyle={{ borderRadius: 12, borderColor: '#f1e6ec', fontSize: 12 }} />
           {lines.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
           {baseline !== undefined && <ReferenceLine y={baseline} stroke="#b69eab" strokeDasharray="5 5" label={{ value: 'Baseline', position: 'insideTopRight', fill: '#817680', fontSize: 10 }} />}
           {lines.map((line) => <Line key={line.key} type="monotone" dataKey={line.key} name={line.label} stroke={line.color ?? '#f65398'} strokeWidth={2.4} dot={false} connectNulls={false} strokeDasharray={line.dashed ? '5 4' : undefined} />)}

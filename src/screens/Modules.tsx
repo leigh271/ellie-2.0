@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, ErrorBar, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, ErrorBar, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useDemoStore } from '../state/DemoStore';
 import { useRemote } from '../lib/useRemote';
 import { getApi, postApi } from '../lib/api';
 import { COACH_FAMILY, scoreCoaching } from '../lib/miScore';
 import { BentoGrid, DatasetCard, EmptyState, ErrorState, LoadingTile, Pill, SourceBadge, SourceNote, Stat, Tile, TrendChart } from '../components/UI';
-import { useDataset } from '../data/datasets';
+import { datasetFieldLabel, formatDatasetNumber, useDataset } from '../data/datasets';
 import type { CoachingSummary as C5CoachingDataset, FatigueDataset, LifeSnapsDataset, NhanesDataset, ProgramCallsDataset } from '../data/datasets';
 
 type C3Patient = { survivorId: string; displayName: string; status: string; headline: string; urgent?: boolean; updatedAt?: string };
@@ -37,6 +37,14 @@ type CoachLine = {
 type DemoCall = { call_id: string; language: string; goal_topic: string; demo_tag?: string; duration_min: number; labelled?: 'yes' | 'no'; lines: CoachLine[] };
 type Calls = { about: string; calls: DemoCall[] };
 type TaggedLine = CoachLine & { tag: string | null; gold: string | null; confidence?: number; flag?: string | null; reason?: string };
+type CoachingRecommendation = {
+  trigger: string;
+  line_number: number;
+  time_in_call: string;
+  quote: string;
+  cue?: string;
+  say?: string;
+};
 const EMPTY_CALLS: DemoCall[] = [];
 
 function Heading({ eyebrow, title, subtitle, action }: { eyebrow: string; title: string; subtitle: string; action?: ReactNode }) {
@@ -97,30 +105,34 @@ export function C3Page() {
         <div className="dataset-inner-grid">
           <section>
             <h3>Steps by self-rated day</h3>
-            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={fatigue.data.by_day_rating} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="rating" tick={{ fontSize: 11 }} /><YAxis width={58} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="steps" name="Steps" fill="#f65398" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={fatigue.data.by_day_rating} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="rating" tickFormatter={datasetFieldLabel} tick={{ fontSize: 11 }} /><YAxis width={58} tickFormatter={(value: number) => formatDatasetNumber(value, 0)} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [formatDatasetNumber(Number(value), 0), 'Steps']} /><Bar dataKey="steps" name="Steps" fill="#f65398" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></div>
             {(() => {
               const steps = fatigue.data.within_person.find((row) => row.metric === 'steps');
-              return steps && <p className="callout">On self-rated bad days, steps averaged {steps.bad_day_pct_vs_own_average}% vs each person's own average ({steps.people} people).</p>;
+              if (!steps) return null;
+              const change = steps.bad_day_pct_vs_own_average;
+              const direction = change > 0 ? 'above' : change < 0 ? 'below' : 'at';
+              const amount = change === 0 ? '' : `${formatDatasetNumber(Math.abs(change), 1)}% `;
+              return <p className="callout">On self-rated bad days, steps were {amount}{direction} each person's own average ({steps.people} people).</p>;
             })()}
             <p className="tiny muted">Comparing different people mixes in who they are; the within-person rows are the fairer comparison.</p>
           </section>
           <section>
             <h3>Within the same person</h3>
-            <div className="table-scroll"><table className="data-table">
+            <div className="table-scroll"><table className="data-table wrap-data-table">
               <thead><tr><th>Metric</th><th>People</th><th>Bad day vs own average</th><th>Good day vs own average</th></tr></thead>
-              <tbody>{fatigue.data.within_person.map((row) => <tr key={row.metric}><th>{row.metric.replaceAll('_', ' ')}</th><td>{row.people}</td><td>{row.bad_day_pct_vs_own_average}%</td><td>{row.good_day_pct_vs_own_average}%</td></tr>)}</tbody>
+              <tbody>{fatigue.data.within_person.map((row) => <tr key={row.metric}><th>{datasetFieldLabel(row.metric)}</th><td>{row.people.toLocaleString()}</td><td>{formatDatasetNumber(row.bad_day_pct_vs_own_average)}%</td><td>{formatDatasetNumber(row.good_day_pct_vs_own_average)}%</td></tr>)}</tbody>
             </table></div>
           </section>
           <section>
             <h3>Bad-day rate by health group</h3>
             <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Health group</th><th>People</th><th>Rated days</th><th>Bad-day rate</th></tr></thead>
-              <tbody>{fatigue.data.by_health_group.map((row) => <tr key={row.group}><th>{row.group}</th><td>{row.people}</td><td>{row.rated_days.toLocaleString()}</td><td>{row.bad_day_pct}%</td></tr>)}</tbody>
+              <tbody>{fatigue.data.by_health_group.map((row) => <tr key={row.group}><th>{datasetFieldLabel(row.group)}</th><td>{row.people.toLocaleString()}</td><td>{row.rated_days.toLocaleString()}</td><td>{formatDatasetNumber(row.bad_day_pct)}%</td></tr>)}</tbody>
             </table></div>
           </section>
           <section>
             <h3>Missing observations</h3>
-            <div className="dataset-stats"><Stat value={`${fatigue.data.days_without_rating_pct}%`} label="Days without a fatigue rating" /><Stat value={`${fatigue.data.wearer_days_without_steps_pct}%`} label="Wearer-days without step data" /></div>
+            <div className="dataset-stats"><Stat value={`${formatDatasetNumber(fatigue.data.days_without_rating_pct)}%`} label="Days without a fatigue rating" /><Stat value={`${formatDatasetNumber(fatigue.data.wearer_days_without_steps_pct)}%`} label="Wearer-days without step data" /></div>
           </section>
         </div>
       </DatasetCard>}
@@ -130,19 +142,22 @@ export function C3Page() {
         <div className="dataset-inner-grid">
           <section>
             <h3>Hourly profile · steps</h3>
-            <TrendChart data={lifeSnaps.data.hourly_profile.map((row) => ({ hour: `${row.hour}:00`, steps: row.steps }))} lines={[{ key: 'steps', label: 'Average steps', color: '#f65398' }]} height={240} xKey="hour" />
+            <TrendChart data={lifeSnaps.data.hourly_profile.map((row) => ({ hour: `${row.hour}:00`, steps: row.steps }))} lines={[{ key: 'steps', label: 'Average steps', color: '#f65398' }]} height={240} xKey="hour" formatValue={(value) => formatDatasetNumber(value, 0)} />
           </section>
           <section>
             <h3>Day-to-day variation</h3>
-            <div className="table-scroll"><table className="data-table">
+            <div className="table-scroll"><table className="data-table wrap-data-table">
               <thead><tr><th>Metric</th><th>People</th><th>Personal average</th><th>Typical day-to-day SD</th><th>CV%</th></tr></thead>
-              <tbody>{lifeSnaps.data.day_to_day_variation.map((row) => <tr key={row.metric}><th>{row.metric.replaceAll('_', ' ')}</th><td>{row.people}</td><td>{row.typical_personal_average}</td><td>{row.typical_day_to_day_sd}</td><td>{row.typical_cv_pct}%</td></tr>)}</tbody>
+              <tbody>{lifeSnaps.data.day_to_day_variation.map((row) => {
+                const precision = row.metric === 'steps' ? 0 : 1;
+                return <tr key={row.metric}><th>{datasetFieldLabel(row.metric)}</th><td>{row.people.toLocaleString()}</td><td>{formatDatasetNumber(row.typical_personal_average, precision)}</td><td>{formatDatasetNumber(row.typical_day_to_day_sd, precision)}</td><td>{formatDatasetNumber(row.typical_cv_pct)}%</td></tr>;
+              })}</tbody>
             </table></div>
             <p className="tiny muted">Why the Radar compares to each person's own baseline.</p>
           </section>
           <section className="dataset-wide">
             <h3>Missing sensor days are normal.</h3>
-            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={lifeSnaps.data.sensor_completeness} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 12 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="field" width={150} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${value}%`, 'Days present']} /><Bar dataKey="days_present_pct" name="Days present" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={lifeSnaps.data.sensor_completeness} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 12 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${formatDatasetNumber(value)}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="field" width={150} tickFormatter={datasetFieldLabel} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${formatDatasetNumber(Number(value))}%`, 'Days present']} /><Bar dataKey="days_present_pct" name="Days present" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
           </section>
         </div>
       </DatasetCard>}
@@ -203,11 +218,16 @@ export function C4Page() {
     return { bin, estimate: est, range: [Math.abs(est - lo), Math.abs(hi - est)], meals: detail.data?.charts?.walkDose?.nMeals?.[index] };
   }) ?? [];
   const nhanesRows = nhanes.data?.[nhanesAge] ?? [];
-  const hba1cData = nhanes.data?.survivors_hba1c_by_movement.map((row) => ({
-    group: row.group,
-    survivors: row.hba1c_pct,
-    allAdults: nhanes.data?.all_hba1c_by_movement.find((item) => item.group === row.group)?.hba1c_pct,
-  })) ?? [];
+  const hba1cData = nhanes.data?.survivors_hba1c_by_movement.map((row) => {
+    const allAdults = nhanes.data?.all_hba1c_by_movement.find((item) => item.group === row.group);
+    return {
+      group: row.group,
+      survivors: row.hba1c_pct,
+      survivorRange: row.range,
+      allAdults: allAdults?.hba1c_pct,
+      allAdultRange: allAdults?.range,
+    };
+  }) ?? [];
   const fetchAdvice = async () => {
     setAdviceLoading(true); setAdviceError('');
     try { setAdvice((await getApi<any>(`/api/c4/survivors/${encodeURIComponent(selected)}/advice`)).data); }
@@ -271,25 +291,31 @@ export function C4Page() {
             <h3>{nhanesAge === 'all_ages' ? 'All ages' : 'Age 60+'} summary</h3>
             <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Measure</th><th>Unit</th><th>Cancer survivors</th><th>n</th><th>No cancer</th><th>n</th></tr></thead>
-              <tbody>{nhanesRows.map((row) => <tr key={row.metric}><th>{row.label}</th><td>{row.unit}</td><td>{row.unit === '%' ? `${row.survivors}%` : row.survivors}</td><td>{row.survivors_n.toLocaleString()}</td><td>{row.unit === '%' ? `${row.no_cancer}%` : row.no_cancer}</td><td>{row.no_cancer_n.toLocaleString()}</td></tr>)}</tbody>
+              <tbody>{nhanesRows.map((row) => {
+                const digits = row.metric === 'hba1c' ? 2 : row.label.toLowerCase().includes('movement') ? 0 : 1;
+                const display = (value: number) => `${formatDatasetNumber(value, digits)}${row.unit === '%' ? '%' : ''}`;
+                return <tr key={row.metric}><th>{datasetFieldLabel(row.label)}</th><td>{row.unit}</td><td>{display(row.survivors)}</td><td>{row.survivors_n.toLocaleString()}</td><td>{display(row.no_cancer)}</td><td>{row.no_cancer_n.toLocaleString()}</td></tr>;
+              })}</tbody>
             </table></div>
           </section>
           <section>
             <h3>HbA1c by movement third</h3>
             <p className="tiny muted">Survey-weighted HbA1c (%) by movement group; patterns are associations, not effects.</p>
-            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={hba1cData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="group" tick={{ fontSize: 10 }} /><YAxis width={48} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="survivors" name="Cancer survivors" fill="#f65398" radius={[5, 5, 0, 0]} /><Bar dataKey="allAdults" name="All adults" fill="#82559a" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="chart movement-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={hba1cData} margin={{ top: 24, right: 12, bottom: 0, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="group" tickFormatter={datasetFieldLabel} tick={{ fontSize: 10 }} /><YAxis width={48} tickFormatter={(value: number) => formatDatasetNumber(value, 2)} tick={{ fontSize: 10 }} /><Tooltip formatter={(value, name) => [`${formatDatasetNumber(Number(value), 2)}%`, name]} /><Legend wrapperStyle={{ fontSize: 10 }} /><Bar dataKey="survivors" name="Cancer survivors" fill="#f65398" radius={[5, 5, 0, 0]}><LabelList dataKey="survivors" position="top" formatter={(value: number) => `${formatDatasetNumber(value, 2)}%`} style={{ fontSize: 9, fill: '#4a2034' }} /></Bar><Bar dataKey="allAdults" name="All adults" fill="#82559a" radius={[5, 5, 0, 0]}><LabelList dataKey="allAdults" position="top" formatter={(value: number) => `${formatDatasetNumber(value, 2)}%`} style={{ fontSize: 9, fill: '#4a2034' }} /></Bar></BarChart></ResponsiveContainer></div>
+            <p className="tiny muted">Movement ranges in MIMS/day · pink: cancer survivors · plum: all adults.</p>
+            <div className="movement-range-grid">{hba1cData.map((row) => <div key={row.group}><b>{datasetFieldLabel(row.group)}</b><span><i className="range-survivors">Survivors</i> {row.survivorRange.map((value) => formatDatasetNumber(value, 0)).join('–')} MIMS/day</span><span><i className="range-adults">All adults</i> {row.allAdultRange?.map((value) => formatDatasetNumber(value, 0)).join('–')} MIMS/day</span></div>)}</div>
           </section>
           <section>
             <h3>Survivor cancer types</h3>
             <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Cancer type</th><th>People</th></tr></thead>
-              <tbody>{nhanes.data.survivor_cancer_types.map((row) => <tr key={row.type}><th>{row.type}</th><td>{row.people}</td></tr>)}</tbody>
+              <tbody>{nhanes.data.survivor_cancer_types.map((row) => <tr key={row.type}><th>{datasetFieldLabel(row.type)}</th><td>{row.people.toLocaleString()}</td></tr>)}</tbody>
             </table></div>
           </section>
           <section className="dataset-wide">
             <div className="dataset-stats">
-              <Stat value={nhanes.data.survivor_median_age} label="Survivor median age" />
-              <Stat value={nhanes.data.no_cancer_median_age} label="No-cancer median age" />
+              <Stat value={formatDatasetNumber(nhanes.data.survivor_median_age, 0)} label="Survivor median age" />
+              <Stat value={formatDatasetNumber(nhanes.data.no_cancer_median_age, 0)} label="No-cancer median age" />
             </div>
             <p className="small muted top-gap">{nhanes.data.weighting}</p>
             <p className="tiny muted">{nhanes.data.caveat}</p>
@@ -341,6 +367,16 @@ function triggerFor(lines: TaggedLine[], index: number, lastCueAt: number): { tr
   return { trigger, lastCueAt };
 }
 
+function triggerReference(lines: TaggedLine[], index: number) {
+  const line = lines[index];
+  const participant = line.speaker === 'participant'
+    ? line
+    : [...lines.slice(0, index)].reverse().find((item) => item.speaker === 'participant');
+  const source = participant ?? line;
+  const quote = source.text.length > 100 ? `${source.text.slice(0, 97).trimEnd()}…` : source.text;
+  return { line_number: source.line_number, time_in_call: source.time_in_call, quote };
+}
+
 function C5ReferencePanels({ data, loading, error, reload }: {
   data: C5CoachingDataset | null;
   loading: boolean;
@@ -368,23 +404,23 @@ function C5ReferencePanels({ data, loading, error, reload }: {
             <h3>Coach scorecard · sorted by Ellie MI score</h3>
             <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Coach</th><th>Role</th><th>Languages</th><th>Labelled calls</th><th>Ellie MI score</th><th>Supervisor overall</th></tr></thead>
-              <tbody>{scorecard.map((coach) => <tr key={coach.coach_id}><th>{coach.first_name}</th><td>{coach.role}</td><td>{coach.languages}</td><td>{coach.labelled_calls}</td><td>{coach.mi_score}</td><td>{coach.supervisor_overall}</td></tr>)}</tbody>
+      <tbody>{scorecard.map((coach) => <tr key={coach.coach_id}><th>{coach.first_name}</th><td>{coach.role}</td><td>{coach.languages}</td><td>{coach.labelled_calls.toLocaleString()}</td><td>{formatDatasetNumber(coach.mi_score)}</td><td>{formatDatasetNumber(coach.supervisor_overall)}</td></tr>)}</tbody>
             </table></div>
           </section>
           <section>
             <h3>Ellie score vs supervisor overall</h3>
-            <Stat value={`Spearman ρ ${program.mi_score_vs_supervisor.spearman}`} label={`Across ${program.mi_score_vs_supervisor.calls} calls`} />
+            <Stat value={`Spearman ρ ${formatDatasetNumber(program.mi_score_vs_supervisor.spearman)}`} label={`Across ${program.mi_score_vs_supervisor.calls.toLocaleString()} calls`} />
           </section>
           <section>
             <h3>Supervisor agreement</h3>
             <div className="dataset-stats">
-              <Stat value={`${program.supervisor_agreement.exact_overall_pct}%`} label="Exact overall agreement" />
-              <Stat value={`${program.supervisor_agreement.within_one_point_pct}%`} label="Within one point" />
+              <Stat value={`${formatDatasetNumber(program.supervisor_agreement.exact_overall_pct)}%`} label="Exact overall agreement" />
+              <Stat value={`${formatDatasetNumber(program.supervisor_agreement.within_one_point_pct)}%`} label="Within one point" />
             </div>
           </section>
           <section>
             <h3>Checklist completion</h3>
-            {program.checklist_done_pct.map((item) => <div className="dataset-progress-row" key={item.item}><span>{item.item.replaceAll('_', ' ')}</span><b>{item.pct}%</b><div className="progress"><span style={{ width: `${item.pct}%` }} /></div></div>)}
+            {program.checklist_done_pct.map((item) => <div className="dataset-progress-row" key={item.item}><span>{datasetFieldLabel(item.item)}</span><b>{formatDatasetNumber(item.pct)}%</b><div className="progress"><span style={{ width: `${item.pct}%` }} /></div></div>)}
           </section>
           <section>
             <h3>Safety review counts</h3>
@@ -397,23 +433,23 @@ function C5ReferencePanels({ data, loading, error, reload }: {
           </section>
           <section className="dataset-wide">
             <h3>Goal-met percentage by topic</h3>
-            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={program.goal_met_by_topic} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 16 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="topic" width={140} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${value}%`, 'Weeks']} /><Bar dataKey="met_pct" name="Met" fill="#f65398" radius={[0, 6, 6, 0]} /><Bar dataKey="partly_pct" name="Partly met" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={program.goal_met_by_topic} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 16 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${formatDatasetNumber(value)}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="topic" width={140} tickFormatter={datasetFieldLabel} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${formatDatasetNumber(Number(value))}%`, 'Weeks']} /><Bar dataKey="met_pct" name="Met" fill="#f65398" radius={[0, 6, 6, 0]} /><Bar dataKey="partly_pct" name="Partly met" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
           </section>
         </div>
       </DatasetCard>
     </BentoGrid>
     <Heading eyebrow="Real coaching references" title="Real reference data" subtitle="Independent research sources, not Ellie patients." />
     <BentoGrid className="top-gap">
-      <DatasetCard span={6} title="AnnoMI · expert-labelled counselling dialogues" kind={data.annomi.kind} citation={data.sources.annomi} population={`${data.annomi.high_quality.sessions} high-quality and ${data.annomi.low_quality.sessions} low-quality sessions.`} caveat={`Benchmark: ${data.annomi.benchmark_lines} ten-expert lines; experts agree ${data.annomi.benchmark_expert_agreement_pct}%.`}>
+      <DatasetCard span={6} title="AnnoMI · expert-labelled counselling dialogues" kind={data.annomi.kind} citation={data.sources.annomi} population={`${data.annomi.high_quality.sessions.toLocaleString()} high-quality and ${data.annomi.low_quality.sessions.toLocaleString()} low-quality sessions.`} caveat={`Benchmark: ${data.annomi.benchmark_lines.toLocaleString()} ten-expert lines; experts agree ${formatDatasetNumber(data.annomi.benchmark_expert_agreement_pct)}%.`}>
         <div className="table-scroll"><table className="data-table">
           <thead><tr><th>Measure</th><th>High quality</th><th>Low quality</th></tr></thead>
-          <tbody>{annomiMetrics.map(({ label, key, suffix }) => <tr key={key}><th>{label}</th><td>{data.annomi.high_quality[key]}{suffix}</td><td>{data.annomi.low_quality[key]}{suffix}</td></tr>)}</tbody>
+          <tbody>{annomiMetrics.map(({ label, key, suffix }) => <tr key={key}><th>{label}</th><td>{formatDatasetNumber(data.annomi.high_quality[key])}{suffix}</td><td>{formatDatasetNumber(data.annomi.low_quality[key])}{suffix}</td></tr>)}</tbody>
         </table></div>
       </DatasetCard>
-      <DatasetCard span={6} title="UIC · health coaching text corpus" kind={data.text_coaching.kind} citation={data.sources.text_coaching} population={`${data.text_coaching.patients} patients · ${data.text_coaching.messages.toLocaleString()} messages.`} caveat={data.text_coaching.caveat}>
+      <DatasetCard span={6} title="UIC · health coaching text corpus" kind={data.text_coaching.kind} citation={data.sources.text_coaching} population={`${data.text_coaching.patients.toLocaleString()} patients · ${data.text_coaching.messages.toLocaleString()} messages.`} caveat={data.text_coaching.caveat}>
         <div className="dataset-stats">{Object.entries(data.text_coaching.by_sender).map(([sender, messages]) => <Stat key={sender} value={messages.toLocaleString()} label={`${sender} messages`} />)}</div>
         <h3 className="top-gap">Messages by week</h3>
-        <div className="chart dataset-chart compact-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={data.text_coaching.by_week} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis width={48} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="messages" name="Messages" fill="#82559a" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
+        <div className="chart dataset-chart compact-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={data.text_coaching.by_week} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis width={48} tickFormatter={(value: number) => formatDatasetNumber(value, 0)} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [formatDatasetNumber(Number(value), 0), 'Messages']} /><Bar dataKey="messages" name="Messages" fill="#82559a" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
       </DatasetCard>
     </BentoGrid>
   </>;
@@ -435,7 +471,8 @@ export function C5Page() {
   const [lines, setLines] = useState<TaggedLine[]>([]);
   const [working, setWorking] = useState(false);
   const [liveError, setLiveError] = useState('');
-  const [cues, setCues] = useState<Array<{ trigger: string; cue?: string; say?: string }>>([]);
+  const [cues, setCues] = useState<CoachingRecommendation[]>([]);
+  const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
   const selected = calls.find((call) => call.call_id === callId) ?? calls[0];
   const reviewKey = selected ? `${callSource === 'program' ? 'program:' : ''}${selected.call_id}` : '';
   const review = state.reviews[reviewKey] ?? { status: 'Pending' as const, note: '', acknowledged: [] };
@@ -444,18 +481,18 @@ export function C5Page() {
   const expertTriggers = useMemo(() => {
     if (live || selected?.labelled === 'no') return [];
     let lastCueAt = -99;
-    const found: Array<{ trigger: string }> = [];
+    const found: CoachingRecommendation[] = [];
     lines.forEach((_, index) => {
       const result = triggerFor(lines, index, lastCueAt);
       lastCueAt = result.lastCueAt;
-      if (result.trigger) found.unshift({ trigger: result.trigger });
+      if (result.trigger) found.unshift({ trigger: result.trigger, ...triggerReference(lines, index) });
     });
     return found.slice(0, 4);
   }, [lines, live, selected?.labelled]);
-  const recommendations: Array<{ trigger: string; cue?: string; say?: string }> = live ? cues : expertTriggers;
+  const recommendations: CoachingRecommendation[] = live ? cues : expertTriggers;
   useEffect(() => { if (calls.length && !calls.some((call) => call.call_id === callId)) setCallId(calls[0].call_id); }, [calls, callId]);
   useEffect(() => {
-    if (selected) { setLines(selected.lines.map(expertLine)); setCues([]); setLiveError(''); setLive(false); }
+    if (selected) { setLines(selected.lines.map(expertLine)); setCues([]); setLiveError(''); setLive(false); setHighlightedLine(null); }
   }, [callSource, selected?.call_id]);
   const supervisorUpdate = (patch: Partial<typeof review>) => update((previous) => ({
     ...previous,
@@ -492,8 +529,8 @@ export function C5Page() {
           const recent = progress.slice(Math.max(0, index - 7), index + 1).map(({ speaker, text, tag: lineTag }) => ({ speaker, text, tag: lineTag }));
           try {
             const cue = await postApi<any>('/api/c5/cue', { trigger: triggerResult.trigger, recent });
-            setCues((previousCues) => [{ trigger: triggerResult.trigger as string, cue: cue.cue, say: cue.say }, ...previousCues].slice(0, 4));
-          } catch { setCues((previousCues) => [{ trigger: triggerResult.trigger as string }, ...previousCues].slice(0, 4)); }
+            setCues((previousCues) => [{ trigger: triggerResult.trigger as string, ...triggerReference(progress, index), cue: cue.cue, say: cue.say }, ...previousCues].slice(0, 4));
+          } catch { setCues((previousCues) => [{ trigger: triggerResult.trigger as string, ...triggerReference(progress, index) }, ...previousCues].slice(0, 4)); }
         }
       }
     } catch (error) {
@@ -503,14 +540,20 @@ export function C5Page() {
     } finally { setWorking(false); }
   };
   const showExpert = () => { if (selected) { setLive(false); setLines(selected.lines.map(expertLine)); setLiveError(''); setCues([]); } };
+  const showTranscriptLine = (lineNumber: number) => {
+    if (!selected) return;
+    setHighlightedLine(lineNumber);
+    document.getElementById(`c5-line-${selected.call_id}-${lineNumber}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => setHighlightedLine((current) => current === lineNumber ? null : current), 2500);
+  };
   const createFollowup = () => createTask({ patientId: 'unassigned', title: `Supervisor follow-up · ${selected.call_id}`, source: `C5 · ${callSource === 'program' ? 'synthetic program · ' : ''}${selected.call_id}`, assignee: 'Survivorship coordinator', dueDate: '', status: 'Open', outcome: '', shareWithPatient: false, patientMessage: '' });
   return <>
     <Heading eyebrow="Challenge 05 · separate call cohorts" title="Coach’s Co-pilot" subtitle="Review line-by-line expert labels, live classifications, coaching fidelity and human-review flags." action={callSource === 'challenge' && callsRemote.data ? <SourceBadge source={callsRemote.source} /> : callSource === 'program' && programCallsRemote.data ? <Pill tone="pink">Synthetic</Pill> : undefined} />
     <div className="c5-source-controls">
       <label className="small" htmlFor="call-source">Call source</label>
       <select id="call-source" value={callSource} onChange={(event) => { setCallSource(event.target.value as 'challenge' | 'program'); setCallId(''); setLines([]); setLive(false); setCues([]); setLiveError(''); }} className="switch">
-        <option value="challenge">Challenge demo calls{callsRemote.data ? ` (${callsRemote.data.calls.length})` : ''}</option>
-        <option value="program">Program dataset · {programCallsRemote.data?.calls.length ?? 'loading…'} synthetic calls</option>
+        <option value="challenge">Challenge demo calls{callsRemote.data ? ` (${callsRemote.data.calls.length.toLocaleString()})` : ''}</option>
+        <option value="program">Program dataset · {programCallsRemote.data?.calls.length.toLocaleString() ?? 'loading…'} synthetic calls</option>
       </select>
     </div>
     {callLoading && <LoadingTile title={callSource === 'challenge' ? 'Challenge demo calls' : 'Synthetic program calls'} />}
@@ -518,11 +561,11 @@ export function C5Page() {
     {callSource === 'program' && programCallsRemote.data && <SourceNote kind="synthetic" citation={programCallsRemote.data.about} population={`${programCallsRemote.data.calls.length} calls in the supplied sample.`} caveat="Synthetic demo conversations; no real people." />}
     {selected && <>
       <div className="c5-controls">
-        <label className="small" htmlFor="call-picker">Call · {selected.language} · {selected.goal_topic} · labelled {selected.labelled ?? 'yes'}</label>
+        <label className="small" htmlFor="call-picker">Call · {selected.language} · {datasetFieldLabel(selected.goal_topic)} · labelled {selected.labelled ?? 'yes'}</label>
         <select id="call-picker" value={selected.call_id} onChange={(event) => { setCallId(event.target.value); setLiveError(''); }} className="switch">
           {calls.map((call) => {
             const demoTag = 'demo_tag' in call ? call.demo_tag : undefined;
-            return <option key={call.call_id} value={call.call_id}>{demoTag === 'safety' ? '⚠ ' : demoTag === 'rough coach' ? '△ ' : ''}{call.call_id} · {call.language} · {call.goal_topic} · labelled {call.labelled ?? 'yes'}{demoTag ? ` · ${demoTag}` : ''}</option>;
+            return <option key={call.call_id} value={call.call_id}>{demoTag === 'safety' ? '⚠ ' : demoTag === 'rough coach' ? '△ ' : ''}{call.call_id} · {call.language} · {datasetFieldLabel(call.goal_topic)} · labelled {call.labelled ?? 'yes'}{demoTag ? ` · ${demoTag}` : ''}</option>;
           })}
         </select>
         <div className="mode-switch"><button className={!live ? 'active' : ''} onClick={showExpert}>Expert labels</button><button className={live ? 'active' : ''} onClick={runLive} disabled={working}>{working ? 'Classifying…' : 'Live classify (Clef via proxy)'}</button></div>
@@ -531,7 +574,7 @@ export function C5Page() {
       {liveError && <div className="callout warning-note top-gap" role="alert">{liveError}</div>}
       <BentoGrid className="top-gap">
         <Tile span={8} title="Transcript" badge={<Pill tone="pink">{selected.language} · {selected.duration_min} min</Pill>}>
-          <div className="transcript" aria-live="polite">{lines.map((line) => <div className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? (!live && selected.labelled === 'no' ? 'no expert label' : 'tagging…')}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag === 'needs_human' ? 'needs human review' : line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && !line.flag && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
+          <div className="transcript" aria-live="polite">{lines.map((line) => <div id={`c5-line-${selected.call_id}-${line.line_number}`} className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''} ${highlightedLine === line.line_number ? 'trigger-highlight' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? (!live && selected.labelled === 'no' ? 'no expert label' : 'tagging…')}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag === 'needs_human' ? 'needs human review' : line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && !line.flag && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
         </Tile>
         <Tile span={4} title="MI fidelity score" badge={<Pill tone={!live && selected.labelled === 'no' ? 'neutral' : score.score === null ? 'neutral' : score.score >= 70 ? 'good' : score.score >= 50 ? 'warn' : 'danger'}>{!live && selected.labelled === 'no' ? 'No expert labels' : score.score === null ? 'Need 4 tagged coach lines' : score.score >= 70 ? 'Good' : score.score >= 50 ? 'Review' : 'Low'}</Pill>}>
           {!live && selected.labelled === 'no' ? <div className="empty-state"><p>No expert labels for this call — use live classification.</p><button className="btn primary" onClick={runLive} disabled={working}>Live classify</button></div> : <>
@@ -546,7 +589,7 @@ export function C5Page() {
           </>}
         </Tile>
         <Tile span={5} title="Coaching recommendations" badge={<Pill tone="pink">{live ? 'Live cue service' : 'Expert trigger rules'}</Pill>}>
-          {recommendations.length ? recommendations.map((cue, index) => <div className="recommendation" key={`${cue.trigger}-${index}`}><p className="tiny muted">{cue.trigger}</p>{cue.cue && <b>{cue.cue}</b>}{cue.say && <p className="small">“{cue.say}”</p>}</div>) : <EmptyState>Quiet. Coaching prompts appear when a reference trigger fires.</EmptyState>}
+          {recommendations.length ? recommendations.map((cue, index) => <div className="recommendation" key={`${cue.trigger}-${cue.line_number}-${index}`}><p className="tiny muted">{cue.trigger}</p><button className="trigger-reference" type="button" onClick={() => showTranscriptLine(cue.line_number)}>Line {cue.line_number} · {cue.time_in_call} · “{cue.quote}”</button>{cue.cue && <b>{cue.cue}</b>}{cue.say && <p className="small">“{cue.say}”</p>}</div>) : <EmptyState>Quiet. Coaching prompts appear when a reference trigger fires.</EmptyState>}
         </Tile>
         <Tile span={7} title="Supervisor review" badge={<Pill tone={review.status === 'Approved' ? 'good' : review.status === 'Escalated' ? 'danger' : 'warn'}>{review.status}</Pill>}>
           <div className="page-tools"><button className="btn" onClick={() => supervisorUpdate({ status: 'In review' })}>Start review</button><button className="btn" onClick={() => supervisorUpdate({ status: 'Approved' })}>Approve</button><button className="btn" onClick={() => supervisorUpdate({ status: 'Escalated' })}>Escalate</button></div>

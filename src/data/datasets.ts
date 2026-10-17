@@ -2,6 +2,47 @@ import { useCallback, useEffect, useState } from 'react';
 
 export type DatasetKind = 'real' | 'synthetic';
 
+export const DATASET_FIELD_LABELS: Record<string, string> = {
+  steps: 'Steps',
+  sleep_minutes: 'Sleep (min)',
+  resting_heart_rate: 'Resting heart rate',
+  hrv_rmssd_ms: 'HRV (ms)',
+  sleep_efficiency_pct: 'Sleep efficiency',
+  minutes_brisk_activity: 'Brisk activity (min)',
+  blood_oxygen_spo2_pct: 'Blood oxygen',
+  fitbit_stress_score_0_to_100: 'Stress score',
+  skin_temp_change_c: 'Skin temp change',
+  any_mood_reported: 'Mood check-in',
+  after_dinner: 'Walk after dinner',
+  alcohol: 'Weekend drinks',
+  cooking: 'Cooking at home',
+  fasting: 'Overnight fast',
+  sleep: 'Bedtime',
+  soda: 'Soda to water',
+  strength: 'Band exercises',
+  veggies: 'Vegetables',
+  walking: 'Walking',
+  set_agenda: 'Set agenda',
+  checked_feelings: 'Checked feelings',
+  reviewed_last_goal: 'Reviewed last goal',
+  set_new_goal: 'Set new goal',
+  planned_for_barriers: 'Planned for barriers',
+  summarized: 'Summarized',
+  set_next_contact: 'Set next contact',
+};
+
+export function datasetFieldLabel(value: string): string {
+  const label = DATASET_FIELD_LABELS[value];
+  if (label) return label;
+  const sentence = value.replaceAll('_', ' ');
+  return sentence ? `${sentence[0].toLocaleUpperCase()}${sentence.slice(1)}` : sentence;
+}
+
+export function formatDatasetNumber(value: number, maximumFractionDigits = 1): string {
+  const formatted = new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(Math.abs(value));
+  return value < 0 ? `−${formatted}` : formatted;
+}
+
 export type FatigueDay = {
   rating: 'good' | 'average' | 'bad';
   days: number;
