@@ -11,6 +11,8 @@ const DiagnosisScreen = lazy(() => import('./patientApp/screens/Diagnosis'));
 const PatientHelpScreen = lazy(() => import('./patientApp/screens/Help'));
 const PatientAskScreen = lazy(() => import('./patientApp/screens/Ask'));
 const PatientUpdatesScreen = lazy(() => import('./patientApp/screens/Updates'));
+const PatientResourcesScreen = lazy(() => import('./patientApp/screens/Resources'));
+const PatientResourceDetailScreen = lazy(() => import('./patientApp/screens/ResourceDetail'));
 const CommandCenter = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.CommandCenter })));
 const PatientList = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.PatientList })));
 const Patient360 = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.Patient360 })));
@@ -72,6 +74,8 @@ export default function App() {
       <Route path="/app/help" element={<PatientHelpScreen />} />
       <Route path="/app/ask" element={<PatientAskScreen />} />
       <Route path="/app/updates" element={<PatientUpdatesScreen />} />
+      <Route path="/app/resources/:resourceId" element={<PatientResourceDetailScreen />} />
+      <Route path="/app/resources" element={<PatientResourcesScreen />} />
       <Route path="*" element={<Navigate to="/app" replace />} />
     </Routes></PatientAppLayout></Suspense>;
   }

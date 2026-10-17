@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { companionDestination, companionReply } from './companion';
+import { companionDestination, companionReply, companionResourceCategory } from './companion';
 import { getMessages } from '../patientApp/i18n';
 
 describe('patient app companion', () => {
@@ -21,6 +21,18 @@ describe('patient app companion', () => {
 
   it('routes an explicit ride request to ride support', () => {
     expect(companionDestination('I need a ride')).toBe('/app/help?need=rides');
+  });
+
+  it('suggests transportation resources for a ride request', () => {
+    expect(companionResourceCategory('I need a ride to my appointment')).toBe('transportation');
+  });
+
+  it.each([
+    ['I feel anxious and lonely', 'emotional'],
+    ['I need help with food and bills', 'local'],
+    ['Necesito ayuda con vivienda', 'local'],
+  ] as const)('maps resource request %s to %s', (prompt, category) => {
+    expect(companionResourceCategory(prompt, prompt.startsWith('Necesito') ? 'es' : 'en')).toBe(category);
   });
 
   it.each(['en', 'es', 'ht'] as const)('uses the localized default reply for unknown %s text', (language) => {

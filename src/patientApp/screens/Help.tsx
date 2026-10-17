@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { PatientLanguage } from '../../state/DemoStore';
 import { useDemoStore } from '../../state/DemoStore';
+import type { HelpNeedKey } from '../content/helpNeeds';
 import { AppCard, PageHeading } from '../components';
 import { getMessages, type Messages } from '../i18n';
 import { useLanguage } from '../useLanguage';
 
-type NeedKey = 'rides' | 'costs' | 'food' | 'emotional' | 'caregiver' | 'medications' | 'symptoms';
+type NeedKey = HelpNeedKey;
 
 const needDetails: Record<NeedKey, { icon: string; label: keyof Messages; assignee: string; task: string }> = {
   rides: { icon: '↔', label: 'helpRides', assignee: 'Navigator', task: 'Rides to appointments' },
