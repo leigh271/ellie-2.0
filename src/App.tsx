@@ -84,12 +84,14 @@ export default function App() {
     <div className={`shell ${patientMode ? 'patient-shell' : ''}`}>
       {!patientMode && (
         <aside className="sidebar">
-          <NavLink className="brand" to="/" aria-label="Ellie command center"><Orb /><span>ellie<span className="brand-dot">.</span></span></NavLink>
-          <nav className="nav" aria-label="Provider navigation">
-            {navigation.map((item) => <NavLink end={item.to === '/'} key={item.to} to={item.to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}><span aria-hidden="true">{item.icon}</span>{item.title}</NavLink>)}
-          </nav>
-          <div className="sidebar-note"><b>✦ Ellie AI</b><p>Compassionate, human-led cancer survivorship navigation.</p><span className="tiny">Fictional demo workspace</span></div>
-          <button className="reset-button" onClick={() => { if (window.confirm('Reset all Ellie demo data in this browser?')) { reset(); navigate('/'); } }}>↻ Reset demo data</button>
+          <div className="sidebar-content">
+            <NavLink className="brand" to="/" aria-label="Ellie command center"><Orb /><span>ellie<span className="brand-dot">.</span></span></NavLink>
+            <nav className="nav" aria-label="Provider navigation">
+              {navigation.map((item) => <NavLink end={item.to === '/'} key={item.to} to={item.to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}><span aria-hidden="true">{item.icon}</span>{item.title}</NavLink>)}
+            </nav>
+            <div className="sidebar-note"><b>✦ Ellie AI</b><p>Compassionate, human-led cancer survivorship navigation.</p><span className="tiny">Fictional demo workspace</span></div>
+            <button className="reset-button" onClick={() => { if (window.confirm('Reset all Ellie demo data in this browser?')) { reset(); navigate('/'); } }}>↻ Reset demo data</button>
+          </div>
         </aside>
       )}
       <main className="main">
