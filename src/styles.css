@@ -1113,6 +1113,8 @@ textarea { display: block; width: 100%; resize: vertical; }
 }
 .patient-app-home-transcript {
   max-width: 520px;
+  max-height: 4.2em;
+  overflow-y: auto;
   margin: 5px auto 0;
   color: #403943;
   font-size: 13px;
@@ -1191,6 +1193,11 @@ textarea { display: block; width: 100%; resize: vertical; }
 .composer-waveform span { width: 3px; min-height: 4px; border-radius: 99px; background: #f65398; transition: height .07s linear; }
 .dictation-waveform { display: flex; align-items: center; justify-content: flex-end; gap: 1.5px; flex: 1 1 auto; min-width: 0; height: 30px; overflow: hidden; }
 .dictation-waveform span { flex: 0 0 2px; min-height: 4px; border-radius: 99px; background: #f65398; transition: height .1s linear; }
+.ellie-composer.is-dictating { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 44px; align-items: center; border-radius: 24px; }
+.dictation-live-transcript { grid-column: 1 / -1; width: 100%; max-height: 4.2em; overflow-y: auto; overflow-wrap: anywhere; padding: 0 8px 3px; color: #403943; font-size: 13px; line-height: 1.4; text-align: left; scrollbar-width: thin; }
+.dictation-live-interim, .dictation-live-placeholder { color: #918995; }
+.ellie-composer.is-dictating .dictation-waveform { width: 100%; justify-content: center; }
+.ellie-composer.is-dictating .dictation-transcribing { grid-column: 1 / -1; min-height: 44px; }
 .dictation-control { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border: 0; border-radius: 50%; font-size: 23px; font-weight: 500; cursor: pointer; }
 .dictation-control:focus-visible { outline: 3px solid #f6539880; outline-offset: 2px; }
 .dictation-cancel { background: #fff4f8; color: #8b7481; }

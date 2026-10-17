@@ -8,6 +8,7 @@ export type WhisperLanguage = 'english' | 'spanish' | 'haitian creole';
 type PendingTranscription = {
   resolve: (text: string) => void;
   reject: () => void;
+  partial: boolean;
 };
 
 let worker: Worker | null = null;
@@ -76,16 +77,34 @@ export function ensureWhisperWorker(): boolean {
   }
 }
 
-export function transcribeWithWhisper(audio: Float32Array, language: WhisperLanguage): Promise<string> {
+function sendTranscription(type: 'transcribe' | 'partial', audio: Float32Array, language: WhisperLanguage): Promise<string> {
   if (!ensureWhisperWorker() || !worker) return Promise.reject(new Error('whisper_unavailable'));
   const id = ++nextRequestId;
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject });
+    pending.set(id, { resolve, reject, partial: type === 'partial' });
     try {
-      worker?.postMessage({ type: 'transcribe', id, audio, language }, [audio.buffer]);
+      worker?.postMessage({ type, id, audio, language }, [audio.buffer]);
     } catch {
       pending.delete(id);
       reject(new Error('whisper_unavailable'));
     }
   });
+}
+
+export function cancelWhisperPartials() {
+  worker?.postMessage({ type: 'cancel-partials' });
+  pending.forEach((request, id) => {
+    if (!request.partial) return;
+    request.resolve('');
+    pending.delete(id);
+  });
+}
+
+export function transcribePartialWithWhisper(audio: Float32Array, language: WhisperLanguage): Promise<string> {
+  return sendTranscription('partial', audio, language);
+}
+
+export function transcribeWithWhisper(audio: Float32Array, language: WhisperLanguage): Promise<string> {
+  cancelWhisperPartials();
+  return sendTranscription('transcribe', audio, language);
 }

@@ -53,7 +53,9 @@ export default function PatientAppHome() {
     setVoiceActive(demoVoice || demoRecording);
     if (!demoVoice && !demoRecording) setVoiceProcessing(false);
   }, [demoVoice, demoRecording]);
-  const displayedTranscript = voice.transcript || (demoVoice || demoRecording ? demoTranscript : '');
+  const displayedTranscript = voice.transcript || dictation.liveTranscript || (demoVoice || demoRecording ? demoTranscript : '');
+  const liveFinal = demoRecording ? 'I have a question about my recent' : dictation.liveFinalTranscript;
+  const liveInterim = demoRecording ? ' health numbers.' : dictation.liveInterimTranscript;
   const nativeRecording = dictation.state === 'recording' || demoRecording;
   const transcribing = dictation.state === 'transcribing';
   const voiceActiveNow = voiceActive || nativeRecording || transcribing;
@@ -122,7 +124,13 @@ export default function PatientAppHome() {
     <p className="patient-app-home-voice-label" role={voiceActiveNow ? 'status' : undefined} aria-live="polite">
       {transcribing ? messages.voiceTranscribing : voiceProcessing ? messages.voiceProcessing : voice.listening || nativeRecording || demoVoice && voiceActive ? messages.voiceRecording : messages.homeVoiceIdle}
     </p>
-    {voiceActiveNow && !nativeRecording && !transcribing && <p className="patient-app-home-transcript" aria-live="polite">{displayedTranscript || messages.voiceTranscriptWaiting}</p>}
+    {voiceActiveNow && <p className="patient-app-home-transcript" aria-live="polite">
+      {nativeRecording && !voice.transcript
+        ? liveFinal || liveInterim
+          ? <><span>{liveFinal}</span>{liveInterim && <span className="dictation-live-interim"> {liveInterim}</span>}</>
+          : messages.voiceLiveListening
+        : displayedTranscript || messages.voiceLiveListening}
+    </p>}
     {!voiceActiveNow && <p className="patient-app-home-voice-hint">{messages.homeVoiceHint}</p>}
     {dictation.error === 'permission' && <p className="patient-app-home-voice-hint" role="alert">{messages.voicePermissionDenied}</p>}
     {voiceUnavailable || !voice.supported && !dictation.canRecord ? <p className="patient-app-home-voice-hint">{messages.voiceUnavailable}</p> : null}

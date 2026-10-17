@@ -116,6 +116,7 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
   const [showUnavailable, setShowUnavailable] = useState(false);
+  const liveTranscriptRef = useRef<HTMLDivElement | null>(null);
   const demoMode = import.meta.env.DEV ? searchParams.get('demoDictation') : null;
   const demoWhisper = import.meta.env.DEV ? searchParams.get('demoWhisper') : null;
   const demoLevels = Array.from({ length: 40 }, (_, index) => 0.16 + Math.abs(Math.sin(index * 0.71)) * 0.6);
@@ -169,6 +170,10 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   };
   const nativeRecording = dictation.state === 'recording' || demoRecording;
   const transcribing = dictation.state === 'transcribing' || demoTranscribing;
+  useEffect(() => {
+    const transcript = liveTranscriptRef.current;
+    if (transcript) transcript.scrollTop = transcript.scrollHeight;
+  }, [dictation.liveTranscript, nativeRecording]);
   const shownValue = voice.transcript || (demoInserted && !value ? 'How did I sleep this week?' : value);
   const demoWhisperLoading = demoWhisper === 'loading';
   const demoWhisperUsed = demoWhisper === 'recording' || demoWhisper === 'inserted';
@@ -184,6 +189,13 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
         <label className="sr-only" htmlFor={inputId}>{placeholder}</label>
         {nativeRecording
           ? <>
+            <div ref={liveTranscriptRef} className="dictation-live-transcript" role="status" aria-live="polite" aria-atomic="false">
+              {demoRecording
+                ? <><span>How did I sleep</span><span className="dictation-live-interim"> this week?</span></>
+                : dictation.liveTranscript
+                  ? <><span>{dictation.liveFinalTranscript}</span>{dictation.liveInterimTranscript && <span className="dictation-live-interim"> {dictation.liveInterimTranscript}</span>}</>
+                  : <span className="dictation-live-placeholder">{messages.voiceLiveListening}</span>}
+            </div>
             <button type="button" className="dictation-control dictation-cancel" onClick={() => dictation.cancel()} aria-label={messages.voiceCancelRecording}>×</button>
             <DictationWaveform levels={demoRecording ? demoLevels : dictation.levels} />
             <span className="dictation-timer">{demoRecording ? '00:07' : formatDictationTime(dictation.elapsedMs)}</span>
