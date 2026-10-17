@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { PatientLanguage } from '../state/DemoStore';
 import type { GlossaryTerm } from './content/glossary';
 import { glossary } from './content/glossary';
 import { useLanguage } from './useLanguage';
+import { formatDictationTime, useDictation } from './useDictation';
 import { SpeakButton, useVoiceInput } from './useSpeech';
 
 export function AppCard({ title, text, language, children, className = '' }: {
@@ -97,6 +99,10 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   return <svg className="ellie-icon" aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">{ICONS[name]}</svg>;
 }
 
+export function DictationWaveform({ levels }: { levels: number[] }) {
+  return <div className="dictation-waveform" aria-hidden="true">{levels.map((level, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(level * 27))}px` }} />)}</div>;
+}
+
 export function Composer({ value, onChange, onSubmit, language, placeholder, inputId, className = '' }: {
   value: string;
   onChange: (value: string) => void;
@@ -107,7 +113,14 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   className?: string;
 }) {
   const { messages } = useLanguage();
+  const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
+  const [showUnavailable, setShowUnavailable] = useState(false);
+  const demoMode = import.meta.env.DEV ? searchParams.get('demoDictation') : null;
+  const demoLevels = Array.from({ length: 40 }, (_, index) => 0.16 + Math.abs(Math.sin(index * 0.71)) * 0.6);
+  const demoRecording = demoMode === 'recording';
+  const demoTranscribing = demoMode === 'transcribing';
+  const demoInserted = demoMode === 'inserted';
   const finishVoice = (transcript: string) => {
     if (!transcript.trim()) return;
     setProcessing(true);
@@ -117,9 +130,32 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
     }, 700);
   };
   const voice = useVoiceInput(language, finishVoice);
+  const startSpeechFallback = () => {
+    if (!voice.supported) {
+      setShowUnavailable(true);
+      return;
+    }
+    setShowUnavailable(false);
+    voice.clearTranscript();
+    voice.toggle();
+  };
+  const addDictatedText = (transcript: string) => {
+    onChange([value.trim(), transcript.trim()].filter(Boolean).join(' '));
+    window.requestAnimationFrame(() => document.getElementById(inputId)?.focus());
+  };
+  const dictation = useDictation(language, addDictatedText, startSpeechFallback);
   useEffect(() => {
     if (!value.trim() && !voice.listening && !processing && voice.transcript.trim()) voice.clearTranscript();
   }, [value, voice.listening, voice.transcript, voice.clearTranscript, processing]);
+  useEffect(() => {
+    if (demoInserted && !value) onChange('How did I sleep this week?');
+  }, [demoInserted, onChange, value]);
+  const startRecording = async () => {
+    setShowUnavailable(false);
+    voice.clearTranscript();
+    const result = await dictation.start();
+    if (result === 'fallback') startSpeechFallback();
+  };
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const transcript = voice.transcript.trim();
@@ -130,21 +166,36 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
     }
     if (value.trim()) onSubmit(value.trim());
   };
+  const nativeRecording = dictation.state === 'recording' || demoRecording;
+  const transcribing = dictation.state === 'transcribing' || demoTranscribing;
+  const shownValue = voice.transcript || (demoInserted && !value ? 'How did I sleep this week?' : value);
   return (
     <>
-      <form className={`ellie-composer ${className}`} onSubmit={submit}>
+      <form className={`ellie-composer ${className} ${nativeRecording || transcribing ? 'is-dictating' : ''}`} onSubmit={submit}>
         <label className="sr-only" htmlFor={inputId}>{placeholder}</label>
-        <div className={`ellie-composer-input ${voice.listening ? 'is-listening' : ''}`}>
-          {voice.listening && <div className="composer-waveform" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (8 + 13 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
-          <input id={inputId} value={voice.transcript || value} onChange={(event) => { voice.clearTranscript(); onChange(event.target.value); }} placeholder={placeholder} autoComplete="off" />
-        </div>
-        {voice.listening
-          ? <button type="button" className="composer-stop-button" onClick={() => voice.toggle()} aria-label={messages.voiceStop}>{messages.voiceStopShort}</button>
-          : <button type="button" className="composer-mic" aria-label={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} aria-pressed={false} title={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} disabled={!voice.supported} onClick={() => { if (!voice.supported) return; voice.clearTranscript(); voice.toggle(); }}><Icon name="mic" size={19} /></button>}
-        <button type="submit" className="composer-send" aria-label={messages.send} disabled={processing || (!value.trim() && !voice.transcript.trim())}><Icon name="arrowUp" size={19} /></button>
-        {processing && <span className="sr-only" role="status">{messages.voiceProcessing}</span>}
+        {nativeRecording
+          ? <>
+            <button type="button" className="dictation-control dictation-cancel" onClick={() => dictation.cancel()} aria-label={messages.voiceCancelRecording}>×</button>
+            <DictationWaveform levels={demoRecording ? demoLevels : dictation.levels} />
+            <span className="dictation-timer">{demoRecording ? '00:07' : formatDictationTime(dictation.elapsedMs)}</span>
+            <button type="button" className="dictation-control dictation-confirm" onClick={() => dictation.confirm()} aria-label={messages.voiceDone}>✓</button>
+          </>
+          : transcribing
+            ? <div className="dictation-transcribing" role="status" aria-live="polite"><span className="dictation-spinner" />{messages.voiceTranscribing}</div>
+            : <>
+              <div className={`ellie-composer-input ${voice.listening ? 'is-listening' : ''}`}>
+                {voice.listening && <div className="composer-waveform" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (8 + 13 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
+                <input id={inputId} value={shownValue} onChange={(event) => { voice.clearTranscript(); onChange(event.target.value); }} placeholder={placeholder} autoComplete="off" />
+              </div>
+              {voice.listening
+                ? <button type="button" className="composer-stop-button" onClick={() => voice.toggle()} aria-label={messages.voiceStop}>{messages.voiceStopShort}</button>
+                : <button type="button" className="composer-mic" aria-label={messages.speakQuestion} aria-pressed={false} title={messages.speakQuestion} disabled={!voice.supported && !dictation.canRecord} onClick={() => void startRecording()}><Icon name="mic" size={19} /></button>}
+              <button type="submit" className="composer-send" aria-label={messages.send} disabled={processing || (!value.trim() && !voice.transcript.trim() && !demoInserted)}><Icon name="arrowUp" size={19} /></button>
+            </>}
+        {(processing || dictation.state === 'recording' || transcribing) && <span className="sr-only" role="status" aria-live="polite">{transcribing ? messages.voiceTranscribing : dictation.state === 'recording' ? messages.voiceRecording : messages.voiceProcessing}</span>}
       </form>
-      {!voice.supported && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
+      {dictation.error === 'permission' && <p className="composer-voice-unavailable" role="alert">{messages.voicePermissionDenied}</p>}
+      {(showUnavailable || !voice.supported && !dictation.canRecord) && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
     </>
   );
 }

@@ -3,12 +3,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import { buildPatientContext } from './patientContext.mjs';
+import { registerTranscribeRoute } from './transcribe.mjs';
 
 const app = express();
 const port = Number(process.env.PORT || 8787);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const snapshots = path.join(root, 'server', 'snapshots');
 const aiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const aiTranscribeModel = process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe';
 const aiRequestsByIp = new Map();
 app.use(express.json({ limit: '1mb' }));
 
@@ -38,7 +40,7 @@ async function snapshotResponse(file, res) {
 app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'ellie-api', offline: process.env.ELLIE_OFFLINE === '1' }));
 
 app.get('/api/ai/status', (_req, res) => {
-  res.json({ enabled: Boolean(process.env.OPENAI_API_KEY), model: aiModel });
+  res.json({ enabled: Boolean(process.env.OPENAI_API_KEY), model: aiModel, transcribe: Boolean(process.env.OPENAI_API_KEY) });
 });
 
 const languageNames = { en: 'English', es: 'Spanish', ht: 'Haitian Creole' };
@@ -63,6 +65,12 @@ function allowAiRequest(req, res) {
   aiRequestsByIp.set(ip, recent);
   return true;
 }
+
+registerTranscribeRoute(app, {
+  allowAiRequest,
+  getApiKey: () => process.env.OPENAI_API_KEY,
+  model: aiTranscribeModel,
+});
 
 async function requestOpenAI(systemPrompt, messages) {
   const controller = new AbortController();

@@ -1119,6 +1119,8 @@ textarea { display: block; width: 100%; resize: vertical; }
   line-height: 1.4;
 }
 .patient-app-home-voice-actions { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 10px 0 0; }
+.patient-app-home-recording { display: flex; align-items: center; gap: 10px; width: min(300px, 100%); margin: 4px auto 0; }
+.patient-app-home-recording .dictation-waveform { justify-content: center; }
 .patient-app-home-voice-actions .patient-app-primary { min-height: 44px; padding: 0 22px; border-radius: 99px; }
 .patient-app-home-voice-actions .patient-app-text-button { min-height: 44px; padding: 0 13px; }
 .patient-app-home-composer { width: min(100%, 590px); margin: 19px 0 0; }
@@ -1168,6 +1170,7 @@ textarea { display: block; width: 100%; resize: vertical; }
   background: #fff;
   box-shadow: 0 6px 21px #4b29360c;
 }
+.ellie-composer.is-dictating { gap: 6px; padding-left: 6px; padding-right: 6px; }
 .ellie-composer:focus-within { border-color: #f2a7c6; box-shadow: 0 0 0 3px #f6539816; }
 .ellie-composer-input { display: flex; align-items: center; flex: 1; min-width: 0; }
 .ellie-composer input {
@@ -1186,6 +1189,16 @@ textarea { display: block; width: 100%; resize: vertical; }
 .ellie-composer input:focus-visible { outline: none; }
 .composer-waveform { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; height: 24px; }
 .composer-waveform span { width: 3px; min-height: 4px; border-radius: 99px; background: #f65398; transition: height .07s linear; }
+.dictation-waveform { display: flex; align-items: center; justify-content: flex-end; gap: 1.5px; flex: 1 1 auto; min-width: 0; height: 30px; overflow: hidden; }
+.dictation-waveform span { flex: 0 0 2px; min-height: 4px; border-radius: 99px; background: #f65398; transition: height .1s linear; }
+.dictation-control { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border: 0; border-radius: 50%; font-size: 23px; font-weight: 500; cursor: pointer; }
+.dictation-control:focus-visible { outline: 3px solid #f6539880; outline-offset: 2px; }
+.dictation-cancel { background: #fff4f8; color: #8b7481; }
+.dictation-confirm { background: #f65398; color: #fff; box-shadow: 0 4px 12px #f653982b; }
+.dictation-timer { flex: 0 0 auto; min-width: 37px; color: #6c626a; font-size: 12px; font-variant-numeric: tabular-nums; text-align: center; }
+.dictation-transcribing { display: flex; align-items: center; justify-content: center; gap: 9px; flex: 1; min-width: 0; color: #6c626a; font-size: 13px; }
+.dictation-spinner { width: 16px; height: 16px; border: 2px solid #f5c7da; border-top-color: #f65398; border-radius: 50%; animation: dictationSpin .8s linear infinite; }
+@keyframes dictationSpin { to { transform: rotate(360deg); } }
 .composer-mic, .composer-send {
   display: grid;
   place-items: center;
@@ -1435,7 +1448,7 @@ textarea { display: block; width: 100%; resize: vertical; }
   .patient-app-home-topic { gap: 7px; padding: 8px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .patient-app-splash, .patient-app-splash > span, .patient-app-home-voice.is-listening::before, .patient-app-home-voice.is-listening::after, .patient-app-home-voice.is-processing .patient-app-home-voice-core, .typing-dots i {
+  .patient-app-splash, .patient-app-splash > span, .patient-app-home-voice.is-listening::before, .patient-app-home-voice.is-listening::after, .patient-app-home-voice.is-processing .patient-app-home-voice-core, .typing-dots i, .dictation-spinner {
     animation: none !important;
   }
   .patient-app-home-voice { transform: none !important; transition: none !important; }
