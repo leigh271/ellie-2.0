@@ -2,6 +2,13 @@ import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'reac
 import type { ReactNode } from 'react';
 import { Orb } from './components/UI';
 import { useDemoStore } from './state/DemoStore';
+import PatientAppLayout from './patientApp/PatientAppLayout';
+import PatientAppHome from './patientApp/screens/Home';
+import DiagnosisScreen from './patientApp/screens/Diagnosis';
+import PatientHelpScreen from './patientApp/screens/Help';
+import PatientAskScreen from './patientApp/screens/Ask';
+import PatientUpdatesScreen from './patientApp/screens/Updates';
+import { getMessages } from './patientApp/i18n';
 import {
   ActivityPage, C3Page, C4Page, C5Page, CommandCenter, Patient360, PatientList, PatientView, ResourcesPage, TasksPage,
 } from './screens/Screens';
@@ -33,10 +40,32 @@ export default function App() {
   const location = useLocation();
   const current = navigation.find((item) => item.to === location.pathname);
   const patientMode = state.role === 'patient';
-  const roleChanged = (role: 'provider' | 'patient') => {
+  const appRoute = location.pathname === '/app' || location.pathname.startsWith('/app/');
+  const appMessages = getMessages(state.patientLanguage[state.patientId] ?? 'en');
+  const roleChanged = (role: 'provider' | 'patient' | 'patient-app') => {
+    if (role === 'patient-app') {
+      setRole('patient');
+      navigate('/app');
+      return;
+    }
     setRole(role);
     navigate(role === 'patient' ? '/patient' : '/');
   };
+
+  if (appRoute) {
+    if (state.role !== 'patient') return <div className="patient-app-root"><section className="patient-app-gate">
+      <Orb /><h1>{appMessages.patientApp}</h1><p>{appMessages.homeSubtitle}</p>
+      <button className="patient-app-primary" type="button" onClick={() => setRole('patient')}>{appMessages.openAsPatient}</button>
+    </section></div>;
+    return <PatientAppLayout><Routes>
+      <Route path="/app" element={<PatientAppHome />} />
+      <Route path="/app/diagnosis" element={<DiagnosisScreen />} />
+      <Route path="/app/help" element={<PatientHelpScreen />} />
+      <Route path="/app/ask" element={<PatientAskScreen />} />
+      <Route path="/app/updates" element={<PatientUpdatesScreen />} />
+      <Route path="*" element={<Navigate to="/app" replace />} />
+    </Routes></PatientAppLayout>;
+  }
 
   return (
     <div className={`shell ${patientMode ? 'patient-shell' : ''}`}>
@@ -56,9 +85,10 @@ export default function App() {
           <div className="topright">
             <PillDemo />
             <label htmlFor="role-switch" className="tiny muted">Viewing as</label>
-            <select id="role-switch" className="switch" value={state.role} onChange={(event) => roleChanged(event.target.value as 'provider' | 'patient')} aria-label="Choose dashboard role">
+            <select id="role-switch" className="switch" value={state.role === 'patient' && location.pathname.startsWith('/app') ? 'patient-app' : state.role} onChange={(event) => roleChanged(event.target.value as 'provider' | 'patient' | 'patient-app')} aria-label="Choose dashboard role">
               <option value="provider">Provider</option>
               <option value="patient">Patient · Maria</option>
+              <option value="patient-app">{appMessages.patientApp}</option>
             </select>
           </div>
         </header>

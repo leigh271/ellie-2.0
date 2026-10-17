@@ -10,6 +10,8 @@ export type CareLoop = {
   followup: string | null;
 };
 
+export type PatientLanguage = 'en' | 'es' | 'ht';
+
 export type CareTask = {
   id: string;
   patientId: string;
@@ -21,6 +23,7 @@ export type CareTask = {
   outcome: string;
   shareWithPatient: boolean;
   patientMessage: string;
+  details?: string;
   createdAt: string;
 };
 
@@ -32,7 +35,7 @@ export type DemoActivity = {
   message: string;
 };
 
-export type CheckIn = { id: string; energy: 'Good' | 'Okay' | 'Low'; note: string; at: string };
+export type CheckIn = { id: string; patientId?: string; energy: 'Good' | 'Okay' | 'Low'; note: string; at: string };
 export type SupervisorReview = {
   status: 'Pending' | 'In review' | 'Approved' | 'Escalated';
   note: string;
@@ -48,11 +51,20 @@ export type DemoState = {
   checkIns: CheckIn[];
   patientReplies: Record<string, string>;
   sharedResources: Record<string, string[]>;
+  patientLanguage: Record<string, PatientLanguage>;
+  patientQuestions: Record<string, string[]>;
   reviews: Record<string, SupervisorReview>;
 };
 
 const STORAGE_KEY = 'ellie-demo-v1';
 const mariaLoop: CareLoop = { detect: new Date().toISOString(), understand: null, review: null, act: null, followup: null };
+
+function preferredLanguage(language: string): PatientLanguage {
+  const normalized = language.toLowerCase();
+  if (normalized.startsWith('spanish') || normalized === 'es') return 'es';
+  if (normalized.startsWith('haitian') || normalized === 'ht') return 'ht';
+  return 'en';
+}
 
 function createSeed(): DemoState {
   return {
@@ -67,14 +79,26 @@ function createSeed(): DemoState {
     checkIns: [],
     patientReplies: {},
     sharedResources: {},
+    patientLanguage: Object.fromEntries(elliePatients.map((patient) => [patient.id, preferredLanguage(patient.language)])),
+    patientQuestions: {},
     reviews: {},
+  };
+}
+
+function mergeStoredState(value: Partial<DemoState>): DemoState {
+  const seed = createSeed();
+  return {
+    ...seed,
+    ...value,
+    patientLanguage: { ...seed.patientLanguage, ...value.patientLanguage },
+    patientQuestions: { ...seed.patientQuestions, ...value.patientQuestions },
   };
 }
 
 function readState(): DemoState {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return { ...createSeed(), ...JSON.parse(stored) as Partial<DemoState> };
+    if (stored) return mergeStoredState(JSON.parse(stored) as Partial<DemoState>);
   } catch {
     // A fresh demo state is safer than partially parsed browser data.
   }
@@ -87,6 +111,7 @@ type StoreValue = {
   reset: () => void;
   log: (type: string, patientId: string, message: string) => void;
   setRole: (role: 'provider' | 'patient') => void;
+  setPatientId: (patientId: string) => void;
   markLoop: (patientId: string, stage: keyof CareLoop) => void;
   createTask: (task: Omit<CareTask, 'id' | 'createdAt'>) => void;
   setTaskStatus: (id: string, status: CareTask['status'], outcome?: string) => void;
@@ -100,7 +125,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key === STORAGE_KEY && event.newValue) {
-        try { setState(JSON.parse(event.newValue) as DemoState); } catch { /* Ignore invalid cross-tab state. */ }
+        try { setState(mergeStoredState(JSON.parse(event.newValue) as Partial<DemoState>)); } catch { /* Ignore invalid cross-tab state. */ }
       }
     };
     window.addEventListener('storage', onStorage);
@@ -128,6 +153,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
     reset: () => { const next = createSeed(); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); setState(next); },
     log,
     setRole: (role) => update((previous) => ({ ...previous, role })),
+    setPatientId: (patientId) => update((previous) => ({ ...previous, patientId })),
     markLoop: (patientId, stage) => update((previous) => ({
       ...previous,
       careLoops: {
@@ -138,12 +164,17 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
     createTask: (task) => update((previous) => {
       const record: CareTask = { ...task, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
       const currentLoop = previous.careLoops[task.patientId];
+      const needsDetect = task.source.startsWith('Patient app · need:') && !currentLoop?.detect;
+      const isInsightTask = task.patientId === 'maria' && (task.source.startsWith('Simulated Ellie') || task.source.startsWith('Insight'));
+      const nextLoop = currentLoop ?? { detect: null, understand: null, review: null, act: null, followup: null };
       return {
         ...previous,
         tasks: [record, ...previous.tasks],
-        careLoops: task.patientId === 'maria' && task.source.startsWith('Simulated Ellie') || task.patientId === 'maria' && task.source.startsWith('Insight')
-          ? { ...previous.careLoops, maria: { ...currentLoop, act: currentLoop?.act ?? record.createdAt } }
-          : previous.careLoops,
+        careLoops: needsDetect
+          ? { ...previous.careLoops, [task.patientId]: { ...nextLoop, detect: record.createdAt } }
+          : isInsightTask
+            ? { ...previous.careLoops, maria: { ...nextLoop, act: nextLoop.act ?? record.createdAt } }
+            : previous.careLoops,
         activity: [{ id: crypto.randomUUID(), at: record.createdAt, type: 'Task created', patientId: task.patientId, message: record.title }, ...previous.activity],
       };
     }),
@@ -154,10 +185,14 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
       const at = new Date().toISOString();
       const nextTasks = previous.tasks.map((task) => task.id === id ? { ...task, status, outcome: outcome ?? task.outcome } : task);
       const isLoopTask = target.patientId === 'maria' && (target.source.startsWith('Simulated Ellie') || target.source.startsWith('Insight'));
+      const isPatientAppRequest = target.source.startsWith('Patient app · need:');
+      const loop = previous.careLoops[target.patientId] ?? { detect: null, understand: null, review: null, act: null, followup: null };
       return {
         ...previous,
         tasks: nextTasks,
-        careLoops: isLoopTask && closed ? { ...previous.careLoops, maria: { ...previous.careLoops.maria, followup: at } } : previous.careLoops,
+        careLoops: closed && (isLoopTask || isPatientAppRequest)
+          ? { ...previous.careLoops, [target.patientId]: { ...loop, followup: at } }
+          : previous.careLoops,
         activity: [{ id: crypto.randomUUID(), at, type: closed ? 'Task closed' : 'Task updated', patientId: target.patientId, message: closed ? `${target.title} · outcome: ${outcome}` : `${target.title} · ${status}` }, ...previous.activity],
       };
     }),

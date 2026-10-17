@@ -1,5 +1,6 @@
 import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { elliePatients, maria } from '../data/ellieDemo';
 import { companionReply } from '../lib/companion';
 import { useDemoStore } from '../state/DemoStore';
@@ -11,7 +12,7 @@ function PageHeading({ eyebrow, title, subtitle, action }: { eyebrow: string; ti
 }
 
 const staff = ['Navigator', 'Health coach', 'RN', 'Survivorship coordinator'];
-const sources = ['All sources', 'Care plan', 'Patient request', 'Simulated Ellie', 'C3', 'C4', 'C5'];
+const sources = ['All sources', 'Care plan', 'Patient request', 'Patient app', 'Simulated Ellie', 'C3', 'C4', 'C5'];
 const today = new Date().toISOString().slice(0, 10);
 
 export function TasksPage() {
@@ -67,7 +68,8 @@ export function TasksPage() {
         {filtered.length ? filtered.map((task) => {
           const patient = elliePatients.find((item) => item.id === task.patientId);
           return <div className="task-card" key={task.id}>
-            <div className="row between"><div className="grow"><b>{task.title}</b><p className="small muted">{patient?.name ?? 'Separate synthetic cohort / unassigned'} · {task.source}</p></div><Pill tone={task.status === 'Done' ? 'good' : task.status === 'In progress' ? 'warn' : 'pink'}>{task.status}</Pill></div>
+            <div className="row between"><div className="grow"><b>{task.title}</b><p className="small muted">{patient?.name ?? 'Separate synthetic cohort / unassigned'}</p><Pill tone="pink">{task.source.startsWith('Patient app') ? 'Patient app' : task.source}</Pill></div><Pill tone={task.status === 'Done' ? 'good' : task.status === 'In progress' ? 'warn' : 'pink'}>{task.status}</Pill></div>
+            {task.details && <p className="small"><b>Patient note:</b> {task.details}</p>}
             <div className="task-meta"><span>Assignee: <b>{task.assignee}</b></span><span>Due: <b>{task.dueDate || 'Not set'}</b></span>{task.shareWithPatient && <Pill tone="pink">Patient update shared</Pill>}</div>
             {task.shareWithPatient && <p className="tiny muted">“{task.patientMessage}”</p>}
             {task.status !== 'Done' && <div className="task-actions">
@@ -161,7 +163,7 @@ export function PatientView() {
   const sharedResources = (state.sharedResources.maria ?? []).map((id) => id);
   const checkIn = () => {
     if (!energy) return;
-    const record = { id: crypto.randomUUID(), energy, note: note.trim(), at: new Date().toISOString() };
+    const record = { id: crypto.randomUUID(), patientId: 'maria', energy, note: note.trim(), at: new Date().toISOString() };
     update((previous) => {
       const existing = previous.careLoops.maria ?? { detect: null, understand: null, review: null, act: null, followup: null };
       return {
@@ -181,10 +183,11 @@ export function PatientView() {
     setChatText('');
   };
   const acknowledge = (taskId: string) => update((previous) => ({ ...previous, patientReplies: { ...previous.patientReplies, [taskId]: 'Maria acknowledged this care-team update.' } }));
-  const latest = state.checkIns[0];
+  const latest = state.checkIns.find((checkin) => checkin.patientId === 'maria' || !checkin.patientId);
   return <>
     <div className="heading"><div><div className="eyebrow">My wellness journey</div><h1>Welcome back, Maria.</h1><p className="muted">Support for your recovery, one step at a time.</p></div><Pill tone="pink">Survivorship</Pill></div>
     <BentoGrid className="patient-surface">
+      <Tile span={12} hero title="Open the Ellie patient app"><p className="small">Read or listen to plain-language diagnosis information, explore support, and send questions to your care team.</p><Link className="btn primary top-gap" to="/app">Open the Ellie patient app →</Link></Tile>
       <Tile span={8} hero title="Your care journey" badge={<Pill tone="pink">Recovery & survivorship</Pill>}><p className="small">You are in the recovery and survivorship phase of this fictional care journey. Ellie can help you stay connected to your care team.</p><div className="progress"><span style={{ width: '74%' }} /></div><p className="tiny muted top-gap">Screening → Diagnosis → Treatment → You are here → Long-term care</p></Tile>
       <Tile span={4} title="Next appointment"><div className="stat">{maria.appointment}</div><p className="small muted">Illustrative oncology follow-up</p></Tile>
       <Tile span={6} title="My wellness check-in" badge={<Pill tone="pink">Shared with your care team</Pill>}>

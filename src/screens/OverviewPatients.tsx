@@ -55,7 +55,7 @@ export function CommandCenter() {
       <Tile span={3}><div className="head"><span className="small muted">C4 module alerts</span>{c4.data && <SourceBadge source={c4.source} />}</div>{c4.loading ? <div className="stat">…</div> : c4.error ? <div className="tiny muted">{c4.error}</div> : <Stat value={c4Alerts} label="Synthetic cohort · Glucose Guide" note="Not attached to Ellie patients" />}</Tile>
       <Tile span={4} title="Patient attention queue" badge={<Pill tone="pink">Explainable demo signals</Pill>}>
         {priority.length ? priority.slice(0, 4).map(({ patient, result }) => {
-          const lowCheckin = state.checkIns.some((checkin) => checkin.energy === 'Low' && patient.id === 'maria');
+          const lowCheckin = state.checkIns.some((checkin) => checkin.energy === 'Low' && (checkin.patientId ?? 'maria') === patient.id);
           return <div className="patient-row" key={patient.id}><span className="avatar">{patient.initials}</span><div className="grow"><b>{patient.name}</b><p className="small muted">{lowCheckin ? 'Low-energy check-in to review' : result.rules[0]}</p></div><Link className="btn" to={`/patients/${patient.id}`}>Open 360</Link></div>;
         }) : <EmptyState>No current demo attention items.</EmptyState>}
         <p className="tiny muted">Ellie roster signals use simulated data; the C3/C4 cohorts remain separate.</p>
@@ -105,6 +105,12 @@ export function Patient360() {
   const { state, log, markLoop, createTask } = useDemoStore();
   const result = analyzeRoughPatch(patient);
   const patientTasks = state.tasks.filter((task) => task.patientId === patient.id);
+  const sharedQuestionTasks = patientTasks.filter((task) => task.title === 'Patient questions for next visit' && task.details);
+  const patientQuestions = [...new Set([
+    ...(state.patientQuestions[patient.id] ?? []),
+    ...sharedQuestionTasks.flatMap((task) => (task.details ?? '').split('\n').map((question) => question.replace(/^•\s*/, '').trim()).filter(Boolean)),
+  ])];
+  const appLanguage = ({ en: 'English', es: 'Spanish', ht: 'Haitian Creole' } as const)[state.patientLanguage[patient.id] ?? 'en'];
   const loop = state.careLoops[patient.id];
   const tabs: PatientTab[] = ['Overview', 'Wearables', 'Lifestyle', 'Coaching', 'Care plan & tasks', 'Notes (internal)'];
   const openTab = (next: PatientTab) => {
@@ -136,6 +142,7 @@ export function Patient360() {
     {tab === 'Overview' && <BentoGrid>
       <Tile span={8} hero title="Care journey" badge={<Pill tone="pink">{patient.phase}</Pill>}><p className="small">Screening → Diagnosis → Treatment → <b>{patient.phase}</b> → Long-term care</p><div className="progress"><span style={{ width: patient.id === 'maria' ? '74%' : '62%' }} /></div><p className="small muted top-gap">Current demo focus: navigation, wellness support and follow-up coordination.</p></Tile>
       <Tile span={4} title="Next follow-up"><div className="stat">{patient.appointment}</div><p className="small muted">Illustrative oncology visit · not linked to scheduling</p></Tile>
+      <Tile span={4} title="Patient app"><p className="small muted">Preferred app language</p><b>{appLanguage}</b><div className="divider" /><p className="small muted">Saved or shared questions</p>{patientQuestions.length ? <ul className="compact-list">{patientQuestions.map((question, index) => <li key={`${question}-${index}`}>{question}</li>)}</ul> : <p className="small muted">No questions saved yet.</p>}</Tile>
       <Tile span={7} title="Needs & care gaps">{patient.needs.map((need) => <div className="patient-row" key={need}><span className="avatar">♡</span><div className="grow"><b>{need}</b><p className="small muted">Confirm preferences and next steps with the patient.</p></div><button className="btn" onClick={() => createTask({ patientId: patient.id, title: `Discuss ${need.toLowerCase()}`, source: 'Care plan', assignee: 'Navigator', dueDate: '', status: 'Open', outcome: '', shareWithPatient: false, patientMessage: '' })}>Create task</button></div>)}</Tile>
       <Tile span={5} hero title="Ellie AI insight" badge={<Pill tone="pink">Requires human review</Pill>}>
         <p className="small">Simulated Ellie demo data · explainable rule, not C3 model.</p>
@@ -145,7 +152,7 @@ export function Patient360() {
         <div className="review-controls"><label className="small" htmlFor="review-note">Optional review note</label><input id="review-note" value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder="What did the team review?" /><button className="btn" onClick={review}>Mark reviewed</button></div>
       </Tile>
       <Tile span={6} title="Coaching goals">{patient.goals.map((goal) => <p className="patient-row small" key={goal}>✓ &nbsp;{goal}</p>)}</Tile>
-      <Tile span={6} title="Care tasks">{patientTasks.length ? patientTasks.slice(0, 3).map((task) => <p className="patient-row small" key={task.id}>{task.title} <Pill tone={task.status === 'Done' ? 'good' : 'warn'}>{task.status}</Pill></p>) : <EmptyState>No patient-specific tasks yet.</EmptyState>}</Tile>
+      <Tile span={6} title="Care tasks">{patientTasks.length ? patientTasks.slice(0, 3).map((task) => <div className="patient-row small" key={task.id}><span>{task.title}</span><Pill tone="pink">{task.source.startsWith('Patient app') ? 'Patient app' : task.source}</Pill><Pill tone={task.status === 'Done' ? 'good' : 'warn'}>{task.status}</Pill></div>) : <EmptyState>No patient-specific tasks yet.</EmptyState>}</Tile>
     </BentoGrid>}
     {tab === 'Wearables' && <BentoGrid>
       <Tile span={12} hero title="Wearable activity & recovery patterns" badge={<Pill tone="pink">Simulated Ellie demo data</Pill>}><p className="small muted">Explainable local baseline rule, not the C3 model. Reference baseline is the median from days −35 to −8.</p></Tile>

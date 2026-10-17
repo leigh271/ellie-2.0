@@ -297,3 +297,178 @@ textarea { display: block; width: 100%; resize: vertical; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.patient-app-root {
+  min-height: 100vh; min-height: 100dvh; display: flex; justify-content: center;
+  background: linear-gradient(145deg, #fff1f6, #f9f7fa 55%, #fff7fa);
+}
+.patient-app {
+  width: 100%; max-width: 480px; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+  background: #fff; color: #29282d; box-shadow: 0 0 50px #4a203410; font-size: 17px; line-height: 1.55;
+}
+.patient-app-header {
+  position: sticky; top: 0; z-index: 20; padding: 11px 16px 9px; display: grid; gap: 8px;
+  background: #fffffff5; border-bottom: 1px solid #f1e6ec; backdrop-filter: blur(12px);
+}
+.patient-app-brand, .patient-app-brand-name, .patient-app-settings, .patient-app-header-actions,
+.patient-app-card-header, .patient-app-card-controls, .patient-app-energy-options {
+  display: flex; align-items: center; gap: 9px;
+}
+.patient-app-brand { justify-content: space-between; min-height: 40px; }
+.patient-app-brand-name { color: var(--plum); font-size: 22px; gap: 7px; }
+.patient-app-brand-name .orb { width: 29px; height: 29px; }
+.patient-app-patient-name { color: var(--muted); font-size: 14px; font-weight: 650; }
+.patient-app-settings { justify-content: flex-end; }
+.patient-app-settings select {
+  min-height: 48px; padding: 7px 9px; font-size: 14px; color: var(--plum); font-weight: 650;
+}
+.patient-app-settings select:first-of-type { max-width: 180px; }
+.patient-app-header-actions { justify-content: space-between; }
+.patient-app-read-page, .patient-app-provider-link {
+  min-height: 48px; padding: 7px 10px; border: 1px solid #eedfe6; border-radius: 12px; background: white;
+  color: var(--plum); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 7px;
+}
+.patient-app-read-page svg, .speak-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.speak-button svg rect { fill: currentColor; stroke: none; }
+.patient-app-provider-link { border-color: transparent; color: #7a5368; }
+.patient-app-translation-note {
+  margin: 10px 14px 0; padding: 9px 11px; border-radius: 12px; background: #fff8ec;
+  color: #68461e; font-size: 12px; line-height: 1.4;
+}
+.patient-app-toast {
+  position: sticky; top: 150px; z-index: 15; margin: 8px 14px 0; padding: 9px 12px; border-radius: 12px;
+  background: #4a2034; color: white; font-size: 14px; box-shadow: 0 4px 20px #4a203433;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.patient-app-main { flex: 1; padding: 17px 15px 22px; }
+.patient-app-screen { display: grid; gap: 14px; }
+.patient-app-page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 2px 2px 3px; }
+.patient-app-page-heading h1 { margin: 3px 0 7px; font-size: 27px; line-height: 1.16; letter-spacing: -.75px; }
+.patient-app-page-heading p:not(.patient-app-eyebrow) { color: #645a62; font-size: 16px; line-height: 1.45; }
+.patient-app-eyebrow { color: #b52d70; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+.patient-app-card {
+  min-width: 0; padding: 17px; border: 1px solid #f0e4ea; border-radius: 19px; background: #fff;
+  box-shadow: 0 4px 18px #4a203408;
+}
+.patient-app-card-header { justify-content: space-between; align-items: flex-start; margin-bottom: 11px; }
+.patient-app-card-header h2 { font-size: 18px; line-height: 1.28; letter-spacing: -.25px; }
+.patient-app-card p { line-height: 1.55; }
+.patient-app-welcome-card { background: linear-gradient(145deg, #fff0f6, white 75%); border-color: #f6d8e5; }
+.patient-app-field { display: grid; gap: 6px; margin-top: 12px; color: #4f3946; font-size: 14px; font-weight: 700; }
+.patient-app-field select, .patient-app-field textarea, .patient-app-field input {
+  width: 100%; min-height: 48px; padding: 11px 12px; border-radius: 12px; font-size: 16px;
+}
+.patient-app-info-line { margin-top: 8px; font-size: 16px; }
+.patient-app-caption { margin-top: 7px !important; color: #776c74; font-size: 13px; }
+.patient-app-prompt { font-weight: 700; font-size: 17px; }
+.patient-app-energy-options { gap: 8px; margin-top: 12px; }
+.patient-app-choice, .patient-app-primary, .patient-app-secondary, .patient-app-quick-link,
+.patient-app-tab, .patient-app-save-question {
+  min-height: 48px; border-radius: 13px; font-weight: 700; cursor: pointer;
+}
+.patient-app-choice {
+  flex: 1; border: 1px solid #e9dce3; background: #fff; color: #4a2034; padding: 9px 10px; font-size: 15px;
+}
+.patient-app-choice.selected { background: #fff0f6; border: 2px solid #dc4d8b; color: #8f2054; }
+.patient-app-primary, .patient-app-secondary {
+  width: 100%; margin-top: 12px; border: 1px solid #e04b8b; background: #e94e91;
+  color: #fff; padding: 11px 14px; font-size: 16px;
+}
+.patient-app-secondary { background: white; color: #9b2861; border-color: #e6cbd9; }
+.patient-app-primary:disabled { opacity: .55; cursor: not-allowed; }
+.patient-app-quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.patient-app-quick-link {
+  display: flex; align-items: center; gap: 7px; padding: 10px 11px; border: 1px solid #f0dce6;
+  background: #fff8fb; color: #6a2547; font-size: 15px; line-height: 1.25;
+}
+.patient-app-quick-link span:last-child { margin-left: auto; }
+.patient-app-question-list { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.patient-app-question-list li {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 10px;
+  background: #fff8fb; border: 1px solid #f4e5ec; border-radius: 12px; font-size: 15px;
+}
+.patient-app-text-button { min-height: 48px; border: 0; background: transparent; color: #9b2861; font-size: 14px; font-weight: 750; padding: 7px; }
+.patient-app-empty { color: #766a73; font-size: 15px; }
+.patient-app-diagnosis-summary { background: linear-gradient(140deg, #fff2f7, #fff 75%); }
+.patient-app-diagnosis-name { font-size: 22px; color: #4a2034; font-weight: 800; }
+.patient-app-glossary-hint { margin-top: 11px !important; color: #776c74; font-size: 13px; }
+.patient-app-education-list { margin: 0; padding-left: 23px; display: grid; gap: 10px; }
+.patient-app-education-list li { padding-left: 2px; font-size: 16px; line-height: 1.55; }
+.patient-app-education-list li::marker { color: #d64988; font-weight: 800; }
+.patient-app-save-question { display: block; width: 100%; margin-top: 8px; padding: 8px 10px; border: 1px solid #edd8e2; background: #fff8fb; color: #98285f; text-align: left; font-size: 13px; }
+.patient-app-save-question:disabled { color: #35775f; background: #f0faf4; border-color: #d5ecdd; }
+.patient-app-card-controls { flex-wrap: wrap; margin-top: 12px; padding-top: 9px; border-top: 1px solid #f4e9ee; }
+.patient-app-safety-note { background: #fff8ec; border-color: #f1dfbd; color: #563f22; }
+.speak-button {
+  flex: none; min-width: 48px; min-height: 48px; padding: 7px; border-radius: 50%;
+  border: 1px solid #efd7e3; background: #fff4f9; color: #8e2454; font-size: 17px;
+}
+.patient-app-disclaimer { padding: 2px 16px 12px; color: #766b73; text-align: center; font-size: 11px; }
+.patient-app-tabs {
+  position: sticky; bottom: 0; z-index: 18; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px; padding: 6px 5px max(7px, env(safe-area-inset-bottom)); background: #fffffff4;
+  border-top: 1px solid #eee1e8; backdrop-filter: blur(14px);
+}
+.patient-app-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 5px 1px;
+  color: #62545e; text-align: center; font-size: 10px; line-height: 1.15; white-space: normal;
+}
+.patient-app-tab > span:first-child { font-size: 17px; line-height: 1.05; }
+.patient-app-tab.active { background: #fff0f6; color: #a12560; }
+.patient-app-gate {
+  width: min(100% - 28px, 440px); margin: auto; padding: 30px; background: white; border: 1px solid #f0dce6;
+  border-radius: 22px; box-shadow: 0 12px 40px #4a20340d; text-align: center;
+}
+.patient-app-gate .orb { display: inline-block; }
+.patient-app-gate h1 { font-size: 28px; }
+.patient-app-gate p { color: #746872; margin-bottom: 12px; }
+.glossary-link { border: 0; border-bottom: 1px dashed #a42866; background: transparent; color: #8e2454; padding: 0; font: inherit; text-decoration: none; cursor: pointer; }
+.glossary-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: #26121f80; }
+.glossary-sheet { width: min(100%, 480px); padding: 22px 18px max(25px, env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; background: white; box-shadow: 0 -14px 50px #28121d36; }
+.glossary-definition { margin: 8px 0 18px !important; font-size: 17px; }
+.patient-app-toast .speak-button { background: #fff; }
+.patient-app-chat { display: grid; gap: 10px; }
+.patient-app-message { max-width: 92%; padding: 12px; border-radius: 15px; font-size: 16px; line-height: 1.5; }
+.patient-app-message.assistant { background: #fff2f7; color: #412439; }
+.patient-app-message.user { justify-self: end; background: #4a2034; color: white; }
+.patient-app-message-actions { display: flex; align-items: flex-start; gap: 7px; }
+.patient-app-message-actions .speak-button { min-width: 48px; min-height: 48px; }
+.patient-app-chat-form { display: flex; align-items: stretch; gap: 7px; margin-top: 12px; }
+.patient-app-chat-form input { flex: 1; width: 100%; min-width: 0; min-height: 48px; font-size: 16px; }
+.patient-app-chat-form .patient-app-primary { width: auto; margin: 0; min-width: 74px; }
+.voice-button { min-width: 48px; min-height: 48px; padding: 7px; }
+.voice-button.listening { background: #fff0f1; border-color: #ca4b68; color: #9f2d4b; }
+.patient-app-update-card, .patient-app-request-card { padding: 13px; border: 1px solid #f0e2e9; border-radius: 14px; margin-top: 10px; }
+.patient-app-update-card p, .patient-app-request-card p { font-size: 16px; }
+.patient-app-need-grid { display: grid; gap: 9px; }
+.patient-app-need-choice { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 12px; border: 1px solid #f0dce6; border-radius: 14px; background: #fff; color: #49263a; text-align: left; font-size: 15px; font-weight: 750; }
+.patient-app-need-choice[aria-pressed="true"] { border: 2px solid #d74e8c; background: #fff3f8; }
+.patient-app-need-choice > span:first-child { font-size: 23px; }
+.patient-app-resource-list, .patient-app-step-list { display: grid; gap: 8px; padding-left: 21px; }
+.patient-app-urgent { border-color: #efc7cc; background: #fff3f2; color: #6d2933; }
+.patient-app-inline-link { color: inherit; font-weight: 800; text-decoration: underline; }
+.patient-app-message-row { display: grid; gap: 4px; }
+.patient-app-message-row.assistant { justify-items: start; }
+.patient-app-message-row.user { justify-items: end; }
+.patient-app-chat-link { color: #8e2454; font-size: 14px; font-weight: 750; }
+.patient-app-auto-read { display: flex; align-items: center; gap: 10px; min-height: 48px; font-size: 15px; font-weight: 650; }
+.patient-app-auto-read input { width: 20px; height: 20px; }
+.patient-app-success { margin-top: 8px !important; color: #20684d; font-size: 14px; font-weight: 750; }
+.patient-app-update-language { margin-bottom: 8px !important; color: #71636d; font-size: 12px !important; font-weight: 750; }
+.patient-app-status { display: inline-flex; align-items: center; min-height: 30px; padding: 3px 10px; border-radius: 16px; background: #fff3d9; color: #6b4b1f; font-size: 13px; font-weight: 750; }
+.patient-app-status.status-done { background: #e9f7ee; color: #286547; }
+.patient-app-assistant-label { background: #fff9ec; border-color: #f1e3c5; }
+@media (max-width: 480px) {
+  .patient-app { box-shadow: none; }
+  .patient-app-header { padding-left: 12px; padding-right: 12px; }
+  .patient-app-main { padding: 14px 12px 18px; }
+  .patient-app-card { padding: 15px; border-radius: 17px; }
+  .patient-app-read-page, .patient-app-provider-link { font-size: 12px; padding: 6px 8px; }
+  .patient-app-settings select { font-size: 12px; min-height: 48px; }
+  .patient-app-page-heading h1 { font-size: 25px; }
+  .patient-app-tab { font-size: 9px; }
+}
