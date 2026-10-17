@@ -26,6 +26,10 @@ npm run build && npm start
 ELLIE_OFFLINE=1 npm start
 ```
 
+## Deploy to Vercel
+
+Import this repository in Vercel or deploy with `vercel deploy`. Vercel builds the static Vite app and serves the Express API as a serverless function. Set `OPENAI_API_KEY` in Project → Environment Variables to enable AI features; without it, the app uses built-in replies.
+
 ## Five-minute demo walkthrough
 
 1. Open the command center and point out that the six-patient Ellie roster is fictional and separate from the C3/C4/C5 synthetic challenge cohorts.
