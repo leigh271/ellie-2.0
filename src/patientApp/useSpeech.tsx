@@ -8,10 +8,12 @@ import { useLanguage } from './useLanguage';
 type SpeechRate = 0.8 | 1 | 1.2;
 type SpeechContextValue = {
   speakingId: string | null;
+  paused: boolean;
   rate: SpeechRate;
   notice: string;
   setRate: (rate: SpeechRate) => void;
   speak: (id: string, text: string, language: PatientLanguage) => void;
+  togglePause: () => void;
   stop: () => void;
 };
 
@@ -38,6 +40,7 @@ function findVoice(voices: SpeechSynthesisVoice[], language: PatientLanguage) {
 export function SpeechProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
   const [rate, setRateValue] = useState<SpeechRate>(readRate);
   const [notice, setNotice] = useState('');
   const noticeTimer = useRef<number | undefined>(undefined);
@@ -53,7 +56,14 @@ export function SpeechProvider({ children }: { children: ReactNode }) {
   const stop = useCallback(() => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setSpeakingId(null);
+    setPaused(false);
   }, []);
+  const togglePause = useCallback(() => {
+    if (!('speechSynthesis' in window)) return;
+    if (paused) window.speechSynthesis.resume();
+    else window.speechSynthesis.pause();
+    setPaused(!paused);
+  }, [paused]);
   const speak = useCallback((id: string, text: string, language: PatientLanguage) => {
     const messages = getMessages(language);
     if (speakingId === id) {
@@ -75,12 +85,13 @@ export function SpeechProvider({ children }: { children: ReactNode }) {
       return;
     }
     window.speechSynthesis.cancel();
+    setPaused(false);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language === 'en' ? 'en-US' : language === 'es' ? 'es-US' : usedFrench ? 'fr-FR' : 'ht-HT';
     if (voice) utterance.voice = voice;
     utterance.rate = rate;
-    utterance.onend = () => setSpeakingId(null);
-    utterance.onerror = () => setSpeakingId(null);
+    utterance.onend = () => { setSpeakingId(null); setPaused(false); };
+    utterance.onerror = () => { setSpeakingId(null); setPaused(false); };
     window.speechSynthesis.speak(utterance);
     setSpeakingId(id);
     if (usedFrench) showNotice(messages.creoleVoiceNote);
@@ -95,7 +106,7 @@ export function SpeechProvider({ children }: { children: ReactNode }) {
     stop();
   }, [stop]);
 
-  const value = useMemo(() => ({ speakingId, rate, notice, setRate, speak, stop }), [speakingId, rate, notice, setRate, speak, stop]);
+  const value = useMemo(() => ({ speakingId, paused, rate, notice, setRate, speak, togglePause, stop }), [speakingId, paused, rate, notice, setRate, speak, togglePause, stop]);
   return <SpeechContext.Provider value={value}>{children}</SpeechContext.Provider>;
 }
 
@@ -137,43 +148,120 @@ type SpeechWindow = Window & {
 
 export function useVoiceInput(language: PatientLanguage, onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
+  const [level, setLevel] = useState(0);
   const recognition = useRef<RecognitionLike | null>(null);
   const transcriptHandler = useRef(onTranscript);
+  const activeListening = useRef(false);
+  const stream = useRef<MediaStream | null>(null);
+  const audioContext = useRef<AudioContext | null>(null);
+  const analyser = useRef<AnalyserNode | null>(null);
+  const animationFrame = useRef<number | null>(null);
   transcriptHandler.current = onTranscript;
   const location = useLocation();
   const recognitionWindow = typeof window === 'undefined' ? undefined : window as SpeechWindow;
   const Recognition = recognitionWindow?.SpeechRecognition ?? recognitionWindow?.webkitSpeechRecognition;
 
+  const stopMeter = useCallback(() => {
+    if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
+    animationFrame.current = null;
+    stream.current?.getTracks().forEach((track) => track.stop());
+    stream.current = null;
+    analyser.current = null;
+    void audioContext.current?.close().catch(() => {});
+    audioContext.current = null;
+    setLevel(0);
+  }, []);
+
+  const startMeter = useCallback(async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext) return;
+    let media: MediaStream;
+    try {
+      media = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      return;
+    }
+    if (!activeListening.current) {
+      media.getTracks().forEach((track) => track.stop());
+      return;
+    }
+    let context: AudioContext | null = null;
+    try {
+      context = new AudioContext();
+      const meter = context.createAnalyser();
+      meter.fftSize = 256;
+      context.createMediaStreamSource(media).connect(meter);
+      stream.current = media;
+      audioContext.current = context;
+      analyser.current = meter;
+      const samples = new Uint8Array(meter.fftSize);
+      const measure = () => {
+        if (!activeListening.current || analyser.current !== meter) return;
+        meter.getByteTimeDomainData(samples);
+        const rms = Math.sqrt(samples.reduce((total, sample) => total + (sample - 128) ** 2, 0) / samples.length);
+        setLevel(Math.min(1, rms / 40));
+        animationFrame.current = window.requestAnimationFrame(measure);
+      };
+      measure();
+    } catch {
+      media.getTracks().forEach((track) => track.stop());
+      void context?.close().catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     recognition.current?.stop();
+    activeListening.current = false;
     setListening(false);
-    return () => recognition.current?.stop();
-  }, [location.pathname]);
+    stopMeter();
+    return () => {
+      recognition.current?.stop();
+      activeListening.current = false;
+      stopMeter();
+    };
+  }, [location.pathname, stopMeter]);
 
   const toggle = useCallback(() => {
     if (!Recognition) return;
     if (listening) {
+      activeListening.current = false;
       recognition.current?.stop();
       setListening(false);
+      stopMeter();
+      navigator.vibrate?.([30, 40, 30]);
       return;
     }
+    stopMeter();
     const input = new Recognition();
     input.lang = language === 'en' ? 'en-US' : language === 'es' ? 'es-US' : 'ht-HT';
     input.interimResults = false;
     input.maxAlternatives = 1;
     input.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript;
+      activeListening.current = false;
       setListening(false);
+      stopMeter();
+      navigator.vibrate?.([30, 40, 30]);
       if (transcript) transcriptHandler.current(transcript);
     };
-    input.onerror = () => setListening(false);
-    input.onend = () => setListening(false);
+    input.onerror = () => {
+      activeListening.current = false;
+      setListening(false);
+      stopMeter();
+    };
+    input.onend = () => {
+      activeListening.current = false;
+      setListening(false);
+      stopMeter();
+    };
     recognition.current = input;
     input.start();
+    activeListening.current = true;
     setListening(true);
-  }, [Recognition, language, listening]);
+    navigator.vibrate?.(40);
+    void startMeter();
+  }, [Recognition, language, listening, startMeter, stopMeter]);
 
-  return { supported: Boolean(Recognition), listening, toggle };
+  return { supported: Boolean(Recognition), listening, level, toggle };
 }
 
 export type { SpeechRate };

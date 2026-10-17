@@ -103,6 +103,7 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   return <form className="ellie-composer" onSubmit={submit}>
     <label className="sr-only" htmlFor={inputId}>{placeholder}</label>
     <input id={inputId} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete="off" />
+    {voice.listening && <div className="composer-waveform" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (8 + 13 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
     {voice.supported && <button type="button" className={`composer-mic ${voice.listening ? 'active' : ''}`} aria-label={voice.listening ? messages.listeningTap : messages.speakQuestion} aria-pressed={voice.listening} onClick={voice.toggle}><Icon name={voice.listening ? 'stop' : 'mic'} size={19} /></button>}
     <button type="submit" className="composer-send" aria-label={messages.send} disabled={!value.trim()}><Icon name="arrowUp" size={19} /></button>
   </form>;

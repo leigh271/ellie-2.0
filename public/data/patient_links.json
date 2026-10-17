@@ -1,0 +1,2513 @@
+{
+  "about": {
+    "caveat": "Demo linkage: records from different study participants combined into one fictional profile — not one real person's chart.",
+    "male_wearable_rule_relaxations": []
+  },
+  "patients": {
+    "maria": {
+      "wearable": {
+        "person_id": "FS086",
+        "health_group": "lupus",
+        "baseline": {
+          "steps": 3203.785714285714,
+          "sleep_minutes": 355.42857142857144,
+          "resting_heart_rate": null
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 1948,
+            "sleep_minutes": 339,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 4
+          },
+          {
+            "day": 2,
+            "steps": 2867,
+            "sleep_minutes": 358,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 3,
+            "steps": 3378,
+            "sleep_minutes": 382,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 4,
+            "steps": 4229,
+            "sleep_minutes": 360,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 5,
+            "steps": 3243,
+            "sleep_minutes": 369,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 6,
+            "steps": 4808,
+            "sleep_minutes": 328,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 7,
+            "steps": 4644,
+            "sleep_minutes": 332,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 8,
+            "steps": 3839,
+            "sleep_minutes": 413,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 9,
+            "steps": 4024,
+            "sleep_minutes": 393,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 10,
+            "steps": 2684,
+            "sleep_minutes": 399,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 11,
+            "steps": 2127,
+            "sleep_minutes": 342,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 12,
+            "steps": 2959,
+            "sleep_minutes": 322,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 13,
+            "steps": 1512,
+            "sleep_minutes": 338,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 4
+          },
+          {
+            "day": 14,
+            "steps": 2591,
+            "sleep_minutes": 301,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 15,
+            "steps": 2806,
+            "sleep_minutes": 305,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 4
+          },
+          {
+            "day": 16,
+            "steps": 2255,
+            "sleep_minutes": 291,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 17,
+            "steps": 2509,
+            "sleep_minutes": 372,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 18,
+            "steps": 2232,
+            "sleep_minutes": 348,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 19,
+            "steps": 2627,
+            "sleep_minutes": 361,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 20,
+            "steps": 2913,
+            "sleep_minutes": 176,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 21,
+            "steps": 2908,
+            "sleep_minutes": 402,
+            "resting_heart_rate": null,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 22,
+            "steps": 1506,
+            "sleep_minutes": 355,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 23,
+            "steps": 1995,
+            "sleep_minutes": 294,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 24,
+            "steps": 2096,
+            "sleep_minutes": 282,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 25,
+            "steps": 1597,
+            "sleep_minutes": 312,
+            "resting_heart_rate": null,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 26,
+            "steps": 2935,
+            "sleep_minutes": 331,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 27,
+            "steps": 4218,
+            "sleep_minutes": 301,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 1349,
+            "sleep_minutes": 323,
+            "resting_heart_rate": null,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 63530,
+        "survey_years": "2011-2012",
+        "age": 80,
+        "cancer_types": "cervix",
+        "years_since_first_cancer_diagnosis": 35,
+        "bmi": 31,
+        "waist_cm": 103,
+        "hba1c_pct": 5.8,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 7197.36,
+        "sensor_sleep_hours_per_day": 9.28,
+        "sleep_hours_self_report": 8,
+        "overnight_fast_hours_avg": 12.25,
+        "last_eating_hour_avg": 20.5,
+        "fiber_g": 11,
+        "calories_per_day": 1557.5,
+        "self_rated_health": "good"
+      },
+      "coaching": {
+        "participant_id": "P0002",
+        "cancer_type": "colorectal",
+        "program_focus": "movement",
+        "coach_name": "Kendra",
+        "calls": [
+          {
+            "call_id": "CALL00005",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2025-06-30",
+            "goal_topic": "veggies",
+            "duration_min": 6.8,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00006",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2025-07-07",
+            "goal_topic": "veggies",
+            "duration_min": 6.2,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00007",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2025-07-23",
+            "goal_topic": "cooking",
+            "duration_min": 5.7,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00008",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2025-08-06",
+            "goal_topic": "sleep",
+            "duration_min": 6,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00009",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2025-08-18",
+            "goal_topic": "sleep",
+            "duration_min": 7.3,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00010",
+            "call_number": 6,
+            "program_week": 12,
+            "date": "2025-09-16",
+            "goal_topic": "sleep",
+            "duration_min": 6.2,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "add a vegetable to lunch and dinner on 4 days",
+            "topic": "veggies",
+            "goal_met": "no"
+          },
+          {
+            "week": 2,
+            "goal": "add a vegetable to lunch and dinner on 5 days",
+            "topic": "veggies",
+            "goal_met": "no"
+          },
+          {
+            "week": 3,
+            "goal": "add a vegetable to lunch and dinner on 5 days",
+            "topic": "veggies",
+            "goal_met": "yes"
+          },
+          {
+            "week": 4,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "no"
+          },
+          {
+            "week": 5,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "no"
+          },
+          {
+            "week": 6,
+            "goal": "be in bed by 10:30 on 4 nights",
+            "topic": "sleep",
+            "goal_met": "partly"
+          },
+          {
+            "week": 7,
+            "goal": "be in bed by 10:30 on 4 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 8,
+            "goal": "be in bed by 10:30 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 9,
+            "goal": "be in bed by 10:30 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 10,
+            "goal": "be in bed by 10:30 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 11,
+            "goal": "be in bed by 10:30 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "partly"
+          },
+          {
+            "week": 12,
+            "goal": "be in bed by 10:30 on 3 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          }
+        ],
+        "goal_met_rate": 0.08333333333333333
+      }
+    },
+    "jasmine": {
+      "wearable": {
+        "person_id": "FS003",
+        "health_group": "no autoimmune condition",
+        "baseline": {
+          "steps": 10240.07142857143,
+          "sleep_minutes": 464.7142857142857,
+          "resting_heart_rate": 75.35714285714286
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 9889,
+            "sleep_minutes": 533,
+            "resting_heart_rate": 77,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 2,
+            "steps": 14770,
+            "sleep_minutes": 514,
+            "resting_heart_rate": 77,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 3,
+            "steps": 7526,
+            "sleep_minutes": 498,
+            "resting_heart_rate": 76,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 4,
+            "steps": 8001,
+            "sleep_minutes": 461,
+            "resting_heart_rate": 75,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 5,
+            "steps": 10885,
+            "sleep_minutes": 500,
+            "resting_heart_rate": 75,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 6,
+            "steps": 6244,
+            "sleep_minutes": 507,
+            "resting_heart_rate": 75,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 7,
+            "steps": 7768,
+            "sleep_minutes": 484,
+            "resting_heart_rate": 74,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 8,
+            "steps": 10470,
+            "sleep_minutes": 332,
+            "resting_heart_rate": 74,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 9,
+            "steps": 11755,
+            "sleep_minutes": 503,
+            "resting_heart_rate": 75,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 10,
+            "steps": 11014,
+            "sleep_minutes": 479,
+            "resting_heart_rate": 75,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 11,
+            "steps": 10591,
+            "sleep_minutes": 492,
+            "resting_heart_rate": 75,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 12,
+            "steps": 12872,
+            "sleep_minutes": 505,
+            "resting_heart_rate": 75,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 13,
+            "steps": 9160,
+            "sleep_minutes": 151,
+            "resting_heart_rate": 77,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 14,
+            "steps": 12416,
+            "sleep_minutes": 547,
+            "resting_heart_rate": 75,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 15,
+            "steps": 11617,
+            "sleep_minutes": 494,
+            "resting_heart_rate": 74,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 16,
+            "steps": 7591,
+            "sleep_minutes": 217,
+            "resting_heart_rate": 74,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 17,
+            "steps": 8551,
+            "sleep_minutes": 282,
+            "resting_heart_rate": 77,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 18,
+            "steps": 10713,
+            "sleep_minutes": 671,
+            "resting_heart_rate": 74,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 19,
+            "steps": 10972,
+            "sleep_minutes": 476,
+            "resting_heart_rate": 72,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 20,
+            "steps": 8785,
+            "sleep_minutes": 479,
+            "resting_heart_rate": 72,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 21,
+            "steps": 866,
+            "sleep_minutes": 1210,
+            "resting_heart_rate": 73,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 4
+          },
+          {
+            "day": 22,
+            "steps": 8090,
+            "sleep_minutes": 492,
+            "resting_heart_rate": 72,
+            "day_rating": "bad",
+            "bad_day": 1,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 23,
+            "steps": 10489,
+            "sleep_minutes": 512,
+            "resting_heart_rate": 70,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 24,
+            "steps": 11560,
+            "sleep_minutes": 310,
+            "resting_heart_rate": 68,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 25,
+            "steps": 11577,
+            "sleep_minutes": 444,
+            "resting_heart_rate": 70,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 26,
+            "steps": 11265,
+            "sleep_minutes": 517,
+            "resting_heart_rate": 72,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 27,
+            "steps": 11612,
+            "sleep_minutes": 489,
+            "resting_heart_rate": 72,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 7303,
+            "sleep_minutes": 479,
+            "resting_heart_rate": 72,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 62509,
+        "survey_years": "2011-2012",
+        "age": 60,
+        "cancer_types": "breast",
+        "years_since_first_cancer_diagnosis": 15,
+        "bmi": 24.1,
+        "waist_cm": 82.5,
+        "hba1c_pct": 5.7,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 14556.29,
+        "sensor_sleep_hours_per_day": 7.57,
+        "sleep_hours_self_report": 8,
+        "overnight_fast_hours_avg": 12.25,
+        "last_eating_hour_avg": 19.25,
+        "fiber_g": 19.2,
+        "calories_per_day": 904.5,
+        "self_rated_health": "very good"
+      },
+      "coaching": {
+        "participant_id": "P0004",
+        "cancer_type": "breast",
+        "program_focus": "eating",
+        "coach_name": "Marisol",
+        "calls": [
+          {
+            "call_id": "CALL00017",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2025-02-18",
+            "goal_topic": "veggies",
+            "duration_min": 5.5,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00018",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2025-02-26",
+            "goal_topic": "veggies",
+            "duration_min": 5.2,
+            "supervisor_overall": 3.5
+          },
+          {
+            "call_id": "CALL00019",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2025-03-11",
+            "goal_topic": "veggies",
+            "duration_min": 6,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00020",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2025-03-25",
+            "goal_topic": "cooking",
+            "duration_min": 7.1,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00021",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2025-04-07",
+            "goal_topic": "cooking",
+            "duration_min": 6.1,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00022",
+            "call_number": 6,
+            "program_week": 12,
+            "date": "2025-05-06",
+            "goal_topic": "cooking",
+            "duration_min": 6.7,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "add a vegetable to lunch and dinner on 4 days",
+            "topic": "veggies",
+            "goal_met": "no"
+          },
+          {
+            "week": 2,
+            "goal": "add a vegetable to lunch and dinner on 4 days",
+            "topic": "veggies",
+            "goal_met": "no"
+          },
+          {
+            "week": 3,
+            "goal": "add a vegetable to lunch and dinner on 4 days",
+            "topic": "veggies",
+            "goal_met": "yes"
+          },
+          {
+            "week": 4,
+            "goal": "add a vegetable to lunch and dinner on 5 days",
+            "topic": "veggies",
+            "goal_met": "partly"
+          },
+          {
+            "week": 5,
+            "goal": "add a vegetable to lunch and dinner on 5 days",
+            "topic": "veggies",
+            "goal_met": "partly"
+          },
+          {
+            "week": 6,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 7,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "no"
+          },
+          {
+            "week": 8,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 9,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 10,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 11,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 12,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          }
+        ],
+        "goal_met_rate": 0.4166666666666667
+      }
+    },
+    "ana": {
+      "wearable": {
+        "person_id": "FS022",
+        "health_group": "lupus",
+        "baseline": {
+          "steps": 8262.285714285714,
+          "sleep_minutes": 354.44444444444446,
+          "resting_heart_rate": 71.76923076923077
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 6773,
+            "sleep_minutes": null,
+            "resting_heart_rate": 72,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 2,
+            "steps": 11636,
+            "sleep_minutes": 364,
+            "resting_heart_rate": 72,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 3,
+            "steps": 10974,
+            "sleep_minutes": null,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 4,
+            "steps": 7780,
+            "sleep_minutes": null,
+            "resting_heart_rate": 71,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 5,
+            "steps": 9184,
+            "sleep_minutes": 400,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 6,
+            "steps": 8442,
+            "sleep_minutes": 404,
+            "resting_heart_rate": 71,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 7,
+            "steps": 8996,
+            "sleep_minutes": 387,
+            "resting_heart_rate": 70,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 8,
+            "steps": 7527,
+            "sleep_minutes": 230,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 9,
+            "steps": 6201,
+            "sleep_minutes": 430,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 10,
+            "steps": 4070,
+            "sleep_minutes": null,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 11,
+            "steps": 6993,
+            "sleep_minutes": 351,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 12,
+            "steps": 8174,
+            "sleep_minutes": 453,
+            "resting_heart_rate": 73,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 13,
+            "steps": 9935,
+            "sleep_minutes": null,
+            "resting_heart_rate": 73,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 14,
+            "steps": 8987,
+            "sleep_minutes": 171,
+            "resting_heart_rate": 74,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 15,
+            "steps": 9327,
+            "sleep_minutes": 423,
+            "resting_heart_rate": 73,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 16,
+            "steps": 5599,
+            "sleep_minutes": 484,
+            "resting_heart_rate": 73,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 17,
+            "steps": 11534,
+            "sleep_minutes": 461,
+            "resting_heart_rate": 70,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 18,
+            "steps": 7853,
+            "sleep_minutes": 463,
+            "resting_heart_rate": 70,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 19,
+            "steps": 5712,
+            "sleep_minutes": 458,
+            "resting_heart_rate": 69,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 20,
+            "steps": 9832,
+            "sleep_minutes": 446,
+            "resting_heart_rate": 68,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 21,
+            "steps": 8386,
+            "sleep_minutes": null,
+            "resting_heart_rate": 68,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 22,
+            "steps": 10915,
+            "sleep_minutes": 312,
+            "resting_heart_rate": 69,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 23,
+            "steps": 228,
+            "sleep_minutes": null,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 24,
+            "steps": null,
+            "sleep_minutes": null,
+            "resting_heart_rate": null,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 25,
+            "steps": 9547,
+            "sleep_minutes": null,
+            "resting_heart_rate": 70,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 26,
+            "steps": 6412,
+            "sleep_minutes": 408,
+            "resting_heart_rate": 70,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 27,
+            "steps": 7499,
+            "sleep_minutes": 293,
+            "resting_heart_rate": 70,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 8612,
+            "sleep_minutes": null,
+            "resting_heart_rate": 71,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 63545,
+        "survey_years": "2011-2012",
+        "age": 56,
+        "cancer_types": "lymphoma",
+        "years_since_first_cancer_diagnosis": 9,
+        "bmi": 25.1,
+        "waist_cm": 77.5,
+        "hba1c_pct": 5.5,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 14043.24,
+        "sensor_sleep_hours_per_day": 6.71,
+        "sleep_hours_self_report": 8,
+        "overnight_fast_hours_avg": 11.12,
+        "last_eating_hour_avg": 20.25,
+        "fiber_g": 7.8,
+        "calories_per_day": 1287,
+        "self_rated_health": "good"
+      },
+      "coaching": {
+        "participant_id": "P0073",
+        "cancer_type": "lymphoma",
+        "program_focus": "eating",
+        "coach_name": "Marisol",
+        "calls": [
+          {
+            "call_id": "CALL00407",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2026-01-13",
+            "goal_topic": "walking",
+            "duration_min": 6.1,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00408",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2026-01-19",
+            "goal_topic": "walking",
+            "duration_min": 5.4,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00409",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2026-02-03",
+            "goal_topic": "walking",
+            "duration_min": 5.2,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00410",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2026-02-18",
+            "goal_topic": "walking",
+            "duration_min": 5.6,
+            "supervisor_overall": 3.0
+          },
+          {
+            "call_id": "CALL00411",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2026-03-02",
+            "goal_topic": "walking",
+            "duration_min": 4.8,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00412",
+            "call_number": 6,
+            "program_week": 12,
+            "date": "2026-03-31",
+            "goal_topic": "walking",
+            "duration_min": 5,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "walk 15 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 2,
+            "goal": "walk 30 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 3,
+            "goal": "walk 30 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 4,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 5,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 6,
+            "goal": "walk 30 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 7,
+            "goal": "walk 30 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 8,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 9,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 10,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 11,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 12,
+            "goal": "walk 10 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "no"
+          }
+        ],
+        "goal_met_rate": 0.25
+      }
+    },
+    "david": {
+      "wearable": {
+        "person_id": "FS343",
+        "health_group": "no autoimmune condition",
+        "baseline": {
+          "steps": 10479.285714285714,
+          "sleep_minutes": 476.38461538461536,
+          "resting_heart_rate": 56.142857142857146
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 15380,
+            "sleep_minutes": 474,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 2,
+            "steps": 11206,
+            "sleep_minutes": 464,
+            "resting_heart_rate": 56,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 3,
+            "steps": 6940,
+            "sleep_minutes": 468,
+            "resting_heart_rate": 55,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 4,
+            "steps": 7115,
+            "sleep_minutes": 641,
+            "resting_heart_rate": 55,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 5,
+            "steps": 11401,
+            "sleep_minutes": null,
+            "resting_heart_rate": 55,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 6,
+            "steps": 8571,
+            "sleep_minutes": 452,
+            "resting_heart_rate": 55,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 7,
+            "steps": 6740,
+            "sleep_minutes": 463,
+            "resting_heart_rate": 55,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 8,
+            "steps": 12962,
+            "sleep_minutes": 436,
+            "resting_heart_rate": 56,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 9,
+            "steps": 11963,
+            "sleep_minutes": 468,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 10,
+            "steps": 10122,
+            "sleep_minutes": 501,
+            "resting_heart_rate": 57,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 11,
+            "steps": 8156,
+            "sleep_minutes": 444,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 12,
+            "steps": 10570,
+            "sleep_minutes": 462,
+            "resting_heart_rate": 57,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 13,
+            "steps": 12016,
+            "sleep_minutes": 463,
+            "resting_heart_rate": 57,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 14,
+            "steps": 13568,
+            "sleep_minutes": 457,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 15,
+            "steps": 9954,
+            "sleep_minutes": 447,
+            "resting_heart_rate": 56,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 16,
+            "steps": 15246,
+            "sleep_minutes": 473,
+            "resting_heart_rate": 56,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 17,
+            "steps": 9259,
+            "sleep_minutes": 353,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 18,
+            "steps": 5349,
+            "sleep_minutes": 513,
+            "resting_heart_rate": 56,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 19,
+            "steps": 13828,
+            "sleep_minutes": 423,
+            "resting_heart_rate": 58,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 20,
+            "steps": 8605,
+            "sleep_minutes": null,
+            "resting_heart_rate": 58,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 21,
+            "steps": 8499,
+            "sleep_minutes": 448,
+            "resting_heart_rate": 59,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 22,
+            "steps": 10351,
+            "sleep_minutes": 500,
+            "resting_heart_rate": 59,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 23,
+            "steps": 14506,
+            "sleep_minutes": 499,
+            "resting_heart_rate": 59,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 24,
+            "steps": 13780,
+            "sleep_minutes": 482,
+            "resting_heart_rate": 58,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 25,
+            "steps": 7896,
+            "sleep_minutes": 498,
+            "resting_heart_rate": 58,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 26,
+            "steps": 5819,
+            "sleep_minutes": 492,
+            "resting_heart_rate": 57,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 27,
+            "steps": 16974,
+            "sleep_minutes": 471,
+            "resting_heart_rate": 58,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 8371,
+            "sleep_minutes": 407,
+            "resting_heart_rate": 58,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 63198,
+        "survey_years": "2011-2012",
+        "age": 80,
+        "cancer_types": "colon",
+        "years_since_first_cancer_diagnosis": 27,
+        "bmi": 26.6,
+        "waist_cm": 102.7,
+        "hba1c_pct": 7,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 7295.31,
+        "sensor_sleep_hours_per_day": 10.07,
+        "sleep_hours_self_report": 6,
+        "overnight_fast_hours_avg": 10.75,
+        "last_eating_hour_avg": 21,
+        "fiber_g": 23.8,
+        "calories_per_day": 2480,
+        "self_rated_health": "good"
+      },
+      "coaching": {
+        "participant_id": "P0018",
+        "cancer_type": "colorectal",
+        "program_focus": "both",
+        "coach_name": "Marcus",
+        "calls": [
+          {
+            "call_id": "CALL00094",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2025-08-06",
+            "goal_topic": "cooking",
+            "duration_min": 3.6,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00095",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2025-08-12",
+            "goal_topic": "cooking",
+            "duration_min": 4.5,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00096",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2025-08-26",
+            "goal_topic": "walking",
+            "duration_min": 5.7,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00097",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2025-09-08",
+            "goal_topic": "walking",
+            "duration_min": 4.4,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00098",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2025-09-24",
+            "goal_topic": "sleep",
+            "duration_min": 4.2,
+            "supervisor_overall": 3.5
+          },
+          {
+            "call_id": "CALL00099",
+            "call_number": 6,
+            "program_week": 12,
+            "date": "2025-10-20",
+            "goal_topic": "sleep",
+            "duration_min": 5,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 2,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 3,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "no"
+          },
+          {
+            "week": 4,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 5,
+            "goal": "walk 10 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 6,
+            "goal": "walk 10 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 7,
+            "goal": "walk 10 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 8,
+            "goal": "be in bed by 10 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "yes"
+          },
+          {
+            "week": 9,
+            "goal": "be in bed by 10 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "yes"
+          },
+          {
+            "week": 10,
+            "goal": "be in bed by 10 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 11,
+            "goal": "be in bed by 10 on 5 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          },
+          {
+            "week": 12,
+            "goal": "be in bed by 10:30 on 3 nights",
+            "topic": "sleep",
+            "goal_met": "no"
+          }
+        ],
+        "goal_met_rate": 0.3333333333333333
+      }
+    },
+    "priya": {
+      "wearable": {
+        "person_id": "FS032",
+        "health_group": "Sjogren's syndrome",
+        "baseline": {
+          "steps": 11960.857142857143,
+          "sleep_minutes": 439.57142857142856,
+          "resting_heart_rate": 73.85714285714286
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 14979,
+            "sleep_minutes": 434,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 2,
+            "steps": 17450,
+            "sleep_minutes": 442,
+            "resting_heart_rate": 72,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 3,
+            "steps": 10700,
+            "sleep_minutes": 468,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 4,
+            "steps": 2420,
+            "sleep_minutes": 309,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 5,
+            "steps": 6914,
+            "sleep_minutes": 508,
+            "resting_heart_rate": 72,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 6,
+            "steps": 12383,
+            "sleep_minutes": 406,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 7,
+            "steps": 15965,
+            "sleep_minutes": 456,
+            "resting_heart_rate": 72,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 8,
+            "steps": 11446,
+            "sleep_minutes": 432,
+            "resting_heart_rate": 73,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 9,
+            "steps": 10196,
+            "sleep_minutes": 485,
+            "resting_heart_rate": 74,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 10,
+            "steps": 14787,
+            "sleep_minutes": 405,
+            "resting_heart_rate": 76,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 11,
+            "steps": 12456,
+            "sleep_minutes": 467,
+            "resting_heart_rate": 76,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 12,
+            "steps": 9094,
+            "sleep_minutes": 520,
+            "resting_heart_rate": 78,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 13,
+            "steps": 14079,
+            "sleep_minutes": 426,
+            "resting_heart_rate": 77,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 14,
+            "steps": 14583,
+            "sleep_minutes": 396,
+            "resting_heart_rate": 76,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 15,
+            "steps": 13559,
+            "sleep_minutes": 443,
+            "resting_heart_rate": 74,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 3
+          },
+          {
+            "day": 16,
+            "steps": 10252,
+            "sleep_minutes": 522,
+            "resting_heart_rate": 72,
+            "day_rating": "average",
+            "bad_day": 0,
+            "tired_0_to_4": 2
+          },
+          {
+            "day": 17,
+            "steps": 8021,
+            "sleep_minutes": 431,
+            "resting_heart_rate": 74,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 1
+          },
+          {
+            "day": 18,
+            "steps": 8596,
+            "sleep_minutes": null,
+            "resting_heart_rate": 74,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 19,
+            "steps": 9708,
+            "sleep_minutes": 512,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 20,
+            "steps": 10702,
+            "sleep_minutes": 474,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 21,
+            "steps": 14036,
+            "sleep_minutes": 425,
+            "resting_heart_rate": 74,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 22,
+            "steps": 14807,
+            "sleep_minutes": 424,
+            "resting_heart_rate": 73,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 23,
+            "steps": 13663,
+            "sleep_minutes": null,
+            "resting_heart_rate": 72,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 24,
+            "steps": 12176,
+            "sleep_minutes": 476,
+            "resting_heart_rate": 71,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 25,
+            "steps": 4605,
+            "sleep_minutes": 375,
+            "resting_heart_rate": 72,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 26,
+            "steps": 14496,
+            "sleep_minutes": 458,
+            "resting_heart_rate": 72,
+            "day_rating": "good",
+            "bad_day": 0,
+            "tired_0_to_4": 0
+          },
+          {
+            "day": 27,
+            "steps": 16321,
+            "sleep_minutes": 438,
+            "resting_heart_rate": 70,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 16046,
+            "sleep_minutes": 415,
+            "resting_heart_rate": 70,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 63200,
+        "survey_years": "2011-2012",
+        "age": 59,
+        "cancer_types": "ovary",
+        "years_since_first_cancer_diagnosis": 5,
+        "bmi": 26.9,
+        "waist_cm": 100.3,
+        "hba1c_pct": 5.6,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 9826.01,
+        "sensor_sleep_hours_per_day": 9.5,
+        "sleep_hours_self_report": 8,
+        "overnight_fast_hours_avg": 9.25,
+        "last_eating_hour_avg": 19,
+        "fiber_g": 6.6,
+        "calories_per_day": 1115.5,
+        "self_rated_health": "good"
+      },
+      "coaching": {
+        "participant_id": "P0006",
+        "cancer_type": "prostate",
+        "program_focus": "movement",
+        "coach_name": "Rachel",
+        "calls": [
+          {
+            "call_id": "CALL00029",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2025-08-20",
+            "goal_topic": "cooking",
+            "duration_min": 6.5,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00030",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2025-08-26",
+            "goal_topic": "cooking",
+            "duration_min": 7.1,
+            "supervisor_overall": 4.0
+          },
+          {
+            "call_id": "CALL00031",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2025-09-10",
+            "goal_topic": "cooking",
+            "duration_min": 5.8,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00032",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2025-09-23",
+            "goal_topic": "cooking",
+            "duration_min": 8.3,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00033",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2025-10-06",
+            "goal_topic": "cooking",
+            "duration_min": 6.6,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00034",
+            "call_number": 6,
+            "program_week": 12,
+            "date": "2025-11-05",
+            "goal_topic": "walking",
+            "duration_min": 5.7,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "no"
+          },
+          {
+            "week": 2,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 3,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 4,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 5,
+            "goal": "cook at home 3 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 6,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 7,
+            "goal": "cook at home 5 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 8,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 9,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 10,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 11,
+            "goal": "cook at home 4 nights",
+            "topic": "cooking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 12,
+            "goal": "walk 20 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          }
+        ],
+        "goal_met_rate": 0.6666666666666666
+      }
+    },
+    "robert": {
+      "wearable": {
+        "person_id": "FS345",
+        "health_group": "no autoimmune condition",
+        "baseline": {
+          "steps": 21403.85714285714,
+          "sleep_minutes": 274.85714285714283,
+          "resting_heart_rate": 71.57142857142857
+        },
+        "series": [
+          {
+            "day": 1,
+            "steps": 16550,
+            "sleep_minutes": 194,
+            "resting_heart_rate": 75,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 2,
+            "steps": 11896,
+            "sleep_minutes": 200,
+            "resting_heart_rate": 76,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 3,
+            "steps": 20251,
+            "sleep_minutes": 415,
+            "resting_heart_rate": 74,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 4,
+            "steps": 22040,
+            "sleep_minutes": 383,
+            "resting_heart_rate": 75,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 5,
+            "steps": 30138,
+            "sleep_minutes": 397,
+            "resting_heart_rate": 73,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 6,
+            "steps": 30092,
+            "sleep_minutes": 366,
+            "resting_heart_rate": 73,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 7,
+            "steps": 20172,
+            "sleep_minutes": 169,
+            "resting_heart_rate": 71,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 8,
+            "steps": 23895,
+            "sleep_minutes": 297,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 9,
+            "steps": 15600,
+            "sleep_minutes": 379,
+            "resting_heart_rate": 71,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 10,
+            "steps": 23455,
+            "sleep_minutes": 365,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 11,
+            "steps": 22553,
+            "sleep_minutes": 60,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 12,
+            "steps": 20760,
+            "sleep_minutes": 227,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 13,
+            "steps": 21784,
+            "sleep_minutes": 105,
+            "resting_heart_rate": 68,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 14,
+            "steps": 20468,
+            "sleep_minutes": 291,
+            "resting_heart_rate": 70,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 15,
+            "steps": 17473,
+            "sleep_minutes": 237,
+            "resting_heart_rate": 70,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 16,
+            "steps": 21587,
+            "sleep_minutes": 494,
+            "resting_heart_rate": 68,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 17,
+            "steps": 21420,
+            "sleep_minutes": 412,
+            "resting_heart_rate": 66,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 18,
+            "steps": 24695,
+            "sleep_minutes": 113,
+            "resting_heart_rate": 66,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 19,
+            "steps": 27563,
+            "sleep_minutes": 83,
+            "resting_heart_rate": 66,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 20,
+            "steps": 23417,
+            "sleep_minutes": 166,
+            "resting_heart_rate": 68,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 21,
+            "steps": 27322,
+            "sleep_minutes": 294,
+            "resting_heart_rate": 68,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 22,
+            "steps": 26097,
+            "sleep_minutes": null,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 23,
+            "steps": 20014,
+            "sleep_minutes": 619,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 24,
+            "steps": 20584,
+            "sleep_minutes": 163,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 25,
+            "steps": 22410,
+            "sleep_minutes": 104,
+            "resting_heart_rate": 67,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 26,
+            "steps": 23820,
+            "sleep_minutes": 64,
+            "resting_heart_rate": 69,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 27,
+            "steps": 23123,
+            "sleep_minutes": 269,
+            "resting_heart_rate": 68,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          },
+          {
+            "day": 28,
+            "steps": 24171,
+            "sleep_minutes": 147,
+            "resting_heart_rate": 67,
+            "day_rating": null,
+            "bad_day": null,
+            "tired_0_to_4": null
+          }
+        ]
+      },
+      "nhanes": {
+        "person_id": 62650,
+        "survey_years": "2011-2012",
+        "age": 71,
+        "cancer_types": "prostate",
+        "years_since_first_cancer_diagnosis": 0,
+        "bmi": 33.3,
+        "waist_cm": 118.1,
+        "hba1c_pct": 6.4,
+        "fasting_glucose_mg_dl": null,
+        "movement_per_day_mims": 10647.05,
+        "sensor_sleep_hours_per_day": 6.89,
+        "sleep_hours_self_report": 5,
+        "overnight_fast_hours_avg": 14.75,
+        "last_eating_hour_avg": 18.5,
+        "fiber_g": 16.7,
+        "calories_per_day": 1462.5,
+        "self_rated_health": "fair"
+      },
+      "coaching": {
+        "participant_id": "P0026",
+        "cancer_type": "prostate",
+        "program_focus": "movement",
+        "coach_name": "Yolanda",
+        "calls": [
+          {
+            "call_id": "CALL00138",
+            "call_number": 1,
+            "program_week": 1,
+            "date": "2025-10-08",
+            "goal_topic": "walking",
+            "duration_min": 7.1,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00139",
+            "call_number": 2,
+            "program_week": 2,
+            "date": "2025-10-13",
+            "goal_topic": "walking",
+            "duration_min": 6.5,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00140",
+            "call_number": 3,
+            "program_week": 4,
+            "date": "2025-10-29",
+            "goal_topic": "walking",
+            "duration_min": 7.9,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00141",
+            "call_number": 4,
+            "program_week": 6,
+            "date": "2025-11-11",
+            "goal_topic": "alcohol",
+            "duration_min": 7.2,
+            "supervisor_overall": null
+          },
+          {
+            "call_id": "CALL00142",
+            "call_number": 5,
+            "program_week": 8,
+            "date": "2025-11-25",
+            "goal_topic": "alcohol",
+            "duration_min": 7,
+            "supervisor_overall": null
+          }
+        ],
+        "weekly_goals": [
+          {
+            "week": 1,
+            "goal": "walk 15 minutes on 5 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 2,
+            "goal": "walk 10 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "no"
+          },
+          {
+            "week": 3,
+            "goal": "walk 10 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 4,
+            "goal": "walk 15 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "yes"
+          },
+          {
+            "week": 5,
+            "goal": "walk 15 minutes on 3 days",
+            "topic": "walking",
+            "goal_met": "partly"
+          },
+          {
+            "week": 6,
+            "goal": "keep it to 2 drinks on the weekend",
+            "topic": "alcohol",
+            "goal_met": "no"
+          },
+          {
+            "week": 7,
+            "goal": "keep it to 2 drinks on the weekend",
+            "topic": "alcohol",
+            "goal_met": "no"
+          },
+          {
+            "week": 8,
+            "goal": "keep it to 2 drinks on the weekend",
+            "topic": "alcohol",
+            "goal_met": "no"
+          },
+          {
+            "week": 9,
+            "goal": "keep it to 2 drinks on the weekend",
+            "topic": "alcohol",
+            "goal_met": "yes"
+          },
+          {
+            "week": 10,
+            "goal": "keep it to 2 drinks on the weekend",
+            "topic": "alcohol",
+            "goal_met": "partly"
+          }
+        ],
+        "goal_met_rate": 0.3
+      }
+    }
+  }
+}

@@ -84,7 +84,7 @@ export function ErrorState({ message, retry }: { message: string; retry?: () => 
 export type TrendItem = Record<string, string | number | null>;
 export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date', formatValue }: {
   data: TrendItem[];
-  lines: Array<{ key: string; label: string; color?: string; dashed?: boolean }>;
+  lines: Array<{ key: string; label: string; color?: string; dashed?: boolean; markersOnly?: boolean }>;
   baseline?: number;
   height?: number;
   xKey?: string;
@@ -100,7 +100,7 @@ export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date',
           <Tooltip formatter={formatValue ? (value) => formatValue(Number(value)) : undefined} contentStyle={{ borderRadius: 12, borderColor: '#f1e6ec', fontSize: 12 }} />
           {lines.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
           {baseline !== undefined && <ReferenceLine y={baseline} stroke="#b69eab" strokeDasharray="5 5" label={{ value: 'Baseline', position: 'insideTopRight', fill: '#817680', fontSize: 10 }} />}
-          {lines.map((line) => <Line key={line.key} type="monotone" dataKey={line.key} name={line.label} stroke={line.color ?? '#f65398'} strokeWidth={2.4} dot={false} connectNulls={false} strokeDasharray={line.dashed ? '5 4' : undefined} />)}
+          {lines.map((line) => <Line key={line.key} type="monotone" dataKey={line.key} name={line.label} stroke={line.markersOnly ? 'transparent' : line.color ?? '#f65398'} strokeWidth={line.markersOnly ? 0 : 2.4} dot={line.markersOnly ? { r: 4, fill: line.color ?? '#f65398', stroke: '#fff', strokeWidth: 1.5 } : false} connectNulls={false} strokeDasharray={line.dashed ? '5 4' : undefined} />)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

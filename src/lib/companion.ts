@@ -34,6 +34,10 @@ function isEmergency(message: string, language: PatientLanguage) {
   return words[language].some((word) => text.includes(word));
 }
 
+export function isEmergencyMessage(message: string, language: PatientLanguage = 'en') {
+  return isEmergency(message, language);
+}
+
 export function companionDestination(message: string, language: PatientLanguage = 'en'): string | undefined {
   if (isEmergency(message, language)) return undefined;
   const term = findGlossaryTerm(message, language);

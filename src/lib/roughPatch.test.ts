@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { elliePatients } from '../data/ellieDemo';
+import { readFileSync } from 'node:fs';
+import { withLinkedWearable, type PatientLinksDataset } from '../data/patientLinks';
 import { analyzeRoughPatch } from './roughPatch';
 
+const links = JSON.parse(
+  readFileSync(new URL('../../public/data/patient_links.json', import.meta.url), 'utf8'),
+) as PatientLinksDataset;
+
 describe('analyzeRoughPatch', () => {
-  it('identifies Maria’s recent change and reports recent data completeness', () => {
-    const result = analyzeRoughPatch(elliePatients[0]);
+  it('identifies Maria’s linked recent change and reports data completeness', () => {
+    const patient = withLinkedWearable(elliePatients[0], links.patients.maria);
+    const result = analyzeRoughPatch(patient);
     expect(result.active).toBe(true);
-    expect(result.rules).toHaveLength(3);
-    expect(result.completeness).toBeGreaterThan(70);
+    expect(result.rules).toContain('Steps are down at least 15% from baseline');
+    expect(result.completeness).toBeGreaterThan(60);
   });
 
   it('does not raise an alert for a stable synthetic patient', () => {

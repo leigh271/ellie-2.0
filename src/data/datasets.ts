@@ -216,29 +216,44 @@ export type ProgramCall = {
 
 export type ProgramCallsDataset = { about: string; calls: ProgramCall[] };
 
+const datasetPromises = new Map<string, Promise<unknown>>();
+
+function loadDataset<T>(file: string): Promise<T> {
+  const cached = datasetPromises.get(file);
+  if (cached) return cached as Promise<T>;
+  const request = fetch(`/data/${encodeURIComponent(file)}`).then((response) => {
+    if (!response.ok) throw new Error(`Unable to load ${file} (${response.status}).`);
+    return response.json() as Promise<T>;
+  });
+  datasetPromises.set(file, request);
+  request.catch(() => {
+    if (datasetPromises.get(file) === request) datasetPromises.delete(file);
+  });
+  return request;
+}
+
 export function useDataset<T>(file: string) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const reload = useCallback(() => {
-    const controller = new AbortController();
+  const load = useCallback(() => {
+    let active = true;
     setLoading(true);
     setError(null);
-    setData(null);
-    fetch(`/data/${encodeURIComponent(file)}`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error(`Unable to load ${file} (${response.status}).`);
-        return response.json() as Promise<T>;
-      })
-      .then(setData)
+    loadDataset<T>(file)
+      .then((result) => { if (active) setData(result); })
       .catch((cause: unknown) => {
-        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : `Unable to load ${file}.`);
+        if (active) setError(cause instanceof Error ? cause.message : `Unable to load ${file}.`);
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) setLoading(false);
       });
-    return () => controller.abort();
+    return () => { active = false; };
   }, [file]);
-  useEffect(() => reload(), [reload]);
+  const reload = useCallback(() => {
+    datasetPromises.delete(file);
+    return load();
+  }, [file, load]);
+  useEffect(() => load(), [load]);
   return { data, error, loading, reload };
 }

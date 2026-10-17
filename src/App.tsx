@@ -1,17 +1,26 @@
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 import { Orb } from './components/UI';
 import { useDemoStore } from './state/DemoStore';
-import PatientAppLayout from './patientApp/PatientAppLayout';
-import PatientAppHome from './patientApp/screens/Home';
-import DiagnosisScreen from './patientApp/screens/Diagnosis';
-import PatientHelpScreen from './patientApp/screens/Help';
-import PatientAskScreen from './patientApp/screens/Ask';
-import PatientUpdatesScreen from './patientApp/screens/Updates';
 import { getMessages } from './patientApp/i18n';
-import {
-  ActivityPage, C3Page, C4Page, C5Page, CommandCenter, Patient360, PatientList, PatientView, ResourcesPage, TasksPage,
-} from './screens/Screens';
+
+const PatientAppLayout = lazy(() => import('./patientApp/PatientAppLayout'));
+const PatientAppHome = lazy(() => import('./patientApp/screens/Home'));
+const DiagnosisScreen = lazy(() => import('./patientApp/screens/Diagnosis'));
+const PatientHelpScreen = lazy(() => import('./patientApp/screens/Help'));
+const PatientAskScreen = lazy(() => import('./patientApp/screens/Ask'));
+const PatientUpdatesScreen = lazy(() => import('./patientApp/screens/Updates'));
+const CommandCenter = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.CommandCenter })));
+const PatientList = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.PatientList })));
+const Patient360 = lazy(() => import('./screens/OverviewPatients').then((module) => ({ default: module.Patient360 })));
+const PatientView = lazy(() => import('./screens/CarePages').then((module) => ({ default: module.PatientView })));
+const TasksPage = lazy(() => import('./screens/CarePages').then((module) => ({ default: module.TasksPage })));
+const ResourcesPage = lazy(() => import('./screens/CarePages').then((module) => ({ default: module.ResourcesPage })));
+const ActivityPage = lazy(() => import('./screens/CarePages').then((module) => ({ default: module.ActivityPage })));
+const C3Page = lazy(() => import('./screens/Modules').then((module) => ({ default: module.C3Page })));
+const C4Page = lazy(() => import('./screens/Modules').then((module) => ({ default: module.C4Page })));
+const C5Page = lazy(() => import('./screens/Modules').then((module) => ({ default: module.C5Page })));
 
 const navigation = [
   { to: '/', title: 'Command center', icon: '◈' },
@@ -57,14 +66,14 @@ export default function App() {
       <Orb /><h1>{appMessages.patientApp}</h1><p>{appMessages.homeSubtitle}</p>
       <button className="patient-app-primary" type="button" onClick={() => setRole('patient')}>{appMessages.openAsPatient}</button>
     </section></div>;
-    return <PatientAppLayout><Routes>
+    return <Suspense fallback={<div className="page-loading" aria-live="polite">Loading Ellie…</div>}><PatientAppLayout><Routes>
       <Route path="/app" element={<PatientAppHome />} />
       <Route path="/app/diagnosis" element={<DiagnosisScreen />} />
       <Route path="/app/help" element={<PatientHelpScreen />} />
       <Route path="/app/ask" element={<PatientAskScreen />} />
       <Route path="/app/updates" element={<PatientUpdatesScreen />} />
       <Route path="*" element={<Navigate to="/app" replace />} />
-    </Routes></PatientAppLayout>;
+    </Routes></PatientAppLayout></Suspense>;
   }
 
   return (
@@ -92,7 +101,7 @@ export default function App() {
             </select>
           </div>
         </header>
-        <Routes>
+        <Suspense fallback={<div className="page-loading" aria-live="polite">Loading care workspace…</div>}><Routes>
           <Route path="/" element={<ProviderGate><CommandCenter /></ProviderGate>} />
           <Route path="/patients" element={<ProviderGate><PatientList /></ProviderGate>} />
           <Route path="/patients/:id" element={<ProviderGate><Patient360 /></ProviderGate>} />
@@ -104,7 +113,7 @@ export default function App() {
           <Route path="/activity" element={<ProviderGate><ActivityPage /></ProviderGate>} />
           <Route path="/patient" element={<PatientGate />} />
           <Route path="*" element={<Navigate to={patientMode ? '/patient' : '/'} replace />} />
-        </Routes>
+        </Routes></Suspense>
         <footer className="footer">Fictional, synthetic demo data · Not clinically validated · Not HIPAA-compliant · No real messaging or EHR connection · AI suggestions require human review.</footer>
       </main>
     </div>

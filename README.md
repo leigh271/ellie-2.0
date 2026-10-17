@@ -41,7 +41,7 @@ ELLIE_OFFLINE=1 npm start
 - **Provider / patient state:** React context and `localStorage` (`ellie-demo-v1`), with a `storage` listener for cross-tab updates. Demo reset restores seeded tasks and loop states.
 - **Ellie demo data:** deterministic fictional 42-day wearable series and patient context in `src/data/ellieDemo.ts`. The local rough-patch rule is separately implemented in `src/lib/roughPatch.ts`.
 - **Challenge proxy:** Express on port 8787; Vite proxies `/api` to Express. Successful upstream requests carry `x-ellie-source: live`; bundled fallback responses use `snapshot`.
-- **Privacy boundary:** Patient role routes to Maria’s patient view only. Internal notes, provider fidelity scores and other patient records are not rendered there. C3/C4/C5 IDs are never connected to an Ellie patient record.
+- **Privacy boundary:** Patient routes show only the selected fictional profile and patient-safe content. Internal notes, provider fidelity scores and other patients’ records are not rendered there. C3/C4/C5 challenge-cohort IDs are never connected to an Ellie profile. Separately selected research records are source-labelled demo links with an explicit caveat.
 
 ## Challenge integration status
 
@@ -57,17 +57,17 @@ All proxy GETs use an 8-second timeout (advice and C5 review/cue use 20 seconds)
 
 | Feature | Status |
 | --- | --- |
-| Six Ellie patient profiles, wearable charts, rough-patch rule and care loop | Simulated deterministic demo data; persisted in local browser storage. Not the C3 model. |
+| Six Ellie patient profiles, rough-patch rule and care loop | Fictional demo profiles and workflows. Patient 360 and the patient app also show explicitly caveated, source-labelled records selected from separate datasets. |
 | Patient check-ins, support-resource sharing, task assignment, patient-safe updates, supervisor review, activity log | Local demo workflows only; no real messaging, referrals, scheduling or EHR connection. |
 | C3 survivor list/detail/model metrics | Live challenge worker when reachable; snapshot fallback is provided. Independent synthetic cohort. |
 | C4 glucose details, cohort effects and advice draft | Live challenge worker when reachable; list/cohort/detail snapshots are provided. Advice has no snapshot. Observational, not causal. |
 | C5 call recordings and expert labels | Supplied synthetic snapshot if live call feed unavailable. Calls are not linked to Ellie patients. |
 | C5 turn classification, review and cue | Live proxied API only; no snapshot. Expert labels and local trigger rules remain available if the API fails. |
-| Ellie patient companion | Local keyword/rule-based responses; no LLM. Clinical and urgent concerns are routed to the care team / emergency guidance. |
+| Ellie patient companion | Local library and emergency fallback; optional ChatGPT responses when `OPENAI_API_KEY` is configured. Clinical and urgent concerns are routed to the care team / emergency guidance. |
 
 ## Datasets
 
-The independent research cohorts below appear only in provider dashboards. They are never attached to fictional Ellie patients and are not shown in the patient dashboard or patient app. Supplied summary values are rendered as provided; raw source files are not committed.
+Source-labelled research summaries below appear in provider dashboards. Selected rows from the Rao fatigue study, NHANES and the synthetic coaching program are also linked to fictional Ellie profiles for this demo. These links do not represent real patient charts. Supplied summary values are rendered as provided; raw source files are not committed.
 
 | Dataset | Kind | Placement | Citation |
 | --- | --- | --- | --- |
@@ -78,6 +78,7 @@ The independent research cohorts below appear only in provider dashboards. They 
 | UIC text coaching corpus (`c5_coaching.json`) | Real research data | C5 · Real reference | Gupta I, et al. *Human-Human Health Coaching via Text Messages: Corpus, Annotation, and Analysis*. SIGDIAL 2020. |
 | Synthetic coaching program (`c5_coaching.json`) | Synthetic | C5 · Program analytics | Synthetic coaching program made by the Crane Lab, Sylvester Comprehensive Cancer Center, for the Miami AI Hackathon. Nobody is real. |
 | Program calls (`c5_program_300_calls.json`) | Synthetic | C5 · Call source selector | Synthetic coaching program made by the Crane Lab, Sylvester Comprehensive Cancer Center, for the Miami AI Hackathon. Nobody is real. |
+| Linked patient records (`patient_links.json`) | Real study and NHANES records; synthetic coaching | Patient 360 and patient app | Rao et al. 2023; NHANES 2011–2014; Crane Lab synthetic coaching program. |
 | Live challenge APIs | Live API or bundled snapshot | Command center · Data sources; C3/C4/C5 modules | Challenge-provided endpoints and snapshots; see the integration table above. |
 
 To rebuild the JSON summaries, provide a directory containing the source CSVs and the unzipped C5 dataset folder:
@@ -87,6 +88,28 @@ python3 scripts/build_datasets.py <dir-with-csvs-and-unzipped-c5>
 ```
 
 The build script requires pandas (and NumPy). Raw CSVs and unzipped source archives are not committed; only the source-labelled JSON summaries and the rebuild script are included.
+
+### Demo-linked study records
+
+`scripts/build_patient_links.py <dir-with-csvs-and-unzipped-c5>` builds `public/data/patient_links.json` without copying raw CSVs into the repository. It processes Maria, Jasmine, Ana, David, Priya and Robert in roster order and never reuses a source participant within a dataset.
+
+- **Rao fatigue study:** match sex, sort by date, use the last 28 rows, and require at least 24 non-null step values. The first 14 rows are baseline and the last 14 are recent. Maria’s candidate must have a recent step mean no higher than 85% of baseline and at least two recent bad days; other candidates must remain within 10% of baseline. If a male patient has no candidate, only the step-balance rule may be relaxed.
+- **NHANES:** select the lowest unused respondent ID matching survivor status, sex and the mapped cancer type, with the required HbA1c, BMI, movement and sensor-sleep values present.
+- **Synthetic coaching:** select the lowest unused participant matching sex, call language and cancer type (or any cancer type for fallback patients), with at least three calls.
+
+Every linked card identifies its source and participant ID. The patient app shows only activity, selected health numbers and coaching goals; it does not show supervisor ratings, MI scores or provider notes. **Demo linkage: records from different study participants combined into one fictional profile — not one real person's chart.** Rao and LifeSnaps are not cancer cohorts. These linked values are for demonstration, not a real person’s medical history.
+
+### Optional ChatGPT features
+
+The app works without an API key. Without one, `/api/ai/status` reports AI disabled, Ask Ellie uses the local companion library and diagnosis explanations remain in the built-in education library. To enable server-side OpenAI requests, export the key before starting the server:
+
+```sh
+export OPENAI_API_KEY="your-key"
+export OPENAI_MODEL="gpt-4o-mini" # optional; this is the default
+npm run dev
+```
+
+The key is read only by Express and is never sent to the browser. AI requests use the OpenAI Chat Completions API, are limited to 30 requests per minute per IP, and return an unavailable response if the service is not configured or cannot be reached. Ask Ellie checks for emergency language before making an AI request. AI summaries use source-labelled demo data and require care-team review.
 
 ## Safety and limitations
 

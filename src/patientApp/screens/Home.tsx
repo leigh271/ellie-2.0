@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { elliePatients } from '../../data/ellieDemo';
+import { formatDatasetNumber, useDataset } from '../../data/datasets';
+import type { PatientLinksDataset } from '../../data/patientLinks';
 import { useDemoStore } from '../../state/DemoStore';
 import type { CheckIn } from '../../state/DemoStore';
 import { AppCard, Composer, Icon } from '../components';
@@ -9,10 +11,34 @@ import { useLanguage } from '../useLanguage';
 import { usePreferredName } from '../usePreferredName';
 import { useVoiceInput } from '../useSpeech';
 
+function average(values: Array<number | null>): number | null {
+  const present = values.filter((value): value is number => value !== null);
+  return present.length ? present.reduce((sum, value) => sum + value, 0) / present.length : null;
+}
+
+function substitute(template: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce((text, [key, value]) => text.replaceAll(`{${key}}`, value), template);
+}
+
+function comparisonMessage(change: number, messages: ReturnType<typeof useLanguage>['messages']): string {
+  if (Math.abs(change) <= 5) return messages.activityChangeSame;
+  const template = change < 0 ? messages.activityChangeLower : messages.activityChangeHigher;
+  return substitute(template, { change: formatDatasetNumber(Math.abs(change), 0) });
+}
+
+function patientGoalStatus(value: string | number | null, messages: ReturnType<typeof useLanguage>['messages']): string {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  if (['yes', '1', 'true', 'met'].includes(normalized)) return messages.coachingGoalMet;
+  if (['partial', 'partly', 'partially'].includes(normalized)) return messages.coachingGoalPartly;
+  return messages.coachingGoalNotYet;
+}
+
 export default function PatientAppHome() {
   const { state, update, createTask, setPatientId } = useDemoStore();
   const { language, messages } = useLanguage();
   const patient = elliePatients.find((item) => item.id === state.patientId) ?? elliePatients[0];
+  const linkedData = useDataset<PatientLinksDataset>('patient_links.json');
+  const linked = linkedData.data?.patients[patient.id];
   const questions = state.patientQuestions[patient.id] ?? [];
   const checkIns = state.checkIns.filter((checkin) => checkin.patientId === patient.id || (patient.id === 'maria' && !checkin.patientId));
   const latest = checkIns[0];
@@ -73,17 +99,37 @@ export default function PatientAppHome() {
     { to: '/app/updates', icon: 'bell', label: messages.updatesTab },
   ];
   const checkinText = `${messages.checkinQuestion} ${messages.energyGood}, ${messages.energyOkay}, ${messages.energyLow}.`;
+  const series = linked?.wearable.series ?? [];
+  const usualSteps = average(series.slice(0, 14).map((row) => row.steps));
+  const recentSteps = average(series.slice(14).map((row) => row.steps));
+  const usualSleep = average(series.slice(0, 14).map((row) => row.sleep_minutes === null ? null : row.sleep_minutes / 60));
+  const recentSleep = average(series.slice(14).map((row) => row.sleep_minutes === null ? null : row.sleep_minutes / 60));
+  const activityText = linked ? [
+    substitute(messages.recentActivitySteps, {
+      recent: recentSteps === null ? '—' : formatDatasetNumber(recentSteps, 0),
+      usual: usualSteps === null ? '—' : formatDatasetNumber(usualSteps, 0),
+    }),
+    comparisonMessage(usualSteps && recentSteps !== null ? ((recentSteps - usualSteps) / usualSteps) * 100 : 0, messages),
+    substitute(messages.recentActivitySleep, {
+      recent: recentSleep === null ? '—' : formatDatasetNumber(recentSleep, 1),
+      usual: usualSleep === null ? '—' : formatDatasetNumber(usualSleep, 1),
+    }),
+    comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages),
+  ].join(' ') : '';
+  const coachingText = linked?.coaching.weekly_goals.map((goal) => `${goal.goal}: ${patientGoalStatus(goal.goal_met, messages)}`).join('. ') ?? '';
+  const wearableSource = linked ? substitute(messages.linkedWearableSource, { id: String(linked.wearable.person_id) }) : '';
+  const coachingSource = linked ? substitute(messages.linkedCoachingSource, { id: linked.coaching.participant_id }) : '';
 
   return <div className="patient-app-screen">
     <section className="ellie-hero" data-speech-text={`${messages.heroHi} Ellie. ${supportLine}`}>
       <p className="ellie-kicker">{messages.heroKicker}</p>
       <h1>{messages.heroHi} <span>Ellie.</span></h1>
       <p className="ellie-subtitle">{supportLine}</p>
-      <button type="button" className={`voice-halo ${voice.listening ? 'is-listening' : ''}`} aria-pressed={voice.listening} aria-label={voice.listening ? messages.listeningTap : messages.tapToTalk} onClick={voice.supported ? voice.toggle : () => document.getElementById('patient-app-home-input')?.focus()}>
+      <button type="button" className={`voice-halo ${voice.listening ? 'is-listening' : ''}`} style={{ transform: voice.listening ? `scale(${1 + voice.level * 0.05})` : undefined }} aria-pressed={voice.listening} aria-label={voice.listening ? messages.listeningTap : messages.tapToTalk} onClick={voice.supported ? voice.toggle : () => document.getElementById('patient-app-home-input')?.focus()}>
         <span className="voice-core"><Icon name={voice.listening ? 'stop' : 'mic'} size={42} /></span>
       </button>
       <div className="voice-status" aria-live="polite">{voice.listening ? <><span className="live-dot" />{messages.listeningTap}</> : voice.supported ? messages.tapToTalk : messages.voiceUnavailable}</div>
-      {voice.listening && <div className="waveform" aria-hidden="true">{Array.from({ length: 11 }, (_, index) => <span key={index} />)}</div>}
+      {voice.listening && <div className="waveform" aria-hidden="true">{Array.from({ length: 11 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (18 + 20 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
       <p className="ellie-typing-hint">{messages.typeHint}</p>
       <Composer value={draft} onChange={setDraft} onSubmit={ask} language={language} placeholder={messages.askPlaceholder} inputId="patient-app-home-input" />
       <p className="explore-label">{messages.exploreTopic}</p>
@@ -100,6 +146,28 @@ export default function PatientAppHome() {
       <p className="patient-app-info-line"><b>{messages.nextAppointment}:</b> {patient.appointment}</p>
       <p className="patient-app-caption">{messages.appointmentNote}</p>
     </AppCard>
+    {linked && <AppCard title={messages.recentActivityHeading} text={`${activityText} ${wearableSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-linked-activity">
+      <p className="patient-app-caption">{messages.recentActivitySub}</p>
+      <p className="patient-app-linked-metric">{substitute(messages.recentActivitySteps, {
+        recent: recentSteps === null ? '—' : formatDatasetNumber(recentSteps, 0),
+        usual: usualSteps === null ? '—' : formatDatasetNumber(usualSteps, 0),
+      })}</p>
+      <p className="patient-app-small-comparison">{comparisonMessage(usualSteps && recentSteps !== null ? ((recentSteps - usualSteps) / usualSteps) * 100 : 0, messages)}</p>
+      <p className="patient-app-linked-metric">{substitute(messages.recentActivitySleep, {
+        recent: recentSleep === null ? '—' : formatDatasetNumber(recentSleep, 1),
+        usual: usualSleep === null ? '—' : formatDatasetNumber(usualSleep, 1),
+      })}</p>
+      <p className="patient-app-small-comparison">{comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages)}</p>
+      <p className="patient-app-caption">{wearableSource}</p>
+      <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
+    </AppCard>}
+    {linked && <AppCard title={messages.coachingGoalsHeading} text={`${coachingText} ${coachingSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-coaching-goals">
+      {linked.coaching.weekly_goals.map((goal, index) => <div className="patient-app-goal-row" key={`${goal.week}-${goal.topic}-${index}`}>
+        <span>{goal.goal ?? '—'}</span><span className="patient-app-status">{patientGoalStatus(goal.goal_met, messages)}</span>
+      </div>)}
+      <p className="patient-app-caption">{coachingSource}</p>
+      <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
+    </AppCard>}
     <AppCard title={messages.wellnessCheckin} text={checkinText} language={language}>
       <p className="patient-app-prompt">{messages.checkinQuestion}</p>
       <div className="patient-app-energy-options" role="group" aria-label={messages.checkinQuestion}>

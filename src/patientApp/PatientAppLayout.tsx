@@ -30,7 +30,7 @@ export default function PatientAppLayout({ children }: { children: ReactNode }) 
 function PatientAppFrame({ children }: { children: ReactNode }) {
   const { state, setRole } = useDemoStore();
   const { language, messages, setLanguage } = useLanguage();
-  const { rate, setRate, speak, notice, stop } = useSpeech();
+  const { rate, setRate, notice, stop, speakingId, paused, togglePause } = useSpeech();
   const navigate = useNavigate();
   const patient = elliePatients.find((item) => item.id === state.patientId) ?? elliePatients[0];
   const [preferredName, setPreferredName] = usePreferredName(patient.id);
@@ -42,13 +42,6 @@ function PatientAppFrame({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const readPage = () => {
-    const text = [...document.querySelectorAll<HTMLElement>('.patient-app-main [data-speech-text]')]
-      .map((element) => element.dataset.speechText?.trim() ?? '')
-      .filter(Boolean)
-      .join(' ');
-    if (text) speak('patient-app-page', text, language);
-  };
   const finishWelcome = (name?: string) => {
     if (name !== undefined) setPreferredName(name);
     markWelcomed();
@@ -81,7 +74,6 @@ function PatientAppFrame({ children }: { children: ReactNode }) {
               <option value="1">1.0×</option>
               <option value="1.2">1.2×</option>
             </select>
-            <button className="patient-app-read-page" type="button" onClick={readPage}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z" /><path d="M16 9a5 5 0 0 1 0 6M18.5 6.5a9 9 0 0 1 0 11" /></svg>{messages.readPage}</button>
             <button className="patient-app-provider-link" type="button" onClick={() => { stop(); setRole('provider'); navigate('/'); }}>{messages.switchToProvider}</button>
           </div>
         </header>
@@ -91,6 +83,12 @@ function PatientAppFrame({ children }: { children: ReactNode }) {
           <p>{preferredName && <><button type="button" className="forget-name" onClick={forgetName}>{messages.forgetName}</button><span aria-hidden="true"> · </span></>}{messages.patientAppDisclaimer}</p>
           <p>{messages.translationDisclaimer}</p>
         </footer>
+        {speakingId && <div className="patient-app-now-reading" role="status" aria-live="polite">
+          <strong>{messages.nowReading}</strong>
+          <div className="patient-app-now-reading-wave" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div>
+          <button type="button" onClick={togglePause}>{paused ? messages.resumeReading : messages.pauseReading}</button>
+          <button type="button" onClick={stop}>{messages.stopReading}</button>
+        </div>}
         <nav className="patient-app-tabs" aria-label={messages.patientRole}>
           {tabs.map((tab) => <NavLink end={tab.to === '/app'} key={tab.to} to={tab.to} className={({ isActive }) => `patient-app-tab ${isActive ? 'active' : ''}`}>
             <Icon name={tab.icon} size={21} /><span>{messages[tab.key]}</span>
