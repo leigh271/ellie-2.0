@@ -65,7 +65,7 @@ export function TrendChart({ data, lines, baseline, height = 230, xKey = 'date' 
         <ComposedChart data={data} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}>
           <CartesianGrid stroke="#f3e8ed" vertical={false} />
           <XAxis dataKey={xKey} tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-          <YAxis tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} width={40} />
+          <YAxis tick={{ fontSize: 10, fill: '#817680' }} axisLine={false} tickLine={false} width={48} />
           <Tooltip contentStyle={{ borderRadius: 12, borderColor: '#f1e6ec', fontSize: 12 }} />
           {lines.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
           {baseline !== undefined && <ReferenceLine y={baseline} stroke="#b69eab" strokeDasharray="5 5" label={{ value: 'Baseline', position: 'insideTopRight', fill: '#817680', fontSize: 10 }} />}

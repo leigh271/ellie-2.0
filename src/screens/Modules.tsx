@@ -162,7 +162,7 @@ export function C4Page() {
         <Tile span={6} title="Dinner response · vs cohort"><TrendChart data={responseData} lines={[{ key: 'Your early dinner', label: 'Your early', color: '#f65398' }, { key: 'Your later dinner', label: 'Your later', color: '#ca5a85' }, { key: 'Cohort early dinner', label: 'Cohort early', color: '#6d9a8d', dashed: true }, { key: 'Cohort later dinner', label: 'Cohort later', color: '#3e7a70', dashed: true }]} height={250} xKey="minute" /><button className="btn" onClick={() => makeTask(`Review meal timing patterns with ${selected}`)}>Create care-team task</button></Tile>
         <Tile span={6} title="Walk response · vs cohort"><TrendChart data={walkData} lines={[{ key: 'No walk · you', label: 'No walk · you', color: '#e28a42' }, { key: 'Walk · you', label: 'Walk · you', color: '#f65398' }, { key: 'Cohort no walk', label: 'Cohort · no walk', color: '#9e806a', dashed: true }, { key: 'Cohort walk', label: 'Cohort · walk', color: '#708f79', dashed: true }]} height={240} xKey="minute" /></Tile>
         <Tile span={6} title="Walk duration pattern · cohort" badge={<Pill>95% CI</Pill>}>
-          <div className="chart" style={{ height: 255 }}><ResponsiveContainer width="100%" height="100%"><BarChart data={doseData} margin={{ left: -10, right: 10, bottom: 15 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="bin" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="estimate" fill="#f65398" radius={[6, 6, 0, 0]}><ErrorBar dataKey="range" width={6} stroke="#4a2034" direction="y" /><Cell fill="#f65398" /></Bar></BarChart></ResponsiveContainer></div><p className="tiny muted">Estimates vs no walk · sample meal counts shown in source data. Observational only.</p>
+          <div className="chart" style={{ height: 255 }}><ResponsiveContainer width="100%" height="100%"><BarChart data={doseData} margin={{ left: -10, right: 10, bottom: 15 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="bin" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} width={48} /><Tooltip /><Bar dataKey="estimate" fill="#f65398" radius={[6, 6, 0, 0]}><ErrorBar dataKey="range" width={6} stroke="#4a2034" direction="y" /><Cell fill="#f65398" /></Bar></BarChart></ResponsiveContainer></div><p className="tiny muted">Estimates vs no walk · sample meal counts shown in source data. Observational only.</p>
         </Tile>
         <Tile span={6} title="Overnight fast & follow-up measures">
           {detail.data.charts.overnightFast?.hours?.length ? <TrendChart data={detail.data.charts.overnightFast.hours.map((hour: number, index: number) => ({ hour, glucose: detail.data?.charts.overnightFast.morningGlucose[index] }))} lines={[{ key: 'glucose', label: 'Morning glucose', color: '#82559a' }]} height={175} xKey="hour" /> : <EmptyState>Overnight fasting data is not available for this participant.</EmptyState>}
@@ -193,13 +193,14 @@ const FLAG_TEXT: Record<string, { level: string; text: string }> = {
   dropout: { level: 'warn', text: 'Dropout risk: participant may leave the program' },
   missed_concern: { level: 'warn', text: 'Coach did not route a concern the participant raised' },
   medical_advice: { level: 'warn', text: 'Coach gave medical advice outside their role' },
+  needs_human: { level: 'danger', text: 'Flagged for human review by expert labels' },
 };
 
 const expertLine = (line: CoachLine): TaggedLine => ({
   ...line,
   gold: line.speaker === 'coach' ? line.coach_move ?? null : line.participant_talk ?? null,
   tag: line.speaker === 'coach' ? line.coach_move ?? null : line.participant_talk ?? null,
-  flag: line.flag ?? (line.needs_human === 'yes' ? 'medical' : null),
+  flag: line.needs_human === 'yes' ? 'needs_human' : line.flag ?? null,
 });
 
 function triggerFor(lines: TaggedLine[], index: number, lastCueAt: number): { trigger: string | null; lastCueAt: number } {
@@ -208,6 +209,7 @@ function triggerFor(lines: TaggedLine[], index: number, lastCueAt: number): { tr
   if (line.flag === 'missed_concern') trigger = 'The participant raised a concern and the coach moved on without routing it. Help the coach go back to it now.';
   else if (line.flag === 'medical_advice') trigger = 'The coach just gave medical advice outside their role. Help the coach walk it back and refer to the care team.';
   else if (line.flag === 'dropout') trigger = 'The participant is talking about leaving the program. Help the coach explore it without pressure.';
+  else if (line.flag === 'needs_human') trigger = 'Participant said something the expert labels flagged for human review. Help the coach respond with care and route it to the right person today.';
   else if (line.flag) trigger = `Participant raised a ${line.flag} concern. Help the coach respond with care and connect them to the right person today.`;
   else if (line.speaker === 'coach') {
     const coach = lines.slice(0, index + 1).filter((item) => item.speaker === 'coach' && item.tag);
@@ -240,6 +242,18 @@ export function C5Page() {
   const review = state.reviews[selected?.call_id ?? ''] ?? { status: 'Pending' as const, note: '', acknowledged: [] };
   const score = scoreCoaching(lines.map((line) => ({ speaker: line.speaker, tag: line.tag })));
   const flaggedLines = lines.filter((line) => line.flag);
+  const expertTriggers = useMemo(() => {
+    if (live) return [];
+    let lastCueAt = -99;
+    const found: Array<{ trigger: string }> = [];
+    lines.forEach((_, index) => {
+      const result = triggerFor(lines, index, lastCueAt);
+      lastCueAt = result.lastCueAt;
+      if (result.trigger) found.unshift({ trigger: result.trigger });
+    });
+    return found.slice(0, 4);
+  }, [lines, live]);
+  const recommendations: Array<{ trigger: string; cue?: string; say?: string }> = live ? cues : expertTriggers;
   useEffect(() => { if (calls.length && !callId) setCallId(calls[0].call_id); }, [calls, callId]);
   useEffect(() => {
     if (selected) { setLines(selected.lines.map(expertLine)); setCues([]); setLiveError(''); setLive(false); }
@@ -290,17 +304,6 @@ export function C5Page() {
     } finally { setWorking(false); }
   };
   const showExpert = () => { if (selected) { setLive(false); setLines(selected.lines.map(expertLine)); setLiveError(''); setCues([]); } };
-  const showTriggers = () => {
-    if (live) return;
-    let lastCueAt = -99;
-    const found: Array<{ trigger: string }> = [];
-    lines.forEach((_, index) => {
-      const result = triggerFor(lines, index, lastCueAt);
-      lastCueAt = result.lastCueAt;
-      if (result.trigger) found.unshift({ trigger: result.trigger });
-    });
-    setCues(found.slice(0, 4));
-  };
   const createFollowup = () => createTask({ patientId: 'unassigned', title: `Supervisor follow-up · ${selected.call_id}`, source: `C5 · ${selected.call_id}`, assignee: 'Survivorship coordinator', dueDate: '', status: 'Open', outcome: '', shareWithPatient: false, patientMessage: '' });
   return <>
     <Heading eyebrow="Challenge 05 · separate synthetic call cohort" title="Coach’s Co-pilot" subtitle="Review line-by-line expert labels, live classifications, coaching fidelity and human-review flags." action={callsRemote.data && <SourceBadge source={callsRemote.source} />} />
@@ -318,7 +321,7 @@ export function C5Page() {
       {liveError && <div className="callout warning-note top-gap" role="alert">{liveError}</div>}
       <BentoGrid className="top-gap">
         <Tile span={8} title="Transcript" badge={<Pill tone="pink">{selected.language} · {selected.duration_min} min</Pill>}>
-          <div className="transcript" aria-live="polite">{lines.map((line) => <div className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? 'tagging…'}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
+          <div className="transcript" aria-live="polite">{lines.map((line) => <div className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? 'tagging…'}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag === 'needs_human' ? 'needs human review' : line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && !line.flag && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
         </Tile>
         <Tile span={4} title="MI fidelity score" badge={<Pill tone={score.score === null ? 'neutral' : score.score >= 70 ? 'good' : score.score >= 50 ? 'warn' : 'danger'}>{score.score === null ? 'Need 4 tagged coach lines' : score.score >= 70 ? 'Good' : score.score >= 50 ? 'Review' : 'Low'}</Pill>}>
           <div className="score-number">{score.score ?? '–'}{score.score !== null && <small>/100</small>}</div>
@@ -331,14 +334,13 @@ export function C5Page() {
           <p className="tiny muted top-gap">Exact reference scoring: 30 reflection/question · 20 complex · 20 open question · 30 MI-consistent behavior.</p>
         </Tile>
         <Tile span={5} title="Coaching recommendations" badge={<Pill tone="pink">{live ? 'Live cue service' : 'Expert trigger rules'}</Pill>}>
-          {!live && <button className="btn" onClick={showTriggers}>Check trigger guidance</button>}
-          {cues.length ? cues.map((cue, index) => <div className="recommendation" key={`${cue.trigger}-${index}`}><p className="tiny muted">{cue.trigger}</p>{cue.cue && <b>{cue.cue}</b>}{cue.say && <p className="small">“{cue.say}”</p>}</div>) : <EmptyState>Quiet. Coaching prompts appear when a reference trigger fires.</EmptyState>}
+          {recommendations.length ? recommendations.map((cue, index) => <div className="recommendation" key={`${cue.trigger}-${index}`}><p className="tiny muted">{cue.trigger}</p>{cue.cue && <b>{cue.cue}</b>}{cue.say && <p className="small">“{cue.say}”</p>}</div>) : <EmptyState>Quiet. Coaching prompts appear when a reference trigger fires.</EmptyState>}
         </Tile>
         <Tile span={7} title="Supervisor review" badge={<Pill tone={review.status === 'Approved' ? 'good' : review.status === 'Escalated' ? 'danger' : 'warn'}>{review.status}</Pill>}>
           <div className="page-tools"><button className="btn" onClick={() => supervisorUpdate({ status: 'In review' })}>Start review</button><button className="btn" onClick={() => supervisorUpdate({ status: 'Approved' })}>Approve</button><button className="btn" onClick={() => supervisorUpdate({ status: 'Escalated' })}>Escalate</button></div>
           <label className="field-label" htmlFor="supervisor-note">Reviewer note</label><textarea id="supervisor-note" rows={3} value={review.note} onChange={(event) => supervisorUpdate({ note: event.target.value })} placeholder="Document review context…" />
           <p className="small muted top-gap">Flagged lines · acknowledge after human review</p>
-          {flaggedLines.length ? flaggedLines.map((line) => <label className="ack-row" key={line.line_number}><input type="checkbox" checked={review.acknowledged.includes(String(line.line_number))} onChange={(event) => supervisorUpdate({ acknowledged: event.target.checked ? [...review.acknowledged, String(line.line_number)] : review.acknowledged.filter((id) => id !== String(line.line_number)) })} /><span><b>Line {line.line_number} · {line.flag ?? 'needs review'}</b><small>{line.text}</small></span></label>) : <EmptyState>No flagged lines in this call.</EmptyState>}
+          {flaggedLines.length ? flaggedLines.map((line) => <label className="ack-row" key={line.line_number}><input type="checkbox" checked={review.acknowledged.includes(String(line.line_number))} onChange={(event) => supervisorUpdate({ acknowledged: event.target.checked ? [...review.acknowledged, String(line.line_number)] : review.acknowledged.filter((id) => id !== String(line.line_number)) })} /><span><b>Line {line.line_number} · {line.flag === 'needs_human' ? 'needs human review' : line.flag ?? 'needs review'}</b><small>{line.text}</small></span></label>) : <EmptyState>No flagged lines in this call.</EmptyState>}
           <button className="btn primary top-gap" onClick={createFollowup}>Create follow-up task</button>
         </Tile>
       </BentoGrid>
