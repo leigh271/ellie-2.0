@@ -133,6 +133,12 @@ function dataReply(intent: CompanionDataIntent, context: PatientContext | undefi
   });
 }
 
+function asksForHealthNumbers(message: string, language: PatientLanguage) {
+  const text = normalized(message, language).normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  return ['health numbers', 'my numbers', 'numeros de salud', 'cifras de salud', 'mis numeros', 'chif sante', 'chif mwen']
+    .some((phrase) => text.includes(phrase));
+}
+
 export function companionReply(
   message: string,
   language: PatientLanguage = 'en',
@@ -141,6 +147,9 @@ export function companionReply(
   const messages = getMessages(language);
   if (isEmergency(message, language)) return messages.companionEmergency;
   const intent = companionDataIntent(message, language);
+  if (intent === 'activity' && asksForHealthNumbers(message, language)) {
+    return `${dataReply('activity', context, language)} ${dataReply('labs', context, language)}`;
+  }
   if (intent) return dataReply(intent, context, language);
   const term = findGlossaryTerm(message, language);
   if (term) return messages.companionGlossary

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, FormEvent, ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import type { FormEvent, ReactNode } from 'react';
 import type { PatientLanguage } from '../state/DemoStore';
 import type { GlossaryTerm } from './content/glossary';
 import { glossary } from './content/glossary';
@@ -80,6 +79,7 @@ const ICONS = {
   chat: <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />,
   bell: <><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></>,
   user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+  settings: <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z" /></>,
   arrowLeft: <><path d="m15 18-6-6 6-6" /><path d="M9 12h12" /></>,
   chevronRight: <path d="m9 18 6-6-6-6" />,
   bus: <><path d="M5 17h14a2 2 0 0 0 2-2V6a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v9a2 2 0 0 0 2 2Z" /><path d="M3 9h18M7 21l2-4m8 4-2-4" /><circle cx="7.5" cy="13" r="1" /><circle cx="16.5" cy="13" r="1" /></>,
@@ -107,57 +107,44 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   className?: string;
 }) {
   const { messages } = useLanguage();
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
   const finishVoice = (transcript: string) => {
+    if (!transcript.trim()) return;
     setProcessing(true);
     window.setTimeout(() => {
-      setVoiceOpen(false);
       setProcessing(false);
       onSubmit([value.trim(), transcript.trim()].filter(Boolean).join(' '));
     }, 700);
   };
   const voice = useVoiceInput(language, finishVoice);
-  const sendCaptured = () => {
-    const transcript = voice.transcript.trim();
-    if (!transcript) return;
-    if (voice.listening) voice.toggle();
-    finishVoice(transcript);
-  };
-  const stopVoice = () => {
-    if (voice.listening) voice.toggle();
-    if (!voice.transcript.trim()) {
-      voice.clearTranscript();
-      setVoiceOpen(false);
-    }
-  };
+  useEffect(() => {
+    if (!value.trim() && !voice.listening && !processing && voice.transcript.trim()) voice.clearTranscript();
+  }, [value, voice.listening, voice.transcript, voice.clearTranscript, processing]);
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    const transcript = voice.transcript.trim();
+    if (voice.listening) voice.toggle();
+    if (transcript) {
+      finishVoice(transcript);
+      return;
+    }
     if (value.trim()) onSubmit(value.trim());
   };
-  return <>
-    <form className={`ellie-composer ${className}`} onSubmit={submit}>
-      <label className="sr-only" htmlFor={inputId}>{placeholder}</label>
-      <input id={inputId} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete="off" />
-      {voice.listening && <div className="composer-waveform" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (8 + 13 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
-      <button type="button" className={`composer-mic ${voice.listening ? 'active' : ''}`} aria-label={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} aria-pressed={voice.listening} title={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} disabled={!voice.supported} onClick={() => { if (!voice.supported) return; if (!voice.listening) setVoiceOpen(true); voice.toggle(); }}><Icon name={voice.listening ? 'stop' : 'mic'} size={19} /></button>
-      <button type="submit" className="composer-send" aria-label={messages.send} disabled={!value.trim()}><Icon name="arrowUp" size={19} /></button>
-    </form>
-    {!voice.supported && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
-    {voiceOpen && createPortal(<div className={`patient-app-voice-overlay ${processing ? 'is-processing' : 'is-listening'}`} role="dialog" aria-modal="true" aria-labelledby="voice-overlay-title">
-      <h2 id="voice-overlay-title">{processing ? messages.voiceProcessing : messages.voiceListeningTitle}</h2>
-      <p>{messages.voiceInstruction}</p>
-      <div className={`ellie-orb ellie-orb-voice ${processing ? 'processing' : ''}`} style={{ '--voice-level': voice.level } as CSSProperties} aria-hidden="true">
-        <div className="voice-bars">{Array.from({ length: 9 }, (_, index) => <span key={index} style={{ height: `${Math.max(5, Math.round(voice.level * (26 + 36 * Math.abs(Math.sin(index + 0.6)))))}px` }} />)}</div>
-      </div>
-      <p className="voice-transcript" aria-live="polite">{voice.transcript || messages.voiceTranscriptWaiting}</p>
-      <div className="voice-side-wave left" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <span key={index} style={{ height: `${8 + Math.round(voice.level * 12 * Math.abs(Math.sin(index)))}px` }} />)}</div>
-      <div className="voice-side-wave right" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <span key={index} style={{ height: `${8 + Math.round(voice.level * 12 * Math.abs(Math.cos(index)))}px` }} />)}</div>
-      {!processing && <>
-        <button type="button" className="voice-stop" onClick={stopVoice} aria-label={messages.voiceStop}><Icon name="stop" size={21} /></button>
-        <span className="voice-tap-label">{voice.listening ? messages.voiceTapToStop : messages.voiceTapToSend}</span>
-        {voice.transcript.trim() && <button type="button" className="voice-send" onClick={sendCaptured}>{messages.voiceSendTranscript}</button>}
-      </>}
-    </div>, document.body)}
-  </>;
+  return (
+    <>
+      <form className={`ellie-composer ${className}`} onSubmit={submit}>
+        <label className="sr-only" htmlFor={inputId}>{placeholder}</label>
+        <div className={`ellie-composer-input ${voice.listening ? 'is-listening' : ''}`}>
+          {voice.listening && <div className="composer-waveform" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <span key={index} style={{ height: `${Math.max(4, Math.round(voice.level * (8 + 13 * Math.abs(Math.sin(index)) )))}px` }} />)}</div>}
+          <input id={inputId} value={voice.transcript || value} onChange={(event) => { voice.clearTranscript(); onChange(event.target.value); }} placeholder={placeholder} autoComplete="off" />
+        </div>
+        {voice.listening
+          ? <button type="button" className="composer-stop-button" onClick={() => voice.toggle()} aria-label={messages.voiceStop}>{messages.voiceStopShort}</button>
+          : <button type="button" className="composer-mic" aria-label={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} aria-pressed={false} title={voice.supported ? messages.speakQuestion : messages.voiceUnavailable} disabled={!voice.supported} onClick={() => { if (!voice.supported) return; voice.clearTranscript(); voice.toggle(); }}><Icon name="mic" size={19} /></button>}
+        <button type="submit" className="composer-send" aria-label={messages.send} disabled={processing || (!value.trim() && !voice.transcript.trim())}><Icon name="arrowUp" size={19} /></button>
+        {processing && <span className="sr-only" role="status">{messages.voiceProcessing}</span>}
+      </form>
+      {!voice.supported && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
+    </>
+  );
 }

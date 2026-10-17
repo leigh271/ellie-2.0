@@ -74,6 +74,13 @@ describe('patient app companion', () => {
     expect(companionReply(prompt, language, mariaContext)).toContain(localizedAsk);
   });
 
+  it('combines recent activity and health numbers when requested together', () => {
+    const reply = companionReply('Show my recent activity and health numbers', 'en', mariaContext);
+    expect(reply).toContain('fatigue-study wearable record');
+    expect(reply).toContain('NHANES exam record');
+    expect(reply).toContain('Ask your care team what this means for you.');
+  });
+
   it('handles emergency messages before linked-record data intents', () => {
     expect(companionReply('I have chest pain; what is my HbA1c?', 'en', mariaContext))
       .toBe(getMessages('en').companionEmergency);

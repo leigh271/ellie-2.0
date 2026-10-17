@@ -27,20 +27,16 @@ await context.addInitScript(() => {
 const page = await context.newPage();
 await page.goto('http://localhost:5173/#/app');
 const openAsPatient = page.getByRole('button', { name: 'Open as patient' });
-if (await openAsPatient.count()) {
-  await openAsPatient.click();
-  await page.getByRole('button', { name: /Get Started/ }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-}
-const onboardingStart = page.getByRole('button', { name: /Get Started/ });
-if (await onboardingStart.count()) await onboardingStart.click();
+if (await openAsPatient.count()) await openAsPatient.click();
 const maybeLater = page.getByRole('button', { name: 'Maybe later' });
+await maybeLater.waitFor({ state: 'visible', timeout: 5000 });
 if (await maybeLater.count()) await maybeLater.click();
-await page.getByRole('combobox', { name: 'Demo patient' }).waitFor({ state: 'visible', timeout: 5000 });
-await page.getByRole('combobox', { name: 'Demo patient' }).selectOption('ana');
-await page.locator('.patient-app-home-header .patient-app-icon-button').last().click();
-await page.locator('.patient-app-profile-sheet select').first().selectOption('es');
+await page.getByRole('button', { name: 'Profile and settings' }).click();
+await page.locator('.patient-app-profile-sheet select').first().selectOption('ana');
+await page.locator('.patient-app-profile-sheet select').nth(1).selectOption('es');
 await page.locator('.patient-app-profile-sheet .patient-app-card-header button').click();
-await page.locator('.patient-app-card .speak-button').first().click();
+await page.locator('.patient-app-home-topic').first().click();
+await page.locator('.patient-app-page-heading .speak-button').click();
 await page.waitForFunction(() => window.__ellieSpeechCalls?.length > 0);
 const speech = await page.evaluate(() => window.__ellieSpeechCalls.at(-1));
 if (speech.lang !== 'es-US') throw new Error(`Expected es-US speech, received ${speech.lang}`);

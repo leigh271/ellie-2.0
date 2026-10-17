@@ -933,3 +933,511 @@ textarea { display: block; width: 100%; resize: vertical; }
   outline: 3px solid #f65398;
   outline-offset: 3px;
 }
+
+/* Patient app · clean, spacious Tawny-inspired surface */
+.patient-app-root {
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at 50% 4%, #fff3f8 0, #fffafd 25%, #fff 57%);
+  color: #211a20;
+}
+.patient-app {
+  display: flex;
+  flex-direction: column;
+  max-width: 1050px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow-x: clip;
+  background: transparent;
+  color: #211a20;
+  box-shadow: none;
+}
+.patient-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  padding: 0 28px;
+  border: 0;
+  border-bottom: 1px solid #f3e7ed;
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: blur(14px);
+}
+.patient-app-header-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 70px;
+}
+.ellie-logo {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #211a20;
+  font-size: 31px;
+  font-weight: 760;
+  letter-spacing: -2px;
+  cursor: pointer;
+}
+.ellie-logo span { color: #f65398; }
+.patient-app-header-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: #6b6570;
+  font-size: 13px;
+  font-weight: 550;
+}
+.patient-app-header-note .ellie-icon { color: #f65398; }
+.patient-app-settings-button, .patient-app-back-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #f0e5eb;
+  border-radius: 50%;
+  background: #fff;
+  color: #615a63;
+  cursor: pointer;
+}
+.patient-app-settings-button:hover, .patient-app-back-button:hover { background: #fff7fa; color: #d63e82; }
+.patient-app-back-button { width: 34px; border: 0; font-size: 23px; }
+.patient-app-main { width: 100%; flex: 1; padding: 28px 28px 34px; }
+.patient-app-main-home { padding: 16px 28px 24px; }
+.patient-app-screen { gap: 17px; }
+.patient-app-footer {
+  width: 100%;
+  margin-top: auto;
+  padding: 13px 24px max(15px, env(safe-area-inset-bottom));
+  color: #8a828c;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+.patient-app-footer p { margin: 0; }
+.patient-app-home-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 720px);
+  gap: 0;
+  margin: 0 auto;
+  padding-top: 15px;
+  text-align: center;
+}
+.patient-app-home-eyebrow {
+  margin: 0;
+  color: #df4f8b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.patient-app-home-intro { margin: 17px 0 0; padding: 0; }
+.patient-app-home-intro h1 {
+  margin: 0;
+  color: #201920;
+  font-size: clamp(38px, 8vw, 50px);
+  font-weight: 730;
+  line-height: 1.07;
+  letter-spacing: -2.8px;
+}
+.patient-app-home-intro h1 span { color: #f65398; }
+.patient-app-home-intro p {
+  margin: 12px 0 0;
+  color: #55505a;
+  font-size: 17px;
+  line-height: 1.45;
+}
+.patient-app-home-voice {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 182px;
+  height: 182px;
+  flex: 0 0 auto;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transform: scale(calc(1 + var(--voice-level, 0) * .035));
+  transition: transform .12s ease;
+}
+.patient-app-home-voice::before, .patient-app-home-voice::after {
+  position: absolute;
+  content: '';
+  border: 1px solid #f9dce8;
+  border-radius: 50%;
+}
+.patient-app-home-voice::before {
+  inset: 0;
+  background: #fff7fa;
+  transform: scale(calc(1 + var(--voice-level, 0) * .09));
+}
+.patient-app-home-voice::after {
+  inset: 13px;
+  background: #fff0f6;
+}
+.patient-app-home-voice-core {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 124px;
+  height: 124px;
+  border: 1px solid #f14e91;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 28%, #fb78ae, #f65398 62%, #e8448b);
+  color: #fff;
+  box-shadow: 0 12px 32px #f6539835;
+}
+.patient-app-home-voice.is-listening::before { animation: tawnyVoicePulse 1.6s ease-out infinite; }
+.patient-app-home-voice.is-listening::after { animation: tawnyVoicePulse 1.6s .35s ease-out infinite; }
+.patient-app-home-voice.is-processing .patient-app-home-voice-core { animation: tawnyVoiceMorph .7s ease-in-out infinite alternate; }
+.patient-app-home-voice:disabled { cursor: not-allowed; opacity: .84; }
+.patient-app-home-voice-label {
+  min-height: 23px;
+  margin: 11px 0 0;
+  color: #33303a;
+  font-size: 16px;
+  font-weight: 650;
+}
+.patient-app-home-voice-hint {
+  min-height: 19px;
+  margin: 5px 0 0;
+  color: #827b85;
+  font-size: 12px;
+}
+.patient-app-home-transcript {
+  max-width: 520px;
+  margin: 5px auto 0;
+  color: #403943;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.patient-app-home-voice-actions { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 10px 0 0; }
+.patient-app-home-voice-actions .patient-app-primary { min-height: 44px; padding: 0 22px; border-radius: 99px; }
+.patient-app-home-voice-actions .patient-app-text-button { min-height: 44px; padding: 0 13px; }
+.patient-app-home-composer { width: min(100%, 590px); margin: 19px 0 0; }
+.patient-app-home-composer .ellie-composer { width: 100%; margin: 0; }
+.patient-app-home-explore {
+  width: min(100%, 550px);
+  margin: 27px auto 12px;
+  color: #45404a;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.patient-app-home-topics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 550px);
+}
+.patient-app-home-topic {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 53px;
+  padding: 10px 13px;
+  border: 1px solid #f1e5eb;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 4px 14px #35243308;
+  color: #2e2931;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  text-decoration: none;
+  transition: border-color .16s, box-shadow .16s, transform .16s;
+}
+.patient-app-home-topic:hover { border-color: #f4bfd4; box-shadow: 0 7px 18px #5b24400c; text-decoration: none; transform: translateY(-1px); }
+.patient-app-home-topic .ellie-icon { flex: 0 0 auto; color: #f65398; }
+.patient-app-home-topic span { min-width: 0; }
+.ellie-composer, .patient-app-chat-composer .ellie-composer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 58px;
+  padding: 5px 6px 5px 18px;
+  border: 1px solid #f0e3ea;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: 0 6px 21px #4b29360c;
+}
+.ellie-composer:focus-within { border-color: #f2a7c6; box-shadow: 0 0 0 3px #f6539816; }
+.ellie-composer-input { display: flex; align-items: center; flex: 1; min-width: 0; }
+.ellie-composer input {
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #25202a;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.ellie-composer input::placeholder { color: #918b95; opacity: 1; }
+.ellie-composer input:focus-visible { outline: none; }
+.composer-waveform { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; height: 24px; }
+.composer-waveform span { width: 3px; min-height: 4px; border-radius: 99px; background: #f65398; transition: height .07s linear; }
+.composer-mic, .composer-send {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.composer-mic { background: #fff6fa; color: #df4b8c; }
+.composer-mic.active { background: #ffe8f1; color: #cc3577; }
+.composer-stop-button { min-height: 44px; padding: 0 12px; border: 1px solid #f2cadb; border-radius: 99px; background: #fff6fa; color: #b33e72; font-size: 11px; font-weight: 700; cursor: pointer; }
+.composer-send { background: #f65398; color: #fff; box-shadow: 0 4px 12px #f653982b; }
+.composer-send:disabled { opacity: .48; cursor: not-allowed; }
+.composer-voice-unavailable { margin: 8px 12px 0; color: #817984; font-size: 11px; text-align: center; }
+.patient-app-home-composer .composer-voice-unavailable { margin-bottom: 0; }
+.patient-app-card, .patient-app-resource-info-card, .patient-app-resource-hero {
+  border: 1px solid #f0e6ec;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 5px 20px #3d26360a;
+}
+.patient-app-card { padding: 19px; }
+.patient-app-card-header h2 { color: #28232c; font-size: 17px; font-weight: 700; }
+.patient-app-eyebrow { color: #df4f8b; }
+.patient-app-page-heading h1 { color: #241f27; }
+.patient-app-page-heading > div > p:last-child { color: #77717b; }
+.patient-app-field { color: #46404b; }
+.patient-app-field input, .patient-app-field select, .patient-app-field textarea {
+  border: 1px solid #eee4ea;
+  border-radius: 13px;
+  background: #fff;
+}
+.patient-app-primary {
+  border: 0;
+  border-radius: 99px;
+  background: #f65398;
+  color: #fff;
+  box-shadow: 0 4px 13px #f6539825;
+}
+.patient-app-primary:hover:not(:disabled) { background: #e9438b; }
+.patient-app-secondary { border: 1px solid #f0e4eb; border-radius: 99px; background: #fff; color: #4f4852; }
+.patient-app-text-button { color: #d94383; }
+.patient-app-profile-sheet {
+  width: min(100%, 500px);
+  max-height: 90dvh;
+  padding: 12px 22px max(24px, env(safe-area-inset-bottom));
+  border: 1px solid #f1e5eb;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  background: #fff;
+}
+.patient-app-sheet-unread-dot { width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: #f65398; }
+.patient-app-sheet-link .ellie-icon:last-child { margin-left: 0; }
+.patient-app-sheet-link { color: #322c35; }
+.patient-app-profile-sheet .patient-app-provider-link { width: 100%; margin-top: 10px; }
+.patient-app-splash {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  background: radial-gradient(circle at 50% 44%, #fff2f7 0, #fff 52%);
+  animation: tawnySplashIn .55s ease both;
+}
+.patient-app-splash > span {
+  color: #201920;
+  font-size: 76px;
+  font-weight: 760;
+  letter-spacing: -5px;
+  animation: tawnySplashFloat 1.4s ease-in-out infinite alternate;
+}
+.patient-app-splash > span > span { color: #f65398; }
+.patient-app-onboarding {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 24px 20px;
+  background: radial-gradient(ellipse at 50% 8%, #fff2f7 0, #fff 50%);
+}
+.patient-app-onboarding-content { width: min(100%, 410px); }
+.onboarding-preferences {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 29px 26px 23px;
+  border: 1px solid #f1e5eb;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 12px 42px #3a20320d;
+  text-align: left;
+}
+.onboarding-sparkle { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff0f6; color: #f65398; }
+.onboarding-preferences h2 { margin: 0; color: #201920; font-size: 26px; letter-spacing: -.7px; }
+.onboarding-preferences p { margin: 0; color: #6b6570; font-size: 14px; line-height: 1.5; }
+.onboarding-preferences .welcome-languages { display: flex; flex-wrap: wrap; gap: 7px; }
+.onboarding-preferences .welcome-languages button { min-height: 44px; padding: 0 13px; border: 1px solid #eee5eb; border-radius: 99px; background: #fff; color: #56505b; }
+.onboarding-preferences .welcome-languages button.selected { border-color: #f4b6d0; background: #fff0f6; color: #c93579; }
+.onboarding-preferences input { min-height: 48px; padding: 0 13px; border: 1px solid #eee5eb; border-radius: 13px; font: inherit; }
+.onboarding-preferences .patient-app-primary, .onboarding-preferences .welcome-skip { min-height: 48px; }
+.onboarding-preferences .welcome-skip { border: 0; background: transparent; color: #77717b; cursor: pointer; font: inherit; font-weight: 600; }
+.patient-app-ask-screen { min-height: calc(100dvh - 155px); padding-bottom: 5px; }
+.patient-app-chat-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.patient-app-chat-heading h1 { margin: 0 0 5px; color: #26212a; font-size: 26px; letter-spacing: -.7px; }
+.patient-app-chat-heading p { margin: 0; color: #8a838c; font-size: 11px; }
+.patient-app-auto-read { color: #77717b; font-size: 11px; }
+.patient-app-auto-read input { accent-color: #f65398; }
+.patient-app-chat { gap: 15px; padding: 9px 0 16px; }
+.patient-app-message-row.assistant { justify-items: stretch; }
+.patient-app-message-row.user { justify-items: end; }
+.patient-app-message.assistant {
+  width: 100%;
+  max-width: 100%;
+  padding: 4px 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.patient-app-message-title { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; color: #d84988; }
+.patient-app-message-title strong { color: #362f38; font-size: 13px; }
+.patient-app-message-title .speak-button { margin-left: auto; }
+.patient-app-message.assistant p { margin: 0; color: #28232b; font-size: 15px; line-height: 1.55; }
+.patient-app-user-message { display: grid; justify-items: end; max-width: 90%; }
+.patient-app-message.user { padding: 11px 15px; border: 1px solid #f8dce8; border-radius: 18px 18px 5px 18px; background: #fff0f6; color: #302a33; box-shadow: none; }
+.patient-app-user-message-meta { display: flex; align-items: center; gap: 4px; color: #98919b; font-size: 10px; }
+.patient-app-user-message-meta .speak-button { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+.patient-app-suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.patient-app-suggestions button { min-height: 44px; padding: 7px 13px; border: 1px solid #f1c4d8; border-radius: 99px; background: #fff; color: #9e386b; font-size: 12px; font-weight: 650; }
+.patient-app-suggestions button:hover { background: #fff5f9; }
+.patient-app-chat-resources { display: grid; gap: 8px; width: 100%; margin-top: 9px; }
+.patient-app-chat-resource-label { margin: 0; color: #706a74; font-size: 12px; font-weight: 700; }
+.patient-app-chat-resource, .patient-app-resource-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  padding: 12px 15px;
+  border: 1px solid #f0e6ec;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 14px #3d263608;
+  color: #2c2630;
+  text-decoration: none;
+}
+.patient-app-chat-resource:hover, .patient-app-resource-card:hover { border-color: #f1bfd4; text-decoration: none; }
+.patient-app-chat-resource > span:last-child, .patient-app-resource-card > span:last-child { color: #aaa2ad; font-size: 24px; line-height: 1; }
+.patient-app-chat-resource-copy, .patient-app-resource-card-copy { display: grid; gap: 4px; min-width: 0; }
+.patient-app-resource-card-copy strong, .patient-app-chat-resource-copy strong { color: #2e2931; font-size: 14px; line-height: 1.3; }
+.patient-app-resource-card-copy small, .patient-app-chat-resource-copy small { overflow: hidden; color: #77717b; font-size: 12px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.patient-app-chat-link { margin: 5px 0 0 5px; color: #d34383; }
+.patient-app-typing { display: flex; align-items: center; gap: 8px; border: 1px solid #f0e6ec; border-radius: 16px; background: #fff; color: #716a75; }
+.typing-spark { color: #f65398; }
+.typing-dots { display: inline-flex; gap: 4px; }
+.typing-dots i { background: #f65398; }
+.patient-app-chat-composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 22;
+  margin: auto -28px -13px;
+  padding: 12px 28px max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #ffffff00, #fff 24%);
+}
+.patient-app-chat-composer > p { margin: 6px 0 0; color: #99919a; font-size: 10px; text-align: center; }
+.patient-app-resource-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.patient-app-resource-filters a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid #f0e6ec;
+  border-radius: 99px;
+  background: #fff;
+  color: #615a65;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.patient-app-resource-filters a.active { border-color: #f4b6d0; background: #fff1f6; color: #c93778; }
+.patient-app-resource-cards { display: grid; gap: 10px; }
+.patient-app-resource-hero { padding: 17px; }
+.patient-app-resource-category { display: inline-flex; margin: 0 0 9px; padding: 5px 10px; border: 1px solid #f5d7e4; border-radius: 99px; background: #fff5f9; color: #bd3f78; font-size: 10px; font-weight: 750; }
+.patient-app-resource-hero h1 { margin: 0 0 8px; color: #28222b; font-size: 24px; line-height: 1.2; letter-spacing: -.6px; }
+.patient-app-resource-hero > p { margin: 0; color: #66606b; font-size: 14px; line-height: 1.5; }
+.patient-app-resource-info { display: grid; gap: 9px; }
+.patient-app-resource-info-card { grid-template-columns: 36px minmax(0, 1fr); gap: 10px; padding: 13px; }
+.patient-app-resource-info-icon { width: 36px; height: 36px; background: #fff2f7; color: #d94988; }
+.patient-app-resource-info-card h2 { margin: 0 0 5px; color: #302a33; font-size: 14px; }
+.patient-app-resource-info-card p, .patient-app-resource-info-card li { color: #69636d; font-size: 13px; line-height: 1.45; }
+.patient-app-phone-link { color: #c93b7c; }
+.patient-app-resource-cta { min-height: 48px; border-radius: 99px; }
+.patient-app-resource-note { color: #8b848e; font-size: 11px; line-height: 1.45; }
+.patient-app-resource-toolbar { justify-content: flex-start; gap: 12px; margin-bottom: -3px; }
+.patient-app-resource-back { width: 44px; height: 44px; border: 1px solid #f0e6ec; background: #fff; color: #5c5560; }
+.patient-app-resource-actions { gap: 8px; margin-left: auto; }
+.patient-app-resource-actions .patient-app-icon-button { border: 1px solid #f0e6ec; background: #fff; color: #645d67; }
+.patient-app-resource-actions .speak-button { min-width: 44px; min-height: 44px; }
+.patient-app-resource-feedback { color: #287454; font-size: 12px; }
+.patient-app-my-health { display: grid; gap: 13px; }
+.patient-app-section-heading { margin: 0; color: #28222b; font-size: 21px; letter-spacing: -.5px; }
+.patient-app-health-numbers-grid { gap: 9px; }
+.patient-app-health-number { border: 1px solid #f0e6ec; border-radius: 15px; background: #fff; }
+.patient-app-health-number b { color: #28222b; }
+.patient-app-health-number p, .patient-app-linked-metric, .patient-app-small-comparison { color: #5d5661; }
+.patient-app-goal-row { border-bottom-color: #f0e6ec; }
+.patient-app-need-choice { border-color: #f1dce7; border-radius: 16px; background: #fff; color: #3b3039; box-shadow: 0 3px 12px #3d263606; }
+.patient-app-need-choice[aria-pressed="true"] { border-color: #f1b7d0; background: #fff9fc; }
+.patient-app-need-choice > span:first-child { color: #df4b8c; }
+.patient-app-update-card, .patient-app-request-card { border-color: #f0e3ea; border-radius: 16px; background: #fff; }
+.patient-app-safety-note { background: #fff; }
+.patient-app-now-reading { border: 1px solid #f1e5eb; border-radius: 17px; background: #fff; box-shadow: 0 9px 32px #37243316; }
+.patient-app-sheet-link { min-height: 54px; }
+.patient-app-profile-sheet .patient-app-field select { width: 100%; min-height: 48px; padding: 0 12px; border: 1px solid #eee4ea; border-radius: 13px; background: #fff; }
+@keyframes tawnySplashIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tawnySplashFloat { from { transform: translateY(3px); } to { transform: translateY(-3px); } }
+@keyframes tawnyVoicePulse { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(1.12); opacity: 0; } }
+@keyframes tawnyVoiceMorph { from { border-radius: 50% 50% 46% 54% / 53% 46% 54% 47%; } to { border-radius: 43% 57% 57% 43% / 48% 57% 43% 52%; } }
+@media (max-width: 600px) {
+  .patient-app-header { padding: 0 17px; }
+  .patient-app-main { padding: 20px 18px 28px; }
+  .patient-app-main-home { padding: 14px 18px 18px; }
+  .patient-app-header-row { min-height: 64px; gap: 9px; }
+  .ellie-logo { font-size: 29px; }
+  .patient-app-header-note { font-size: 11px; }
+  .patient-app-settings-button { width: 42px; height: 42px; }
+  .patient-app-back-button { width: 28px; }
+  .patient-app-home-screen { padding-top: 21px; }
+  .patient-app-home-eyebrow { font-size: 9px; letter-spacing: 1.5px; }
+  .patient-app-home-intro { margin-top: 27px; }
+  .patient-app-home-intro h1 { font-size: 41px; }
+  .patient-app-home-intro p { max-width: 360px; margin-top: 9px; font-size: 15px; }
+  .patient-app-home-voice { width: 166px; height: 166px; margin-top: 17px; }
+  .patient-app-home-voice-core { width: 114px; height: 114px; }
+  .patient-app-home-explore { margin-top: 23px; }
+  .patient-app-home-topic { min-height: 51px; padding: 9px 10px; font-size: 12px; }
+  .patient-app-home-composer { width: calc(100% + 36px); margin-right: -18px; margin-left: -18px; padding-right: 20px; padding-left: 20px; }
+  .patient-app-chat-composer { margin-right: -18px; margin-left: -18px; padding-right: 18px; padding-left: 18px; }
+  .patient-app-card { padding: 16px; }
+  .patient-app-resource-filters { gap: 6px; }
+  .patient-app-resource-filters a { min-height: 44px; padding: 0 11px; font-size: 11px; }
+}
+@media (max-width: 359px) {
+  .patient-app-header-note span { display: none; }
+  .patient-app-header-note { margin-left: auto; }
+  .patient-app-home-intro h1 { font-size: 36px; }
+  .patient-app-home-topic { gap: 7px; padding: 8px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .patient-app-splash, .patient-app-splash > span, .patient-app-home-voice.is-listening::before, .patient-app-home-voice.is-listening::after, .patient-app-home-voice.is-processing .patient-app-home-voice-core, .typing-dots i {
+    animation: none !important;
+  }
+  .patient-app-home-voice { transform: none !important; transition: none !important; }
+  .patient-app-home-topic, .ellie-composer { transition: none !important; }
+}

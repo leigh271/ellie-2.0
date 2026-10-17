@@ -83,7 +83,6 @@ export default function ResourceDetailScreen() {
       </div>
     </div>
     <section className={`patient-app-resource-hero icon-${resource.icon}`} data-speech-text={speechText}>
-      <div className="patient-app-resource-hero-art" aria-hidden="true"><Icon name={resource.icon} size={58} /></div>
       <span className="patient-app-resource-category">{messages[categoryLabel[category ?? 'local']]}</span>
       <h1>{content.title}</h1>
       <p>{content.description}</p>

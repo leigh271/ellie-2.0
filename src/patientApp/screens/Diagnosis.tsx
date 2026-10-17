@@ -3,6 +3,7 @@ import { elliePatients } from '../../data/ellieDemo';
 import { formatDatasetNumber, useDataset } from '../../data/datasets';
 import type { PatientLinksDataset } from '../../data/patientLinks';
 import type { PatientLanguage } from '../../state/DemoStore';
+import type { CheckIn } from '../../state/DemoStore';
 import type { DiagnosisKey, LocalizedVariants, PhaseKey, SectionKey } from '../content/diagnoses';
 import { diagnoses, localizedDiagnosisKey, phaseContent, phaseKey, sectionContent } from '../content/diagnoses';
 import type { GlossaryTerm } from '../content/glossary';
@@ -12,6 +13,28 @@ import type { Messages } from '../i18n';
 import { useLanguage } from '../useLanguage';
 
 const sectionKeys: SectionKey[] = ['what', 'phase', 'common', 'care', 'call', 'questions'];
+
+function average(values: Array<number | null>): number | null {
+  const present = values.filter((value): value is number => value !== null);
+  return present.length ? present.reduce((sum, value) => sum + value, 0) / present.length : null;
+}
+
+function substitute(template: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce((text, [key, value]) => text.replaceAll(`{${key}}`, value), template);
+}
+
+function comparisonMessage(change: number, messages: Messages): string {
+  if (Math.abs(change) <= 5) return messages.activityChangeSame;
+  const template = change < 0 ? messages.activityChangeLower : messages.activityChangeHigher;
+  return substitute(template, { change: formatDatasetNumber(Math.abs(change), 0) });
+}
+
+function patientGoalStatus(value: string | number | null, messages: Messages): string {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  if (['yes', '1', 'true', 'met'].includes(normalized)) return messages.coachingGoalMet;
+  if (['partial', 'partly', 'partially'].includes(normalized)) return messages.coachingGoalPartly;
+  return messages.coachingGoalNotYet;
+}
 
 function DiagnosisSection({ section, title, variants, language, messages, savedQuestions, aiEnabled, aiLoading, aiExplanation, onExplain, onSave, onGlossary }: {
   section: SectionKey;
@@ -50,7 +73,7 @@ function DiagnosisSection({ section, title, variants, language, messages, savedQ
 }
 
 export default function DiagnosisScreen() {
-  const { state, update, log } = useDemoStore();
+  const { state, update, log, createTask } = useDemoStore();
   const { language, messages } = useLanguage();
   const patient = elliePatients.find((item) => item.id === state.patientId) ?? elliePatients[0];
   const linkedData = useDataset<PatientLinksDataset>('patient_links.json');
@@ -65,6 +88,9 @@ export default function DiagnosisScreen() {
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiLoadingSection, setAiLoadingSection] = useState<SectionKey | null>(null);
   const [aiExplanations, setAiExplanations] = useState<Partial<Record<SectionKey, string>>>({});
+  const [energy, setEnergy] = useState<CheckIn['energy'] | ''>('');
+  const [note, setNote] = useState('');
+  const [questionsShared, setQuestionsShared] = useState(false);
   useEffect(() => {
     let active = true;
     fetch('/api/ai/status')
@@ -136,15 +162,80 @@ export default function DiagnosisScreen() {
       .replace('{id}', String(linked.nhanes.person_id))
     : '';
   const healthNumbersText = healthNumbers.map((item) => `${item.label}: ${item.value === null ? '—' : formatDatasetNumber(item.value, item.digits)} ${item.unit}. ${item.meaning}`).join(' ');
+  const checkIns = state.checkIns.filter((checkin) => checkin.patientId === patient.id || (patient.id === 'maria' && !checkin.patientId));
+  const latest = checkIns[0];
+  const energyLabels: Record<CheckIn['energy'], string> = { Good: messages.energyGood, Okay: messages.energyOkay, Low: messages.energyLow };
+  const wearableSeries = linked?.wearable.series ?? [];
+  const usualSteps = average(wearableSeries.slice(0, 14).map((row) => row.steps));
+  const recentSteps = average(wearableSeries.slice(14).map((row) => row.steps));
+  const usualSleep = average(wearableSeries.slice(0, 14).map((row) => row.sleep_minutes === null ? null : row.sleep_minutes / 60));
+  const recentSleep = average(wearableSeries.slice(14).map((row) => row.sleep_minutes === null ? null : row.sleep_minutes / 60));
+  const wearableSource = linked ? substitute(messages.linkedWearableSource, { id: String(linked.wearable.person_id) }) : '';
+  const activityText = linked ? [
+    substitute(messages.recentActivitySteps, { recent: recentSteps === null ? '—' : formatDatasetNumber(recentSteps, 0), usual: usualSteps === null ? '—' : formatDatasetNumber(usualSteps, 0) }),
+    comparisonMessage(usualSteps && recentSteps !== null ? ((recentSteps - usualSteps) / usualSteps) * 100 : 0, messages),
+    substitute(messages.recentActivitySleep, { recent: recentSleep === null ? '—' : formatDatasetNumber(recentSleep, 1), usual: usualSleep === null ? '—' : formatDatasetNumber(usualSleep, 1) }),
+    comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages),
+  ].join(' ') : '';
+  const recentGoals = [...(linked?.coaching.weekly_goals ?? [])].sort((a, b) => Number(b.week) - Number(a.week)).slice(0, 4);
+  const goalLabel = (goal?: string | number | null) => {
+    const text = goal == null ? '' : String(goal);
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : '—';
+  };
+  const coachingText = recentGoals.map((goal) => `${goalLabel(goal.goal)}: ${patientGoalStatus(goal.goal_met, messages)}`).join('. ');
+  const coachingSource = linked ? substitute(messages.linkedCoachingSource, { id: linked.coaching.participant_id }) : '';
+  const checkinText = `${messages.checkinQuestion} ${messages.energyGood}, ${messages.energyOkay}, ${messages.energyLow}.`;
+  const recordCheckIn = () => {
+    if (!energy) return;
+    const at = new Date().toISOString();
+    const checkin: CheckIn = { id: crypto.randomUUID(), patientId: patient.id, energy, note: note.trim(), at };
+    update((previous) => {
+      const loop = previous.careLoops[patient.id] ?? { detect: null, understand: null, review: null, act: null, followup: null };
+      return {
+        ...previous,
+        checkIns: [checkin, ...previous.checkIns],
+        careLoops: energy === 'Low' && !loop.detect ? { ...previous.careLoops, [patient.id]: { ...loop, detect: at } } : previous.careLoops,
+        activity: [{ id: crypto.randomUUID(), at, type: 'Patient app check-in', patientId: patient.id, message: `${patient.name} shared a ${energy.toLowerCase()} energy check-in${note.trim() ? ' with a note' : ''}` }, ...previous.activity],
+      };
+    });
+    setEnergy('');
+    setNote('');
+  };
+  const removeQuestion = (index: number) => update((previous) => ({
+    ...previous,
+    patientQuestions: { ...previous.patientQuestions, [patient.id]: (previous.patientQuestions[patient.id] ?? []).filter((_, itemIndex) => itemIndex !== index) },
+  }));
+  const shareQuestions = () => {
+    if (!savedQuestions.length) return;
+    createTask({
+      patientId: patient.id,
+      title: 'Patient questions for next visit',
+      source: 'Patient app',
+      assignee: 'Navigator',
+      dueDate: '',
+      status: 'Open',
+      outcome: '',
+      shareWithPatient: false,
+      patientMessage: '',
+      details: savedQuestions.map((question) => `• ${question}`).join('\n'),
+    });
+    setQuestionsShared(true);
+  };
 
   return <div className="patient-app-screen">
     <PageHeading title={messages.diagnosisHeading} subtitle={messages.diagnosisSub} language={language} />
-    <AppCard title={messages.diagnosis} text={`${messages.diagnosis}: ${diagnosis.name[language]}. ${phaseText}.`} language={language} className="patient-app-diagnosis-summary">
-      <p className="patient-app-diagnosis-name">{diagnosis.name[language]}</p>
-      <p className="patient-app-caption">{phaseText}</p>
-      <p className="patient-app-glossary-hint">{messages.glossaryHow}</p>
-    </AppCard>
-    {linked && <AppCard title={messages.healthNumbersHeading} text={`${healthNumbersText} ${messages.askCareTeamNumbers} ${nhanesSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-health-numbers">
+    <section className="patient-app-my-health">
+      <h2 className="patient-app-section-heading">{messages.myHealth}</h2>
+      {linked && <AppCard title={messages.recentActivityHeading} text={`${activityText} ${wearableSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-linked-activity">
+        <p className="patient-app-caption">{messages.recentActivitySub}</p>
+        <p className="patient-app-linked-metric">{substitute(messages.recentActivitySteps, { recent: recentSteps === null ? '—' : formatDatasetNumber(recentSteps, 0), usual: usualSteps === null ? '—' : formatDatasetNumber(usualSteps, 0) })}</p>
+        <p className="patient-app-small-comparison">{comparisonMessage(usualSteps && recentSteps !== null ? ((recentSteps - usualSteps) / usualSteps) * 100 : 0, messages)}</p>
+        <p className="patient-app-linked-metric">{substitute(messages.recentActivitySleep, { recent: recentSleep === null ? '—' : formatDatasetNumber(recentSleep, 1), usual: usualSleep === null ? '—' : formatDatasetNumber(usualSleep, 1) })}</p>
+        <p className="patient-app-small-comparison">{comparisonMessage(usualSleep && recentSleep !== null ? ((recentSleep - usualSleep) / usualSleep) * 100 : 0, messages)}</p>
+        <p className="patient-app-caption">{wearableSource}</p>
+        <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
+      </AppCard>}
+      {linked && <AppCard title={messages.healthNumbersHeading} text={`${healthNumbersText} ${messages.askCareTeamNumbers} ${nhanesSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-health-numbers">
       <div className="patient-app-health-numbers-grid">
         {healthNumbers.map((item) => <section className="patient-app-health-number" key={item.label}>
           <span className="patient-app-caption">{item.label}</span>
@@ -155,7 +246,20 @@ export default function DiagnosisScreen() {
       <p className="patient-app-prompt">{messages.askCareTeamNumbers}</p>
       <p className="patient-app-caption">{nhanesSource}</p>
       <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
-    </AppCard>}
+      </AppCard>}
+      {linked && <AppCard title={messages.coachingGoalsHeading} text={`${coachingText} ${coachingSource} ${messages.linkedRecordCaveat}`} language={language} className="patient-app-coaching-goals">
+        {recentGoals.map((goal, index) => <div className="patient-app-goal-row" key={`${goal.week}-${goal.topic}-${index}`}>
+          <span>{goalLabel(goal.goal)}</span><span className="patient-app-status">{patientGoalStatus(goal.goal_met, messages)}</span>
+        </div>)}
+        <p className="patient-app-caption">{coachingSource}</p>
+        <p className="patient-app-caption">{messages.linkedRecordCaveat}</p>
+      </AppCard>}
+    </section>
+    <AppCard title={messages.diagnosis} text={`${messages.diagnosis}: ${diagnosis.name[language]}. ${phaseText}.`} language={language} className="patient-app-diagnosis-summary">
+      <p className="patient-app-diagnosis-name">{diagnosis.name[language]}</p>
+      <p className="patient-app-caption">{phaseText}</p>
+      <p className="patient-app-glossary-hint">{messages.glossaryHow}</p>
+    </AppCard>
     {sectionKeys.map((section) => <DiagnosisSection
       key={section}
       section={section}
@@ -173,6 +277,22 @@ export default function DiagnosisScreen() {
     />)}
     <AppCard title={messages.educationDisclaimer} text={messages.educationDisclaimer} language={language} className="patient-app-safety-note">
       <p>{messages.educationDisclaimer}</p>
+    </AppCard>
+    <AppCard title={messages.wellnessCheckin} text={checkinText} language={language}>
+      <p className="patient-app-prompt">{messages.checkinQuestion}</p>
+      <div className="patient-app-energy-options" role="group" aria-label={messages.checkinQuestion}>
+        {(['Good', 'Okay', 'Low'] as const).map((option) => <button type="button" key={option} className={`patient-app-choice ${energy === option ? 'selected' : ''}`} aria-pressed={energy === option} onClick={() => setEnergy(option)}>{energyLabels[option]}</button>)}
+      </div>
+      <label className="patient-app-field">{messages.optionalNote}
+        <textarea rows={2} value={note} onChange={(event) => setNote(event.target.value)} placeholder={messages.checkinPlaceholder} />
+      </label>
+      <button type="button" className="patient-app-primary" disabled={!energy} onClick={recordCheckIn}>{messages.shareCheckin}</button>
+      {latest && <p className="patient-app-caption">{messages.lastCheckin}: {energyLabels[latest.energy]} · {new Date(latest.at).toLocaleDateString(language === 'en' ? 'en-US' : language === 'es' ? 'es-US' : 'fr')}</p>}
+    </AppCard>
+    <AppCard title={messages.questionsTitle} text={`${messages.questionsTitle}. ${savedQuestions.join('. ')}`} language={language}>
+      {savedQuestions.length ? <ul className="patient-app-question-list">{savedQuestions.map((question, index) => <li key={`${question}-${index}`}><span>{question}</span><button type="button" className="patient-app-text-button" aria-label={`${messages.questionRemoved}: ${question}`} onClick={() => removeQuestion(index)}>×</button></li>)}</ul> : <p className="patient-app-empty">{messages.noQuestions}</p>}
+      {savedQuestions.length > 0 && <button type="button" className="patient-app-secondary" onClick={shareQuestions} disabled={questionsShared}>{messages.shareQuestions}</button>}
+      {questionsShared && <p className="patient-app-success" role="status" aria-live="polite">{messages.questionsShared}</p>}
     </AppCard>
     {notice && <div className="patient-app-toast inline-toast" role="status" aria-live="polite">{notice}</div>}
     <GlossarySheet term={activeTerm} onClose={closeGlossary} />

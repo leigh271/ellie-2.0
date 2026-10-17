@@ -166,9 +166,8 @@ export default function AskScreen() {
             {resources.filter((resource) => resource.categories.includes(message.resourceCategory!)).map((resource) => {
               const content = resource.content[message.language];
               return <Link className="patient-app-chat-resource" to={`/app/resources/${resource.id}`} key={resource.id}>
-                <span className={`patient-app-resource-thumb icon-${resource.icon}`}><Icon name={resource.icon} size={22} /></span>
                 <span className="patient-app-chat-resource-copy"><strong>{content.title}</strong><small>{content.description}</small></span>
-                <Icon name="chevronRight" size={18} />
+                <span aria-hidden="true">›</span>
               </Link>;
             })}
           </div>}
