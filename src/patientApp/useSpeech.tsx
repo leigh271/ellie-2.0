@@ -130,7 +130,8 @@ export function SpeakButton({ text, language, className = '' }: { text: string; 
   );
 }
 
-type RecognitionResult = { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+type RecognitionSpeechResult = ArrayLike<{ transcript: string }> & { isFinal: boolean };
+type RecognitionResult = { results: ArrayLike<RecognitionSpeechResult> };
 type RecognitionLike = {
   lang: string;
   interimResults: boolean;
@@ -149,6 +150,7 @@ type SpeechWindow = Window & {
 export function useVoiceInput(language: PatientLanguage, onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [level, setLevel] = useState(0);
+  const [transcript, setTranscript] = useState('');
   const recognition = useRef<RecognitionLike | null>(null);
   const transcriptHandler = useRef(onTranscript);
   const activeListening = useRef(false);
@@ -171,6 +173,8 @@ export function useVoiceInput(language: PatientLanguage, onTranscript: (text: st
     audioContext.current = null;
     setLevel(0);
   }, []);
+
+  const clearTranscript = useCallback(() => setTranscript(''), []);
 
   const startMeter = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext) return;
@@ -231,17 +235,29 @@ export function useVoiceInput(language: PatientLanguage, onTranscript: (text: st
       return;
     }
     stopMeter();
+    setTranscript('');
     const input = new Recognition();
     input.lang = language === 'en' ? 'en-US' : language === 'es' ? 'es-US' : 'ht-HT';
-    input.interimResults = false;
+    input.interimResults = true;
     input.maxAlternatives = 1;
     input.onresult = (event) => {
-      const transcript = event.results[0]?.[0]?.transcript;
+      const finalParts: string[] = [];
+      const interimParts: string[] = [];
+      for (let index = 0; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const part = result?.[0]?.transcript?.trim();
+        if (!part) continue;
+        (result.isFinal ? finalParts : interimParts).push(part);
+      }
+      const finalTranscript = finalParts.join(' ').trim();
+      setTranscript([finalTranscript, interimParts.join(' ').trim()].filter(Boolean).join(' '));
+      if (!finalTranscript || !activeListening.current) return;
       activeListening.current = false;
+      recognition.current?.stop();
       setListening(false);
       stopMeter();
       navigator.vibrate?.([30, 40, 30]);
-      if (transcript) transcriptHandler.current(transcript);
+      transcriptHandler.current(finalTranscript);
     };
     input.onerror = () => {
       activeListening.current = false;
@@ -261,7 +277,7 @@ export function useVoiceInput(language: PatientLanguage, onTranscript: (text: st
     void startMeter();
   }, [Recognition, language, listening, startMeter, stopMeter]);
 
-  return { supported: Boolean(Recognition), listening, level, toggle };
+  return { supported: Boolean(Recognition), listening, level, transcript, clearTranscript, toggle };
 }
 
 export type { SpeechRate };

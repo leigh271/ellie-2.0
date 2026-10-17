@@ -837,6 +837,8 @@ textarea { display: block; width: 100%; resize: vertical; }
 .patient-app-message-title strong { font-size: 13px; }
 .patient-app-message-title .speak-button { margin-left: auto; }
 .patient-app-message.assistant p { margin: 0; color: #111827; font-size: 15px; line-height: 1.5; }
+.patient-app-suggestions { display: flex; flex-wrap: wrap; gap: 7px; margin: 9px 0 0 12px; }
+.patient-app-suggestions button { min-height: 44px; padding: 8px 13px; border: 1px solid #f3c9dc; border-radius: 99px; background: #fff8fb; color: #a52f68; font-size: 12px; font-weight: 650; }
 .patient-app-user-message { display: grid; justify-items: end; max-width: 90%; }
 .patient-app-message.user { max-width: 100%; padding: 12px 15px; border-radius: 20px 20px 6px 20px; background: #ffeaf2; color: #111827; box-shadow: none; }
 .patient-app-user-message-meta { display: flex; align-items: center; gap: 3px; color: #8b909a; font-size: 10px; }
@@ -874,6 +876,8 @@ textarea { display: block; width: 100%; resize: vertical; }
 .voice-side-wave span { width: 3px; border-radius: 99px; background: #f65398; }
 .voice-stop { position: absolute; top: 74%; display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #f2cadd; border-radius: 50%; background: #fff6fa; color: #ed438d; box-shadow: 0 4px 18px #ef88b71e; }
 .voice-tap-label { position: absolute; top: calc(74% + 72px); color: #8b909a; font-size: 12px; }
+.voice-transcript { position: absolute; top: 59%; left: 26px; right: 26px; display: -webkit-box; max-width: 340px; max-height: 74px; overflow: hidden; margin: 0 auto; color: #374151; font-size: 15px; font-weight: 600; line-height: 1.45; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.voice-send { position: absolute; top: calc(74% + 112px); min-height: 48px; padding: 0 23px; border: 0; border-radius: 99px; background: #f65398; color: #fff; font-size: 14px; font-weight: 750; box-shadow: 0 6px 18px #f6539833; }
 .patient-app-voice-overlay.is-processing .ellie-orb-voice { background: radial-gradient(circle at 30% 23%, #fff 0%, #ffd6e9 25%, #e7b1ef 54%, #c5b9f6 83%, #fff5fb 100%); }
 
 .patient-app-resource-toolbar { justify-content: space-between; margin-bottom: -5px; }

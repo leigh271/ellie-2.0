@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useDemoStore } from '../../state/DemoStore';
 import type { PatientLanguage } from '../../state/DemoStore';
-import { companionDestination, companionReply, companionResourceCategory, isEmergencyMessage } from '../../lib/companion';
+import { buildPatientContext, loadPatientLinks } from '../../data/patientLinks';
+import { companionDataIntent, companionDestination, companionReply, companionResourceCategory, isEmergencyMessage } from '../../lib/companion';
 import { Icon, Composer } from '../components';
 import type { ResourceCategory } from '../content/resources';
 import { resources } from '../content/resources';
@@ -14,6 +16,7 @@ type ChatMessage = {
   text: string;
   route?: string;
   resourceCategory?: ResourceCategory;
+  suggestions?: string[];
   language: PatientLanguage;
   createdAt: string;
 };
@@ -26,12 +29,14 @@ const categoryLabel = {
 
 export default function AskScreen() {
   const { language, messages } = useLanguage();
+  const { state: { patientId } } = useDemoStore();
   const { speak } = useSpeech();
   const [searchParams, setSearchParams] = useSearchParams();
   const [chat, setChat] = useState<ChatMessage[]>(() => [{
     id: 'welcome',
     role: 'assistant' as const,
     text: messages.defaultAssistant,
+    suggestions: [messages.suggestionSleep, messages.suggestionLabs, messages.suggestionGoals],
     language,
     createdAt: new Date().toISOString(),
   }].filter(() => !searchParams.get('q')?.trim()));
@@ -40,6 +45,24 @@ export default function AskScreen() {
   const [replying, setReplying] = useState(false);
   const [autoRead, setAutoRead] = useState(() => localStorage.getItem('ellie-app-auto-read') === 'true');
   const handledQuery = useRef<string | null>(null);
+
+  const suggestionsFor = (prompt: string, category?: ResourceCategory) => {
+    const intent = companionDataIntent(prompt, language);
+    const keys: Array<'suggestionSleep' | 'suggestionLabs' | 'suggestionGoals' | 'suggestionRide' | 'suggestionWorried'> = intent === 'activity'
+      ? ['suggestionSleep', 'suggestionLabs', 'suggestionGoals']
+      : intent === 'sleep'
+        ? ['suggestionLabs', 'suggestionGoals', 'suggestionRide']
+        : intent === 'labs'
+          ? ['suggestionSleep', 'suggestionGoals', 'suggestionWorried']
+          : intent === 'coaching'
+            ? ['suggestionSleep', 'suggestionLabs', 'suggestionRide']
+            : category === 'transportation'
+              ? ['suggestionRide', 'suggestionWorried', 'suggestionSleep']
+              : category === 'emotional'
+                ? ['suggestionWorried', 'suggestionRide', 'suggestionGoals']
+                : ['suggestionSleep', 'suggestionLabs', 'suggestionGoals'];
+    return keys.map((key) => messages[key]);
+  };
 
   useEffect(() => {
     let active = true;
@@ -64,14 +87,28 @@ export default function AskScreen() {
         text: answer,
         route: companionDestination(trimmed, language),
         resourceCategory,
+        suggestions: suggestionsFor(trimmed, resourceCategory),
         language,
         createdAt: new Date().toISOString(),
       };
       setChat((previous) => [...previous, response]);
       if (autoRead) window.setTimeout(() => speak(response.id, answer, language), 0);
     };
-    if (isEmergencyMessage(trimmed, language) || !aiEnabled) {
+    const localReply = async () => {
+      try {
+        const links = await loadPatientLinks();
+        const linkedRecord = links.patients[patientId];
+        return companionReply(trimmed, language, linkedRecord ? buildPatientContext(linkedRecord) : undefined);
+      } catch {
+        return companionReply(trimmed, language);
+      }
+    };
+    if (isEmergencyMessage(trimmed, language)) {
       addReply(companionReply(trimmed, language));
+      return;
+    }
+    if (!aiEnabled) {
+      addReply(await localReply());
       return;
     }
     setReplying(true);
@@ -82,13 +119,13 @@ export default function AskScreen() {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ language, messages: messagesToSend }),
+        body: JSON.stringify({ language, patientId, messages: messagesToSend }),
       });
       if (!response.ok) throw new Error('AI unavailable');
       const body = await response.json() as { reply?: string };
       addReply(body.reply || companionReply(trimmed, language));
     } catch {
-      addReply(companionReply(trimmed, language));
+      addReply(await localReply());
     } finally {
       setReplying(false);
     }
@@ -136,6 +173,9 @@ export default function AskScreen() {
             })}
           </div>}
           {message.route && !message.resourceCategory && <Link className="patient-app-chat-link" to={message.route}>{routeLabel(message.route)} →</Link>}
+          {message.suggestions?.length ? <div className="patient-app-suggestions" aria-label={messages.suggestionsHeading}>
+            {message.suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => void respond(suggestion)}>{suggestion}</button>)}
+          </div> : null}
         </>}
         {message.role === 'user' && <div className="patient-app-user-message">
           <div className="patient-app-message user" data-speech-text={message.text}>{message.text}</div>

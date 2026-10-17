@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { PatientLanguage } from '../state/DemoStore';
 import type { GlossaryTerm } from './content/glossary';
 import { glossary } from './content/glossary';
@@ -108,17 +109,28 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   const { messages } = useLanguage();
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const voice = useVoiceInput(language, (transcript) => {
+  const finishVoice = (transcript: string) => {
     setProcessing(true);
     window.setTimeout(() => {
       setVoiceOpen(false);
       setProcessing(false);
-      onSubmit([value.trim(), transcript].filter(Boolean).join(' '));
+      onSubmit([value.trim(), transcript.trim()].filter(Boolean).join(' '));
     }, 700);
-  });
-  useEffect(() => {
-    if (!voice.listening && !processing) setVoiceOpen(false);
-  }, [voice.listening, processing]);
+  };
+  const voice = useVoiceInput(language, finishVoice);
+  const sendCaptured = () => {
+    const transcript = voice.transcript.trim();
+    if (!transcript) return;
+    if (voice.listening) voice.toggle();
+    finishVoice(transcript);
+  };
+  const stopVoice = () => {
+    if (voice.listening) voice.toggle();
+    if (!voice.transcript.trim()) {
+      voice.clearTranscript();
+      setVoiceOpen(false);
+    }
+  };
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (value.trim()) onSubmit(value.trim());
@@ -132,16 +144,20 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
       <button type="submit" className="composer-send" aria-label={messages.send} disabled={!value.trim()}><Icon name="arrowUp" size={19} /></button>
     </form>
     {!voice.supported && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
-    {voiceOpen && <div className={`patient-app-voice-overlay ${processing ? 'is-processing' : 'is-listening'}`} role="dialog" aria-modal="true" aria-labelledby="voice-overlay-title">
+    {voiceOpen && createPortal(<div className={`patient-app-voice-overlay ${processing ? 'is-processing' : 'is-listening'}`} role="dialog" aria-modal="true" aria-labelledby="voice-overlay-title">
       <h2 id="voice-overlay-title">{processing ? messages.voiceProcessing : messages.voiceListeningTitle}</h2>
       <p>{messages.voiceInstruction}</p>
       <div className={`ellie-orb ellie-orb-voice ${processing ? 'processing' : ''}`} style={{ '--voice-level': voice.level } as CSSProperties} aria-hidden="true">
         <div className="voice-bars">{Array.from({ length: 9 }, (_, index) => <span key={index} style={{ height: `${Math.max(5, Math.round(voice.level * (26 + 36 * Math.abs(Math.sin(index + 0.6)))))}px` }} />)}</div>
       </div>
+      <p className="voice-transcript" aria-live="polite">{voice.transcript || messages.voiceTranscriptWaiting}</p>
       <div className="voice-side-wave left" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <span key={index} style={{ height: `${8 + Math.round(voice.level * 12 * Math.abs(Math.sin(index)))}px` }} />)}</div>
       <div className="voice-side-wave right" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <span key={index} style={{ height: `${8 + Math.round(voice.level * 12 * Math.abs(Math.cos(index)))}px` }} />)}</div>
-      {!processing && <button type="button" className="voice-stop" onClick={() => { voice.toggle(); setVoiceOpen(false); }} aria-label={messages.voiceStop}><Icon name="stop" size={21} /></button>}
-      {!processing && <span className="voice-tap-label">{messages.voiceTapToStop}</span>}
-    </div>}
+      {!processing && <>
+        <button type="button" className="voice-stop" onClick={stopVoice} aria-label={messages.voiceStop}><Icon name="stop" size={21} /></button>
+        <span className="voice-tap-label">{voice.listening ? messages.voiceTapToStop : messages.voiceTapToSend}</span>
+        {voice.transcript.trim() && <button type="button" className="voice-send" onClick={sendCaptured}>{messages.voiceSendTranscript}</button>}
+      </>}
+    </div>, document.body)}
   </>;
 }

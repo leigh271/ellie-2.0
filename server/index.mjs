@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
+import { buildPatientContext } from './patientContext.mjs';
 
 const app = express();
 const port = Number(process.env.PORT || 8787);
@@ -103,9 +104,21 @@ function safeStringList(value) {
   return Array.isArray(value) ? value.filter((item) => typeof item === 'string').slice(0, 20).map((item) => safeText(item, 500)) : [];
 }
 
+async function linkedChatContext(patientId) {
+  if (!patientId) return undefined;
+  try {
+    const linkedFile = await readFile(path.join(root, 'public', 'data', 'patient_links.json'), 'utf8');
+    const linkedRecord = JSON.parse(linkedFile).patients?.[patientId];
+    return linkedRecord ? buildPatientContext(linkedRecord) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 app.post('/api/ai/chat', async (req, res) => {
   if (!allowAiRequest(req, res)) return;
   const body = req.body ?? {};
+  const patientId = safeText(body.patientId, 40);
   const messages = Array.isArray(body.messages)
     ? body.messages
       .filter((message) => message && (message.role === 'user' || message.role === 'assistant') && typeof message.text === 'string')
@@ -116,7 +129,11 @@ app.post('/api/ai/chat', async (req, res) => {
   if (!messages.length) return res.status(400).json({ error: 'invalid_request' });
   const languageName = languageNames[requestLanguage(body.language)];
   try {
-    const reply = await requestOpenAI(patientChatPrompt(languageName), messages);
+    const linkedContext = await linkedChatContext(patientId);
+    const contextNote = linkedContext
+      ? `\n\nHere are this person's linked demo records, in JSON: ${JSON.stringify(linkedContext)}. These records come from different research participants and were combined into one fictional demo profile. When the person asks about their activity, sleep, health numbers or coaching goals, answer from these records in plain words, give the numbers, and say which record they come from (fatigue-study wearable record, NHANES exam record, or synthetic coaching record). Do not say whether a number is normal, good or bad for them, and do not diagnose; suggest asking the care team what it means for them. If the records don't contain the answer, say so.`
+      : '';
+    const reply = await requestOpenAI(`${patientChatPrompt(languageName)}${contextNote}`, messages);
     res.json({ reply, source: 'openai' });
   } catch {
     res.status(503).json({ error: 'ai_unavailable' });
