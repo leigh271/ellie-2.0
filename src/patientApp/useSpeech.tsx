@@ -135,12 +135,12 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: new () => RecognitionLike;
 };
 
-export function VoiceInputButton({ language, onTranscript }: { language: PatientLanguage; onTranscript: (text: string) => void }) {
+export function useVoiceInput(language: PatientLanguage, onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const recognition = useRef<RecognitionLike | null>(null);
+  const transcriptHandler = useRef(onTranscript);
+  transcriptHandler.current = onTranscript;
   const location = useLocation();
-  const { messages } = useLanguage();
-  const { speechUnsupported } = messages;
   const recognitionWindow = typeof window === 'undefined' ? undefined : window as SpeechWindow;
   const Recognition = recognitionWindow?.SpeechRecognition ?? recognitionWindow?.webkitSpeechRecognition;
 
@@ -150,8 +150,8 @@ export function VoiceInputButton({ language, onTranscript }: { language: Patient
     return () => recognition.current?.stop();
   }, [location.pathname]);
 
-  if (!Recognition) return null;
-  const toggle = () => {
+  const toggle = useCallback(() => {
+    if (!Recognition) return;
     if (listening) {
       recognition.current?.stop();
       setListening(false);
@@ -163,16 +163,17 @@ export function VoiceInputButton({ language, onTranscript }: { language: Patient
     input.maxAlternatives = 1;
     input.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) onTranscript(transcript);
       setListening(false);
+      if (transcript) transcriptHandler.current(transcript);
     };
     input.onerror = () => setListening(false);
     input.onend = () => setListening(false);
     recognition.current = input;
     input.start();
     setListening(true);
-  };
-  return <button type="button" className={`btn voice-button ${listening ? 'listening' : ''}`} aria-label={messages.speakQuestion} title={speechUnsupported} onClick={toggle}>{listening ? '◉' : '🎙'}</button>;
+  }, [Recognition, language, listening]);
+
+  return { supported: Boolean(Recognition), listening, toggle };
 }
 
 export type { SpeechRate };

@@ -1,11 +1,10 @@
-import { useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { PatientLanguage } from '../../state/DemoStore';
 import { companionDestination, companionReply } from '../../lib/companion';
-import { AppCard, PageHeading } from '../components';
+import { AppCard, Composer, PageHeading } from '../components';
 import { useLanguage } from '../useLanguage';
-import { SpeakButton, VoiceInputButton, useSpeech } from '../useSpeech';
+import { SpeakButton, useSpeech } from '../useSpeech';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; text: string; route?: string; language: PatientLanguage };
 
@@ -15,11 +14,9 @@ export default function AskScreen() {
   const [chat, setChat] = useState<ChatMessage[]>(() => [{ id: 'welcome', role: 'assistant', text: messages.defaultAssistant, language }]);
   const [draft, setDraft] = useState('');
   const [autoRead, setAutoRead] = useState(() => localStorage.getItem('ellie-app-auto-read') === 'true');
-  const greeting = useMemo(() => messages.defaultAssistant, [messages.defaultAssistant]);
-  const send = (event: FormEvent) => {
-    event.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handledQuery = useRef<string | null>(null);
+  const respond = (text: string) => {
     const answer = companionReply(text, language);
     const response: ChatMessage = {
       id: crypto.randomUUID(),
@@ -32,6 +29,13 @@ export default function AskScreen() {
     setDraft('');
     if (autoRead) window.setTimeout(() => speak(response.id, answer, language), 0);
   };
+  useEffect(() => {
+    const query = searchParams.get('q')?.trim();
+    if (!query || handledQuery.current === query) return;
+    handledQuery.current = query;
+    respond(query);
+    setSearchParams({}, { replace: true });
+  }, [searchParams]);
   const setReadReplies = (enabled: boolean) => {
     setAutoRead(enabled);
     localStorage.setItem('ellie-app-auto-read', String(enabled));
@@ -45,16 +49,11 @@ export default function AskScreen() {
     </AppCard>
     <section className="patient-app-chat" aria-label={messages.askHeading} aria-live="polite">
       {chat.map((message) => <div className={`patient-app-message-row ${message.role}`} key={message.id}>
-        {message.role === 'assistant' && <div className="patient-app-message-actions"><SpeakButton text={message.text || greeting} language={message.language} /><div className="patient-app-message assistant" data-speech-text={message.text}>{message.text}</div></div>}
+        {message.role === 'assistant' && <div className="patient-app-message-actions"><SpeakButton text={message.text} language={message.language} /><div className="patient-app-message assistant" data-speech-text={message.text}><strong className="bubble-name">Ellie ✿</strong>{message.text}</div></div>}
         {message.role === 'user' && <div className="patient-app-message-actions"><div className="patient-app-message user" data-speech-text={message.text}>{message.text}</div><SpeakButton text={message.text} language={message.language} /></div>}
         {message.route && <Link className="patient-app-chat-link" to={message.route}>{routeLabel(message.route)} →</Link>}
       </div>)}
     </section>
-    <form className="patient-app-chat-form" onSubmit={send}>
-      <label className="sr-only" htmlFor="patient-app-chat-input">{messages.messagePlaceholder}</label>
-      <input id="patient-app-chat-input" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={messages.messagePlaceholder} />
-      <VoiceInputButton language={language as PatientLanguage} onTranscript={(transcript) => setDraft((previous) => previous ? `${previous} ${transcript}` : transcript)} />
-      <button type="submit" className="patient-app-primary" disabled={!draft.trim()}>{messages.send}</button>
-    </form>
+    <Composer value={draft} onChange={setDraft} onSubmit={respond} language={language} placeholder={messages.messagePlaceholder} inputId="patient-app-chat-input" />
   </div>;
 }

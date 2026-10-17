@@ -28,6 +28,7 @@ const page = await context.newPage();
 await page.goto('http://localhost:5173/#/app');
 const openAsPatient = page.getByRole('button', { name: 'Open as patient' });
 if (await openAsPatient.count()) await openAsPatient.click();
+await page.getByRole('button', { name: 'Maybe later' }).click({ timeout: 5000 }).catch(() => {});
 await page.getByRole('combobox', { name: 'Demo patient' }).selectOption('ana');
 await page.locator('#patient-app-language').selectOption('es');
 await page.locator('.patient-app-card .speak-button').first().click();

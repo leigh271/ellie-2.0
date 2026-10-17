@@ -520,3 +520,161 @@ textarea { display: block; width: 100%; resize: vertical; }
   .patient-app-page-heading h1 { font-size: 25px; }
   .patient-app-tab { font-size: 9px; }
 }
+
+/* Patient app · calm editorial look with a soft futuristic glow */
+.patient-app-root {
+  background:
+    radial-gradient(ellipse 65% 45% at 50% -13%, #fff0f7 0%, transparent 72%),
+    radial-gradient(ellipse 37% 26% at 92% 23%, rgba(246, 83, 152, .065), transparent 80%),
+    radial-gradient(ellipse 42% 30% at 3% 74%, rgba(169, 121, 229, .045), transparent 80%),
+    #fff;
+}
+.patient-app { max-width: 640px; background: transparent; box-shadow: none; }
+.patient-app-header { padding: 12px 22px 10px; gap: 6px; background: rgba(255, 255, 255, .82); border-bottom: 1px solid rgba(246, 83, 152, .10); }
+.patient-app-brand { display: flex; align-items: center; justify-content: space-between; min-height: 48px; }
+.ellie-logo { border: 0; background: none; padding: 0; color: var(--ink); font-size: 31px; font-weight: 750; letter-spacing: -1.8px; line-height: 1; }
+.ellie-logo span, .ellie-splash-name span { color: var(--pink); }
+.ellie-header-note { display: inline-flex; align-items: center; gap: 7px; color: #a38595; font-size: 12px; }
+.ellie-header-note svg { color: var(--pink); }
+.patient-app-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.patient-app-toolbar select, .patient-app-toolbar .patient-app-read-page, .patient-app-toolbar .patient-app-provider-link {
+  min-height: 44px; padding: 6px 13px; border: 1px solid #f3dfe9; border-radius: 99px; background: rgba(255, 255, 255, .9);
+  color: #6b3f56; font-size: 13px; font-weight: 650;
+}
+.patient-app-toolbar select:first-of-type { max-width: 170px; }
+.patient-app-toolbar .patient-app-provider-link { margin-left: auto; border-color: transparent; background: transparent; color: #8c6a7c; }
+.patient-app-main { padding: 18px 22px 24px; }
+
+.ellie-hero { display: flex; flex-direction: column; align-items: center; padding: 24px 0 30px; text-align: center; }
+.ellie-kicker {
+  border: 1px solid #f7dce9; border-radius: 99px; padding: 8px 15px; color: #c78aa4; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(115deg, rgba(255, 255, 255, .95), rgba(255, 239, 247, .75));
+  box-shadow: 0 3px 16px #f6539808;
+}
+.ellie-hero h1 {
+  margin: 18px 0 8px; font-size: clamp(40px, 8vw, 56px); line-height: 1.1; letter-spacing: -2.2px;
+  background: linear-gradient(115deg, #29282d 15%, #743552 65%, #f65398 95%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ellie-hero h1 span { color: var(--pink); -webkit-text-fill-color: var(--pink); }
+.ellie-subtitle { color: #817680; font-size: 18px; }
+.voice-halo {
+  position: relative; display: grid; place-items: center; width: 182px; height: 182px; margin-top: 40px; padding: 0; border: 0; border-radius: 50%;
+  background: radial-gradient(circle at 32% 27%, #fff 0%, #ffe4f0 37%, #fbc6df 69%, #fff4fa 100%);
+  box-shadow: 0 0 0 13px rgba(255, 235, 245, .74), 0 0 0 25px rgba(255, 237, 247, .36), 0 20px 75px rgba(246, 83, 152, .20);
+}
+.voice-halo::before, .voice-halo::after { content: ""; position: absolute; inset: -13px; border: 1px solid rgba(246, 83, 152, .21); border-radius: 50%; pointer-events: none; }
+.voice-halo::after { inset: -27px; border-color: rgba(246, 83, 152, .09); }
+.voice-halo.is-listening { animation: ellieHaloPulse 1.6s ease-in-out infinite; }
+.voice-halo.is-listening::before { animation: ellieRing 1.8s ease-in-out infinite; }
+.voice-core {
+  display: grid; place-items: center; width: 130px; height: 130px; border-radius: 50%; color: #fff;
+  background: radial-gradient(circle at 29% 22%, #ff98c5 0%, #f65398 52%, #d93682 100%);
+  box-shadow: inset 0 2px 5px #ffffff55, 0 15px 35px #e13b874a, 0 0 30px #f6539830; transition: transform .3s ease;
+}
+.voice-core .ellie-icon { stroke-width: 1.7; }
+.voice-halo:hover .voice-core { transform: scale(1.045); }
+.voice-status { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 23px; margin-top: 34px; color: var(--ink); font-size: 15px; font-weight: 650; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); animation: ellieBlink 1s infinite; }
+.waveform { display: flex; align-items: center; justify-content: center; gap: 4px; height: 46px; margin-top: 4px; }
+.waveform span { width: 4px; height: 9px; border-radius: 8px; background: var(--pink); animation: ellieWave 1s ease-in-out infinite; }
+.waveform span:nth-child(2n) { animation-delay: -.35s; }
+.waveform span:nth-child(3n) { animation-delay: -.6s; }
+.waveform span:nth-child(5n) { animation-delay: -.15s; }
+.ellie-typing-hint { margin: 18px 0 !important; color: #9e8f99; font-size: 13px; }
+.ellie-composer {
+  display: flex; align-items: center; gap: 7px; width: 100%; padding: 8px 9px 8px 20px; border: 1px solid #efd8e4; border-radius: 32px;
+  background: rgba(255, 255, 255, .86); backdrop-filter: blur(16px); box-shadow: 0 9px 36px #8e3d6a12, 0 0 0 3px #fff5fa55;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ellie-composer:focus-within { border-color: var(--pink); box-shadow: 0 9px 36px #8e3d6a15, 0 0 0 4px #f6539814; }
+.ellie-composer input { flex: 1; min-width: 0; min-height: 44px; padding: 0; border: 0; outline: none; background: transparent; font-size: 16px; }
+.ellie-composer input:focus-visible { outline: none; }
+.composer-mic, .composer-send { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; }
+.composer-mic { background: #fff0f6; color: var(--pink); }
+.composer-mic.active { background: var(--pink); color: #fff; }
+.composer-send { color: #fff; background: linear-gradient(135deg, #ff70aa, #f65398 55%, #dc3b86); box-shadow: 0 5px 16px #f6539824; }
+.composer-send:disabled { opacity: .4; }
+.explore-label { margin: 34px 0 14px !important; color: #8c8088; font-size: 13px; }
+.topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 520px; }
+.topic-tile {
+  display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 54px; padding: 8px; border: 1px solid #f7e2eb; border-radius: 14px;
+  color: #603f51; font-size: 14px; font-weight: 600; background: linear-gradient(130deg, rgba(255, 255, 255, .98), rgba(255, 241, 248, .8));
+  box-shadow: 0 5px 19px rgba(105, 43, 79, .045); transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.topic-tile:hover { text-decoration: none; transform: translateY(-2px); border-color: #f6b9d5; box-shadow: 0 11px 30px #9d477014; }
+.topic-tile .ellie-icon { color: var(--pink); }
+
+.patient-app-page-heading h1 { color: var(--ink); font-size: 32px; letter-spacing: -1.1px; }
+.patient-app-eyebrow { color: #c78aa4; letter-spacing: 2px; }
+.patient-app-card {
+  border-color: #f5e4ec; border-radius: 20px; background: linear-gradient(130deg, rgba(255, 255, 255, .98), rgba(255, 246, 250, .9));
+  box-shadow: 0 6px 25px rgba(116, 53, 82, .05);
+}
+.patient-app-card-header h2 { color: var(--ink); }
+.patient-app-primary { border: 0; border-radius: 15px; background: linear-gradient(135deg, #ff70aa, #f65398 55%, #dc3b86); box-shadow: 0 5px 16px #f6539824; font-weight: 650; }
+.patient-app-message { padding: 15px 17px; border-radius: 21px; line-height: 1.6; box-shadow: 0 6px 25px #7435520a; }
+.patient-app-message.assistant { background: #f9f6f8; color: var(--ink); border-bottom-left-radius: 5px; }
+.patient-app-message.user { background: linear-gradient(125deg, #ffe5f1, #fff1f7); color: #4a2034; border-bottom-right-radius: 5px; }
+.bubble-name { display: block; margin-bottom: 6px; color: #be4381; font-size: 13px; }
+.patient-app-message-row { animation: ellieBubbleIn .35s cubic-bezier(.2, .8, .2, 1) both; }
+.patient-app-screen > .ellie-composer { margin-top: 6px; }
+.patient-app-footer { padding: 4px 22px 14px; color: #a49aa1; font-size: 11px; line-height: 1.6; text-align: center; }
+.forget-name { padding: 0; border: 0; background: none; color: #a17a8d; font-size: 11px; text-decoration: underline; }
+.patient-app-tabs { background: rgba(255, 255, 255, .9); border-top: 1px solid rgba(246, 83, 152, .12); }
+.patient-app-tab { gap: 3px; border-radius: 14px; color: #7d6874; font-weight: 600; }
+.patient-app-tab:hover { text-decoration: none; }
+.patient-app-tab.active { background: #fff0f6; color: #c23a7c; }
+
+.ellie-splash {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #fff1f8, #fff 57%); animation: ellieSplashExit .5s .65s ease-in forwards;
+}
+.ellie-splash-name { color: var(--ink); font-size: 80px; font-weight: 750; letter-spacing: -5px; animation: ellieSplashStretch .9s ease-in-out both; }
+.welcome-overlay { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; padding: 20px; background: #2d152b50; backdrop-filter: blur(10px); animation: ellieFadeIn .3s ease both; }
+.welcome-card { display: flex; flex-direction: column; gap: 13px; width: min(100%, 420px); padding: 32px; border-radius: 26px; background: #fff; box-shadow: 0 24px 85px #40203928; }
+.welcome-spark { color: var(--pink); }
+.welcome-card h2 { margin: 3px 0; color: var(--ink); font-size: 27px; letter-spacing: -.7px; }
+.welcome-card p { color: #817380; font-size: 15px; line-height: 1.6; }
+.welcome-languages { display: flex; flex-wrap: wrap; gap: 8px; }
+.welcome-languages button { flex: 1 1 auto; min-height: 44px; padding: 8px 12px; border: 1px solid #f1dce8; border-radius: 99px; background: #fff8fb; color: #663c52; font-weight: 650; }
+.welcome-languages button.selected { border: 2px solid var(--pink); background: #fff0f6; color: #a12560; }
+.welcome-card input { min-height: 50px; padding: 13px 15px; border: 1px solid #efd8e4; border-radius: 14px; font-size: 16px; }
+.welcome-card .patient-app-primary { margin-top: 3px; padding: 15px; }
+.welcome-skip { padding: 10px; border: 0; background: none; color: #977f8d; }
+
+@keyframes ellieSplashStretch { 0% { opacity: 0; transform: scale(.85) scaleX(.9); } 45% { opacity: 1; transform: scale(1.07) scaleX(1.12); } 100% { transform: scale(1); } }
+@keyframes ellieSplashExit { to { opacity: 0; visibility: hidden; } }
+@keyframes ellieHaloPulse { 50% { box-shadow: 0 0 0 22px #ffe4ef, 0 0 0 34px rgba(255, 237, 247, .36), 0 12px 55px #f6539855; } }
+@keyframes ellieRing { 0%, 100% { transform: scale(1); opacity: .5; } 50% { transform: scale(1.1); opacity: 1; } }
+@keyframes ellieBlink { 50% { opacity: .25; } }
+@keyframes ellieWave { 50% { height: 38px; } }
+@keyframes ellieBubbleIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes ellieFadeIn { from { opacity: 0; } }
+
+@media (max-width: 480px) {
+  .patient-app-header { padding: 10px 14px 9px; }
+  .patient-app-main { padding: 14px 14px 18px; }
+  .ellie-logo { font-size: 28px; }
+  .ellie-header-note { font-size: 11px; }
+  .patient-app-toolbar select, .patient-app-toolbar .patient-app-read-page, .patient-app-toolbar .patient-app-provider-link { padding: 6px 10px; font-size: 12px; }
+  .ellie-hero { padding-top: 16px; }
+  .ellie-hero h1 { font-size: 42px; }
+  .ellie-subtitle { font-size: 16px; }
+  .voice-halo { width: 168px; height: 168px; margin-top: 34px; }
+  .voice-core { width: 122px; height: 122px; }
+  .topic-grid { gap: 9px; }
+  .topic-tile { font-size: 13px; }
+  .ellie-splash-name { font-size: 64px; letter-spacing: -4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ellie-splash { display: none; }
+  .voice-halo, .voice-halo::before, .waveform span, .patient-app-message-row, .welcome-overlay, .live-dot { animation: none !important; }
+  .voice-core, .topic-tile, .ellie-composer { transition: none; }
+}
+@media (max-width: 520px) {
+  .patient-app-toolbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px 2px; }
+  .patient-app-toolbar::-webkit-scrollbar { display: none; }
+  .patient-app-toolbar > * { flex-shrink: 0; }
+  .patient-app-toolbar .patient-app-provider-link { margin-left: 0; }
+  .ellie-kicker { letter-spacing: 1.4px; font-size: 10px; }
+}

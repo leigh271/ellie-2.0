@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { elliePatients } from '../../data/ellieDemo';
 import { useDemoStore } from '../../state/DemoStore';
 import type { CheckIn } from '../../state/DemoStore';
-import { AppCard, PageHeading } from '../components';
+import { AppCard, Composer, Icon } from '../components';
+import type { IconName } from '../components';
 import { useLanguage } from '../useLanguage';
+import { usePreferredName } from '../usePreferredName';
+import { useVoiceInput } from '../useSpeech';
 
 export default function PatientAppHome() {
   const { state, update, createTask, setPatientId } = useDemoStore();
@@ -16,6 +19,12 @@ export default function PatientAppHome() {
   const [energy, setEnergy] = useState<CheckIn['energy'] | ''>('');
   const [note, setNote] = useState('');
   const [questionsShared, setQuestionsShared] = useState(false);
+  const [draft, setDraft] = useState('');
+  const navigate = useNavigate();
+  const [preferredName] = usePreferredName(patient.id);
+  const supportLine = messages.heroSupportName.replace('{name}', preferredName || patient.name.split(' ')[0]);
+  const ask = (text: string) => navigate(`/app/ask?q=${encodeURIComponent(text)}`);
+  const voice = useVoiceInput(language, ask);
   const energyLabels: Record<CheckIn['energy'], string> = {
     Good: messages.energyGood,
     Okay: messages.energyOkay,
@@ -57,16 +66,29 @@ export default function PatientAppHome() {
     });
     setQuestionsShared(true);
   };
-  const quickActions = [
-    { to: '/app/diagnosis', icon: '♡', label: messages.diagnosisTab },
-    { to: '/app/help', icon: '✚', label: messages.helpTab },
-    { to: '/app/ask', icon: '✦', label: messages.askTab },
-    { to: '/app/updates', icon: '▤', label: messages.updatesTab },
+  const topics: { to: string; icon: IconName; label: string }[] = [
+    { to: '/app/diagnosis', icon: 'heart', label: messages.diagnosisTab },
+    { to: '/app/help', icon: 'lifebuoy', label: messages.helpTab },
+    { to: '/app/ask', icon: 'chat', label: messages.askTab },
+    { to: '/app/updates', icon: 'bell', label: messages.updatesTab },
   ];
   const checkinText = `${messages.checkinQuestion} ${messages.energyGood}, ${messages.energyOkay}, ${messages.energyLow}.`;
 
   return <div className="patient-app-screen">
-    <PageHeading title={`${messages.homeWelcome}, ${patient.name.split(' ')[0]}.`} subtitle={messages.homeSubtitle} language={language} />
+    <section className="ellie-hero" data-speech-text={`${messages.heroHi} Ellie. ${supportLine}`}>
+      <p className="ellie-kicker">{messages.heroKicker}</p>
+      <h1>{messages.heroHi} <span>Ellie.</span></h1>
+      <p className="ellie-subtitle">{supportLine}</p>
+      <button type="button" className={`voice-halo ${voice.listening ? 'is-listening' : ''}`} aria-pressed={voice.listening} aria-label={voice.listening ? messages.listeningTap : messages.tapToTalk} onClick={voice.supported ? voice.toggle : () => document.getElementById('patient-app-home-input')?.focus()}>
+        <span className="voice-core"><Icon name={voice.listening ? 'stop' : 'mic'} size={42} /></span>
+      </button>
+      <div className="voice-status" aria-live="polite">{voice.listening ? <><span className="live-dot" />{messages.listeningTap}</> : voice.supported ? messages.tapToTalk : messages.voiceUnavailable}</div>
+      {voice.listening && <div className="waveform" aria-hidden="true">{Array.from({ length: 11 }, (_, index) => <span key={index} />)}</div>}
+      <p className="ellie-typing-hint">{messages.typeHint}</p>
+      <Composer value={draft} onChange={setDraft} onSubmit={ask} language={language} placeholder={messages.askPlaceholder} inputId="patient-app-home-input" />
+      <p className="explore-label">{messages.exploreTopic}</p>
+      <div className="topic-grid">{topics.map((topic) => <Link key={topic.to} to={topic.to} className="topic-tile"><Icon name={topic.icon} size={18} />{topic.label}</Link>)}</div>
+    </section>
     <AppCard title={messages.demoPatient} text={`${messages.demoPatient}: ${patient.name}. ${messages.diagnosis}: ${patient.diagnosis}. ${messages.phase}: ${patient.phase}.`} language={language} className="patient-app-welcome-card">
       <label className="patient-app-field">{messages.demoPatient}
         <select value={patient.id} onChange={(event) => setPatientId(event.target.value)} aria-label={messages.demoPatient}>
@@ -88,9 +110,6 @@ export default function PatientAppHome() {
       </label>
       <button type="button" className="patient-app-primary" disabled={!energy} onClick={recordCheckIn}>{messages.shareCheckin}</button>
       {latest && <p className="patient-app-caption">{messages.lastCheckin}: {energyLabels[latest.energy]} · {new Date(latest.at).toLocaleDateString(language === 'en' ? 'en-US' : language === 'es' ? 'es-US' : 'fr')}</p>}
-    </AppCard>
-    <AppCard title={messages.quickActions} text={messages.quickActions} language={language}>
-      <div className="patient-app-quick-actions">{quickActions.map((action) => <Link to={action.to} key={action.to} className="patient-app-quick-link"><span aria-hidden="true">{action.icon}</span>{action.label}<span aria-hidden="true">→</span></Link>)}</div>
     </AppCard>
     <AppCard title={messages.questionsTitle} text={`${messages.questionsTitle}. ${questions.join('. ')}`} language={language}>
       {questions.length ? <ul className="patient-app-question-list">{questions.map((question, index) => <li key={`${question}-${index}`}><span>{question}</span><button type="button" className="patient-app-text-button" aria-label={`${messages.questionRemoved}: ${question}`} onClick={() => removeQuestion(index)}>×</button></li>)}</ul> : <p className="patient-app-empty">{messages.noQuestions}</p>}
