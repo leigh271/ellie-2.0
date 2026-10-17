@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PatientLanguage } from '../state/DemoStore';
+import { selectDictationProvider } from './dictationProviders';
+import { ensureWhisperWorker, getWhisperStatus, subscribeWhisperStatus, transcribeWithWhisper } from './whisperClient';
+import type { WhisperStatus } from './whisperClient';
+import { mixAndResample, mixToMono, WHISPER_SAMPLE_RATE } from './whisperAudio';
 
 const RECORDER_MIMES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
 const LEVEL_COUNT = 40;
@@ -18,13 +22,61 @@ export function formatDictationTime(milliseconds: number): string {
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
-export function useDictation(language: PatientLanguage, onTranscript: (text: string) => void, onFallback: () => void) {
+export async function decodeMono16k(blob: Blob): Promise<Float32Array> {
+  const decodeContext = new AudioContext();
+  try {
+    const decoded = await decodeContext.decodeAudioData(await blob.arrayBuffer());
+    const channels = Array.from({ length: decoded.numberOfChannels }, (_, index) => decoded.getChannelData(index));
+    try {
+      const length = Math.ceil(decoded.length * WHISPER_SAMPLE_RATE / decoded.sampleRate);
+      const offline = new OfflineAudioContext(1, length, WHISPER_SAMPLE_RATE);
+      const monoBuffer = offline.createBuffer(1, decoded.length, decoded.sampleRate);
+      monoBuffer.copyToChannel(new Float32Array(mixToMono(channels)), 0);
+      const source = offline.createBufferSource();
+      source.buffer = monoBuffer;
+      source.connect(offline.destination);
+      source.start();
+      const resampled = await offline.startRendering();
+      return resampled.getChannelData(0).slice();
+    } catch {
+      return mixAndResample(channels, decoded.sampleRate, WHISPER_SAMPLE_RATE);
+    }
+  } finally {
+    await decodeContext.close().catch(() => {});
+  }
+}
+
+async function serverTranscriptionAvailable(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/ai/status');
+    if (!response.ok) return false;
+    const status = await response.json() as { transcribe?: boolean };
+    return Boolean(status.transcribe);
+  } catch {
+    return false;
+  }
+}
+
+function whisperLanguage(language: PatientLanguage): 'english' | 'spanish' | 'haitian creole' {
+  return language === 'en' ? 'english' : language === 'es' ? 'spanish' : 'haitian creole';
+}
+
+export function useDictation(
+  language: PatientLanguage,
+  onTranscript: (text: string) => void,
+  onFallback: () => void,
+  speechAvailable = false,
+) {
   const [state, setState] = useState<DictationState>('idle');
   const [error, setError] = useState<DictationError | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [levels, setLevels] = useState<number[]>(() => Array(LEVEL_COUNT).fill(0.04));
+  const [whisperStatus, setWhisperStatus] = useState<WhisperStatus>(getWhisperStatus);
+  const [usedWhisper, setUsedWhisper] = useState(false);
   const stateRef = useRef<DictationState>('idle');
   const languageRef = useRef(language);
+  const speechAvailableRef = useRef(speechAvailable);
+  const provider = useRef<'whisper' | 'server' | null>(null);
   const transcriptHandler = useRef(onTranscript);
   const fallbackHandler = useRef(onFallback);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -42,6 +94,7 @@ export function useDictation(language: PatientLanguage, onTranscript: (text: str
     && typeof navigator !== 'undefined'
     && Boolean(navigator.mediaDevices?.getUserMedia);
   languageRef.current = language;
+  speechAvailableRef.current = speechAvailable;
   transcriptHandler.current = onTranscript;
   fallbackHandler.current = onFallback;
 
@@ -49,6 +102,8 @@ export function useDictation(language: PatientLanguage, onTranscript: (text: str
     stateRef.current = next;
     setState(next);
   }, []);
+
+  useEffect(() => subscribeWhisperStatus(setWhisperStatus), []);
 
   const cleanupAudio = useCallback(() => {
     if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
@@ -77,31 +132,55 @@ export function useDictation(language: PatientLanguage, onTranscript: (text: str
       beginFallback();
       return;
     }
-    try {
-      const response = await fetch(`/api/ai/transcribe?language=${languageRef.current}`, {
-        method: 'POST',
-        headers: { 'content-type': blob.type || 'application/octet-stream' },
-        body: blob,
-      });
-      if (response.status === 503) {
-        beginFallback();
-        return;
+    let whisperSupported = provider.current === 'whisper' && getWhisperStatus().state !== 'error';
+    let whisperText = '';
+    if (whisperSupported) {
+      try {
+        whisperText = (await transcribeWithWhisper(await decodeMono16k(blob), whisperLanguage(languageRef.current))).trim();
+      } catch {
+        whisperSupported = false;
       }
-      if (!response.ok) {
-        beginFallback();
-        return;
-      }
-      const body = await response.json() as { text?: unknown };
-      const text = typeof body.text === 'string' ? body.text.trim() : '';
-      if (!text) {
-        beginFallback();
-        return;
-      }
-      updateState('idle');
-      transcriptHandler.current(text);
-    } catch {
-      beginFallback();
     }
+    const needsServerCheck = !whisperSupported || !whisperText;
+    const creoleEmpty = whisperSupported && languageRef.current === 'ht' && !whisperText;
+    const serverAvailable = needsServerCheck && !creoleEmpty ? await serverTranscriptionAvailable() : false;
+    const selectedProvider = selectDictationProvider({
+      whisperSupported,
+      serverAvailable,
+      speechAvailable: speechAvailableRef.current,
+      language: languageRef.current,
+      whisperText,
+    });
+    if (selectedProvider === 'whisper') {
+      setUsedWhisper(true);
+      provider.current = null;
+      updateState('idle');
+      transcriptHandler.current(whisperText);
+      return;
+    }
+    if (selectedProvider === 'server') {
+      try {
+        const response = await fetch(`/api/ai/transcribe?language=${languageRef.current}`, {
+          method: 'POST',
+          headers: { 'content-type': blob.type || 'application/octet-stream' },
+          body: blob,
+        });
+        if (response.ok) {
+          const body = await response.json() as { text?: unknown };
+          const text = typeof body.text === 'string' ? body.text.trim() : '';
+          if (text) {
+            provider.current = null;
+            updateState('idle');
+            transcriptHandler.current(text);
+            return;
+          }
+        }
+      } catch {
+        provider.current = null;
+      }
+    }
+    provider.current = null;
+    beginFallback();
   }, [beginFallback, updateState]);
 
   const cancel = useCallback(() => {
@@ -141,16 +220,24 @@ export function useDictation(language: PatientLanguage, onTranscript: (text: str
 
   const start = useCallback(async (): Promise<DictationStartResult> => {
     setError(null);
+    updateState('idle');
+    setUsedWhisper(false);
+    provider.current = null;
     if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) return 'fallback';
-    let status: { transcribe?: boolean };
-    try {
-      const response = await fetch('/api/ai/status');
-      if (!response.ok) return 'fallback';
-      status = await response.json() as { transcribe?: boolean };
-    } catch {
-      return 'fallback';
+    const whisperSupported = ensureWhisperWorker();
+    if (whisperSupported) {
+      provider.current = 'whisper';
+    } else {
+      const serverAvailable = await serverTranscriptionAvailable();
+      const fallbackProvider = selectDictationProvider({
+        whisperSupported: false,
+        serverAvailable,
+        speechAvailable: speechAvailableRef.current,
+        language: languageRef.current,
+      });
+      if (fallbackProvider !== 'server') return 'fallback';
+      provider.current = 'server';
     }
-    if (!status.transcribe) return 'fallback';
     const mime = pickRecorderMime((type) => MediaRecorder.isTypeSupported(type));
     if (!mime) return 'fallback';
 
@@ -246,5 +333,21 @@ export function useDictation(language: PatientLanguage, onTranscript: (text: str
   }, [cleanupAudio]);
 
   const level = levels[levels.length - 1] ?? 0;
-  return { state, error, elapsedMs, levels, level, canRecord, start, confirm, cancel };
+  const whisperLoading = whisperStatus.state === 'loading';
+  const onDeviceReady = provider.current === 'whisper' && whisperStatus.state === 'ready';
+  return {
+    state,
+    error,
+    elapsedMs,
+    levels,
+    level,
+    canRecord,
+    whisperStatus,
+    whisperLoading,
+    onDeviceReady,
+    usedWhisper,
+    start,
+    confirm,
+    cancel,
+  };
 }

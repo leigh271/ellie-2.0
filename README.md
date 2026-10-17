@@ -111,6 +111,10 @@ npm run dev
 
 The key is read only by Express and is never sent to the browser. AI requests use the OpenAI Chat Completions API, are limited to 30 requests per minute per IP, and return an unavailable response if the service is not configured or cannot be reached. Ask Ellie checks for emergency language before making an AI request. AI summaries use source-labelled demo data and require care-team review.
 
+### On-device voice transcription
+
+Voice dictation uses the open-source Whisper base model through Transformers.js and runs in a browser worker on the person's device. The first microphone use downloads the model once; Transformers.js caches it in the browser for later use. No API key is needed for on-device transcription. If the local model cannot load, the app can use the optional server transcriber or the browser's built-in speech recognition.
+
 ## Safety and limitations
 
 This prototype uses fictional/synthetic information, is not clinically validated or HIPAA-compliant, and is not connected to a real messaging or EHR system. C4 patterns are observational and do not establish causation. AI-generated wording and other suggestions require human review. For an emergency, contact emergency services.

@@ -1196,6 +1196,7 @@ textarea { display: block; width: 100%; resize: vertical; }
 .dictation-cancel { background: #fff4f8; color: #8b7481; }
 .dictation-confirm { background: #f65398; color: #fff; box-shadow: 0 4px 12px #f653982b; }
 .dictation-timer { flex: 0 0 auto; min-width: 37px; color: #6c626a; font-size: 12px; font-variant-numeric: tabular-nums; text-align: center; }
+.dictation-attribution { margin: -1px auto 5px; color: #827b85; font-size: 11px; line-height: 1.4; text-align: center; }
 .dictation-transcribing { display: flex; align-items: center; justify-content: center; gap: 9px; flex: 1; min-width: 0; color: #6c626a; font-size: 13px; }
 .dictation-spinner { width: 16px; height: 16px; border: 2px solid #f5c7da; border-top-color: #f65398; border-radius: 50%; animation: dictationSpin .8s linear infinite; }
 @keyframes dictationSpin { to { transform: rotate(360deg); } }

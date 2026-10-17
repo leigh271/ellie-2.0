@@ -117,6 +117,7 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   const [processing, setProcessing] = useState(false);
   const [showUnavailable, setShowUnavailable] = useState(false);
   const demoMode = import.meta.env.DEV ? searchParams.get('demoDictation') : null;
+  const demoWhisper = import.meta.env.DEV ? searchParams.get('demoWhisper') : null;
   const demoLevels = Array.from({ length: 40 }, (_, index) => 0.16 + Math.abs(Math.sin(index * 0.71)) * 0.6);
   const demoRecording = demoMode === 'recording';
   const demoTranscribing = demoMode === 'transcribing';
@@ -143,7 +144,7 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
     onChange([value.trim(), transcript.trim()].filter(Boolean).join(' '));
     window.requestAnimationFrame(() => document.getElementById(inputId)?.focus());
   };
-  const dictation = useDictation(language, addDictatedText, startSpeechFallback);
+  const dictation = useDictation(language, addDictatedText, startSpeechFallback, voice.supported);
   useEffect(() => {
     if (!value.trim() && !voice.listening && !processing && voice.transcript.trim()) voice.clearTranscript();
   }, [value, voice.listening, voice.transcript, voice.clearTranscript, processing]);
@@ -169,6 +170,14 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
   const nativeRecording = dictation.state === 'recording' || demoRecording;
   const transcribing = dictation.state === 'transcribing' || demoTranscribing;
   const shownValue = voice.transcript || (demoInserted && !value ? 'How did I sleep this week?' : value);
+  const demoWhisperLoading = demoWhisper === 'loading';
+  const demoWhisperUsed = demoWhisper === 'recording' || demoWhisper === 'inserted';
+  const whisperProgress = demoWhisperLoading
+    ? messages.voiceGettingReady.replace('{percent}', '38')
+    : dictation.whisperLoading
+      ? messages.voiceGettingReady.replace('{percent}', String(Math.round(dictation.whisperStatus.progress)))
+      : null;
+  const showOnDevice = demoWhisperUsed || dictation.onDeviceReady || dictation.usedWhisper;
   return (
     <>
       <form className={`ellie-composer ${className} ${nativeRecording || transcribing ? 'is-dictating' : ''}`} onSubmit={submit}>
@@ -194,6 +203,8 @@ export function Composer({ value, onChange, onSubmit, language, placeholder, inp
             </>}
         {(processing || dictation.state === 'recording' || transcribing) && <span className="sr-only" role="status" aria-live="polite">{transcribing ? messages.voiceTranscribing : dictation.state === 'recording' ? messages.voiceRecording : messages.voiceProcessing}</span>}
       </form>
+      {(nativeRecording || transcribing) && (whisperProgress || showOnDevice) && <p className="dictation-attribution" role="status" aria-live="polite">{whisperProgress ?? messages.voiceOnDevice}</p>}
+      {(dictation.usedWhisper || demoWhisperUsed) && !nativeRecording && !transcribing && <p className="dictation-attribution" role="status" aria-live="polite">{messages.voiceOnDevice}</p>}
       {dictation.error === 'permission' && <p className="composer-voice-unavailable" role="alert">{messages.voicePermissionDenied}</p>}
       {(showUnavailable || !voice.supported && !dictation.canRecord) && <p className="composer-voice-unavailable">{messages.voiceUnavailable}</p>}
     </>

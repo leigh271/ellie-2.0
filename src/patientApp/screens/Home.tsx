@@ -48,7 +48,7 @@ export default function PatientAppHome() {
     setVoiceActive(true);
     voice.toggle();
   };
-  const dictation = useDictation(language, finishVoice, startSpeechFallback);
+  const dictation = useDictation(language, finishVoice, startSpeechFallback, voice.supported);
   useEffect(() => {
     setVoiceActive(demoVoice || demoRecording);
     if (!demoVoice && !demoRecording) setVoiceProcessing(false);
@@ -98,6 +98,9 @@ export default function PatientAppHome() {
   ];
   const voiceStyle = { '--voice-level': demoRecording ? 0.5 : nativeRecording ? dictation.level : demoVoice ? 0.5 : voice.level } as CSSProperties;
   const demoLevels = Array.from({ length: 40 }, (_, index) => 0.16 + Math.abs(Math.sin(index * 0.71)) * 0.6);
+  const whisperProgress = dictation.whisperLoading
+    ? messages.voiceGettingReady.replace('{percent}', String(Math.round(dictation.whisperStatus.progress)))
+    : null;
 
   return <div className="patient-app-screen patient-app-home-screen">
     <p className="patient-app-home-eyebrow">{messages.homeEyebrow}</p>
@@ -127,6 +130,7 @@ export default function PatientAppHome() {
       <DictationWaveform levels={demoRecording ? demoLevels : dictation.levels} />
       <span className="dictation-timer">{demoRecording ? '00:07' : formatDictationTime(dictation.elapsedMs)}</span>
     </div>}
+    {nativeRecording && (whisperProgress || dictation.onDeviceReady) && <p className="dictation-attribution" role="status" aria-live="polite">{whisperProgress ?? messages.voiceOnDevice}</p>}
     {voiceActiveNow && !voiceProcessing && !transcribing && <div className="patient-app-home-voice-actions">
       <button type="button" className="patient-app-text-button" onClick={stopVoice} aria-label={nativeRecording ? messages.voiceCancelRecording : messages.voiceStop}>{nativeRecording ? '×' : messages.voiceStopShort}</button>
       {(nativeRecording || displayedTranscript.trim()) && <button type="button" className="patient-app-primary" onClick={sendVoice}>{messages.voiceSendTranscript}</button>}
