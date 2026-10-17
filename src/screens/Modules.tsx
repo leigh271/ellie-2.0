@@ -5,7 +5,9 @@ import { useDemoStore } from '../state/DemoStore';
 import { useRemote } from '../lib/useRemote';
 import { getApi, postApi } from '../lib/api';
 import { COACH_FAMILY, scoreCoaching } from '../lib/miScore';
-import { BentoGrid, EmptyState, ErrorState, LoadingTile, Pill, SourceBadge, Stat, Tile, TrendChart } from '../components/UI';
+import { BentoGrid, DatasetCard, EmptyState, ErrorState, LoadingTile, Pill, SourceBadge, SourceNote, Stat, Tile, TrendChart } from '../components/UI';
+import { useDataset } from '../data/datasets';
+import type { CoachingSummary as C5CoachingDataset, FatigueDataset, LifeSnapsDataset, NhanesDataset, ProgramCallsDataset } from '../data/datasets';
 
 type C3Patient = { survivorId: string; displayName: string; status: string; headline: string; urgent?: boolean; updatedAt?: string };
 type C3Detail = C3Patient & {
@@ -32,9 +34,10 @@ type CoachLine = {
   needs_human?: 'yes' | 'no' | null;
   flag?: string | null;
 };
-type DemoCall = { call_id: string; language: string; goal_topic: string; demo_tag: string; duration_min: number; lines: CoachLine[] };
+type DemoCall = { call_id: string; language: string; goal_topic: string; demo_tag?: string; duration_min: number; labelled?: 'yes' | 'no'; lines: CoachLine[] };
 type Calls = { about: string; calls: DemoCall[] };
 type TaggedLine = CoachLine & { tag: string | null; gold: string | null; confidence?: number; flag?: string | null; reason?: string };
+const EMPTY_CALLS: DemoCall[] = [];
 
 function Heading({ eyebrow, title, subtitle, action }: { eyebrow: string; title: string; subtitle: string; action?: ReactNode }) {
   return <div className="heading"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="muted">{subtitle}</p></div>{action}</div>;
@@ -47,6 +50,8 @@ function percent(value?: number) { return value === undefined ? '—' : `${Math.
 export function C3Page() {
   const list = useRemote<C3Patient[]>('/api/c3/survivors');
   const metrics = useRemote<Record<string, any>>('/api/c3/metrics');
+  const fatigue = useDataset<FatigueDataset>('c1_fatigue_study.json');
+  const lifeSnaps = useDataset<LifeSnapsDataset>('c1_lifesnaps.json');
   const [selected, setSelected] = useState('c3-P02185');
   useEffect(() => { if (list.data?.length && !list.data.some((item) => item.survivorId === selected)) setSelected(list.data[0].survivorId); }, [list.data, selected]);
   const detail = useRemote<C3Detail>(`/api/c3/survivors/${encodeURIComponent(selected)}`);
@@ -84,6 +89,64 @@ export function C3Page() {
         </Tile>
       </>}
     </BentoGrid>
+    <Heading eyebrow="Independent research cohorts" title="Real-world reference data" subtitle="Population context only. These research participants are not Ellie patients." />
+    <BentoGrid className="top-gap">
+      {fatigue.loading && <LoadingTile title="Rao fatigue study" />}
+      {fatigue.error && <Tile span={12}><ErrorState message={fatigue.error} retry={fatigue.reload} /></Tile>}
+      {fatigue.data && <DatasetCard span={12} title="Rao et al. · self-rated fatigue and daily steps" kind={fatigue.data.kind} citation={fatigue.data.source} population={fatigue.data.population} caveat={fatigue.data.caveat}>
+        <div className="dataset-inner-grid">
+          <section>
+            <h3>Steps by self-rated day</h3>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={fatigue.data.by_day_rating} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="rating" tick={{ fontSize: 11 }} /><YAxis width={58} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="steps" name="Steps" fill="#f65398" radius={[6, 6, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            {(() => {
+              const steps = fatigue.data.within_person.find((row) => row.metric === 'steps');
+              return steps && <p className="callout">On self-rated bad days, steps averaged {steps.bad_day_pct_vs_own_average}% vs each person's own average ({steps.people} people).</p>;
+            })()}
+            <p className="tiny muted">Comparing different people mixes in who they are; the within-person rows are the fairer comparison.</p>
+          </section>
+          <section>
+            <h3>Within the same person</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Metric</th><th>People</th><th>Bad day vs own average</th><th>Good day vs own average</th></tr></thead>
+              <tbody>{fatigue.data.within_person.map((row) => <tr key={row.metric}><th>{row.metric.replaceAll('_', ' ')}</th><td>{row.people}</td><td>{row.bad_day_pct_vs_own_average}%</td><td>{row.good_day_pct_vs_own_average}%</td></tr>)}</tbody>
+            </table></div>
+          </section>
+          <section>
+            <h3>Bad-day rate by health group</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Health group</th><th>People</th><th>Rated days</th><th>Bad-day rate</th></tr></thead>
+              <tbody>{fatigue.data.by_health_group.map((row) => <tr key={row.group}><th>{row.group}</th><td>{row.people}</td><td>{row.rated_days.toLocaleString()}</td><td>{row.bad_day_pct}%</td></tr>)}</tbody>
+            </table></div>
+          </section>
+          <section>
+            <h3>Missing observations</h3>
+            <div className="dataset-stats"><Stat value={`${fatigue.data.days_without_rating_pct}%`} label="Days without a fatigue rating" /><Stat value={`${fatigue.data.wearer_days_without_steps_pct}%`} label="Wearer-days without step data" /></div>
+          </section>
+        </div>
+      </DatasetCard>}
+      {lifeSnaps.loading && <LoadingTile title="LifeSnaps" />}
+      {lifeSnaps.error && <Tile span={12}><ErrorState message={lifeSnaps.error} retry={lifeSnaps.reload} /></Tile>}
+      {lifeSnaps.data && <DatasetCard span={12} title="LifeSnaps · hourly activity and personal variation" kind={lifeSnaps.data.kind} citation={lifeSnaps.data.source} population={lifeSnaps.data.population} caveat={lifeSnaps.data.caveat}>
+        <div className="dataset-inner-grid">
+          <section>
+            <h3>Hourly profile · steps</h3>
+            <TrendChart data={lifeSnaps.data.hourly_profile.map((row) => ({ hour: `${row.hour}:00`, steps: row.steps }))} lines={[{ key: 'steps', label: 'Average steps', color: '#f65398' }]} height={240} xKey="hour" />
+          </section>
+          <section>
+            <h3>Day-to-day variation</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Metric</th><th>People</th><th>Personal average</th><th>Typical day-to-day SD</th><th>CV%</th></tr></thead>
+              <tbody>{lifeSnaps.data.day_to_day_variation.map((row) => <tr key={row.metric}><th>{row.metric.replaceAll('_', ' ')}</th><td>{row.people}</td><td>{row.typical_personal_average}</td><td>{row.typical_day_to_day_sd}</td><td>{row.typical_cv_pct}%</td></tr>)}</tbody>
+            </table></div>
+            <p className="tiny muted">Why the Radar compares to each person's own baseline.</p>
+          </section>
+          <section className="dataset-wide">
+            <h3>Missing sensor days are normal.</h3>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={lifeSnaps.data.sensor_completeness} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 12 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="field" width={150} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${value}%`, 'Days present']} /><Bar dataKey="days_present_pct" name="Days present" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
+          </section>
+        </div>
+      </DatasetCard>}
+    </BentoGrid>
   </>;
 }
 
@@ -103,7 +166,9 @@ function extractSeries(profile: any) {
 export function C4Page() {
   const list = useRemote<C4Patient[]>('/api/c4/survivors');
   const cohort = useRemote<Record<string, any>>('/api/c4/cohort');
+  const nhanes = useDataset<NhanesDataset>('c2_nhanes.json');
   const [selected, setSelected] = useState('c4-N0072');
+  const [nhanesAge, setNhanesAge] = useState<'all_ages' | 'age_60_plus'>('all_ages');
   const [advice, setAdvice] = useState<any>(null);
   const [adviceError, setAdviceError] = useState('');
   const [adviceLoading, setAdviceLoading] = useState(false);
@@ -137,6 +202,12 @@ export function C4Page() {
     const hi = detail.data?.charts?.walkDose?.hi?.[index] ?? est;
     return { bin, estimate: est, range: [Math.abs(est - lo), Math.abs(hi - est)], meals: detail.data?.charts?.walkDose?.nMeals?.[index] };
   }) ?? [];
+  const nhanesRows = nhanes.data?.[nhanesAge] ?? [];
+  const hba1cData = nhanes.data?.survivors_hba1c_by_movement.map((row) => ({
+    group: row.group,
+    survivors: row.hba1c_pct,
+    allAdults: nhanes.data?.all_hba1c_by_movement.find((item) => item.group === row.group)?.hba1c_pct,
+  })) ?? [];
   const fetchAdvice = async () => {
     setAdviceLoading(true); setAdviceError('');
     try { setAdvice((await getApi<any>(`/api/c4/survivors/${encodeURIComponent(selected)}/advice`)).data); }
@@ -183,6 +254,49 @@ export function C4Page() {
         </Tile>
       </>}
     </BentoGrid>
+    <Heading eyebrow="Population context · NHANES 2011–2014" title="Population context · NHANES 2011–2014" subtitle="Survey-weighted population summaries, separate from the synthetic C4 survivor records." />
+    <BentoGrid className="top-gap">
+      {nhanes.loading && <LoadingTile title="NHANES 2011–2014" />}
+      {nhanes.error && <Tile span={12}><ErrorState message={nhanes.error} retry={nhanes.reload} /></Tile>}
+      {nhanes.data && <DatasetCard span={12} title="US adults with and without a cancer history" kind={nhanes.data.kind} citation={nhanes.data.source} population={`${nhanes.data.survivors} cancer survivors among ${nhanes.data.people.toLocaleString()} survey participants.`} caveat={nhanes.data.caveat}>
+        <div className="page-tools">
+          <span className="small muted">Summary table age group</span>
+          <div className="mode-switch" role="group" aria-label="NHANES age group">
+            <button type="button" className={nhanesAge === 'all_ages' ? 'active' : ''} aria-pressed={nhanesAge === 'all_ages'} onClick={() => setNhanesAge('all_ages')}>All ages</button>
+            <button type="button" className={nhanesAge === 'age_60_plus' ? 'active' : ''} aria-pressed={nhanesAge === 'age_60_plus'} onClick={() => setNhanesAge('age_60_plus')}>Age 60+</button>
+          </div>
+        </div>
+        <div className="dataset-inner-grid">
+          <section className="dataset-wide">
+            <h3>{nhanesAge === 'all_ages' ? 'All ages' : 'Age 60+'} summary</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Measure</th><th>Unit</th><th>Cancer survivors</th><th>n</th><th>No cancer</th><th>n</th></tr></thead>
+              <tbody>{nhanesRows.map((row) => <tr key={row.metric}><th>{row.label}</th><td>{row.unit}</td><td>{row.unit === '%' ? `${row.survivors}%` : row.survivors}</td><td>{row.survivors_n.toLocaleString()}</td><td>{row.unit === '%' ? `${row.no_cancer}%` : row.no_cancer}</td><td>{row.no_cancer_n.toLocaleString()}</td></tr>)}</tbody>
+            </table></div>
+          </section>
+          <section>
+            <h3>HbA1c by movement third</h3>
+            <p className="tiny muted">Survey-weighted HbA1c (%) by movement group; patterns are associations, not effects.</p>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={hba1cData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="group" tick={{ fontSize: 10 }} /><YAxis width={48} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="survivors" name="Cancer survivors" fill="#f65398" radius={[5, 5, 0, 0]} /><Bar dataKey="allAdults" name="All adults" fill="#82559a" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
+          </section>
+          <section>
+            <h3>Survivor cancer types</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Cancer type</th><th>People</th></tr></thead>
+              <tbody>{nhanes.data.survivor_cancer_types.map((row) => <tr key={row.type}><th>{row.type}</th><td>{row.people}</td></tr>)}</tbody>
+            </table></div>
+          </section>
+          <section className="dataset-wide">
+            <div className="dataset-stats">
+              <Stat value={nhanes.data.survivor_median_age} label="Survivor median age" />
+              <Stat value={nhanes.data.no_cancer_median_age} label="No-cancer median age" />
+            </div>
+            <p className="small muted top-gap">{nhanes.data.weighting}</p>
+            <p className="tiny muted">{nhanes.data.caveat}</p>
+          </section>
+        </div>
+      </DatasetCard>}
+    </BentoGrid>
   </>;
 }
 
@@ -227,10 +341,94 @@ function triggerFor(lines: TaggedLine[], index: number, lastCueAt: number): { tr
   return { trigger, lastCueAt };
 }
 
+function C5ReferencePanels({ data, loading, error, reload }: {
+  data: C5CoachingDataset | null;
+  loading: boolean;
+  error: string | null;
+  reload: () => void;
+}) {
+  if (loading) return <LoadingTile title="Coaching reference datasets" />;
+  if (error) return <Tile span={12}><ErrorState message={error} retry={reload} /></Tile>;
+  if (!data) return null;
+  const program = data.program;
+  const scorecard = [...program.coach_scorecard].sort((a, b) => b.mi_score - a.mi_score);
+  const annomiMetrics: Array<{ label: string; key: keyof typeof data.annomi.high_quality; suffix: string }> = [
+    { label: 'Reflections per question (R/Q)', key: 'reflections_per_question', suffix: '' },
+    { label: 'Open questions', key: 'open_question_pct', suffix: '%' },
+    { label: 'Complex reflections', key: 'complex_reflection_pct', suffix: '%' },
+    { label: 'Information / advice of counsellor lines', key: 'info_or_advice_pct_of_counsellor_lines', suffix: '%' },
+    { label: 'Change talk', key: 'change_talk_pct', suffix: '%' },
+  ];
+  return <>
+    <Heading eyebrow="Synthetic source · made-up people" title="Program analytics (synthetic)" subtitle="Aggregate program summaries from the supplied synthetic coaching dataset." />
+    <BentoGrid className="top-gap">
+      <DatasetCard span={12} title="Synthetic coaching program" kind={program.kind} citation={data.sources.synthetic} population={`${program.coaches} coaches · ${program.participants.toLocaleString()} participants · ${program.calls.toLocaleString()} calls`} caveat={program.caveat}>
+        <div className="dataset-inner-grid">
+          <section className="dataset-wide">
+            <h3>Coach scorecard · sorted by Ellie MI score</h3>
+            <div className="table-scroll"><table className="data-table">
+              <thead><tr><th>Coach</th><th>Role</th><th>Languages</th><th>Labelled calls</th><th>Ellie MI score</th><th>Supervisor overall</th></tr></thead>
+              <tbody>{scorecard.map((coach) => <tr key={coach.coach_id}><th>{coach.first_name}</th><td>{coach.role}</td><td>{coach.languages}</td><td>{coach.labelled_calls}</td><td>{coach.mi_score}</td><td>{coach.supervisor_overall}</td></tr>)}</tbody>
+            </table></div>
+          </section>
+          <section>
+            <h3>Ellie score vs supervisor overall</h3>
+            <Stat value={`Spearman ρ ${program.mi_score_vs_supervisor.spearman}`} label={`Across ${program.mi_score_vs_supervisor.calls} calls`} />
+          </section>
+          <section>
+            <h3>Supervisor agreement</h3>
+            <div className="dataset-stats">
+              <Stat value={`${program.supervisor_agreement.exact_overall_pct}%`} label="Exact overall agreement" />
+              <Stat value={`${program.supervisor_agreement.within_one_point_pct}%`} label="Within one point" />
+            </div>
+          </section>
+          <section>
+            <h3>Checklist completion</h3>
+            {program.checklist_done_pct.map((item) => <div className="dataset-progress-row" key={item.item}><span>{item.item.replaceAll('_', ' ')}</span><b>{item.pct}%</b><div className="progress"><span style={{ width: `${item.pct}%` }} /></div></div>)}
+          </section>
+          <section>
+            <h3>Safety review counts</h3>
+            <div className="dataset-stats">
+              <Stat value={program.safety.labelled_calls_with_needs_human} label="Labelled calls with needs-human flags" />
+              <Stat value={program.safety.needs_human_lines} label="Needs-human lines" />
+              <Stat value={program.safety.labelled_texts} label="Labelled texts" />
+              <Stat value={program.safety.texts_needs_human} label="Texts flagged needs-human" />
+            </div>
+          </section>
+          <section className="dataset-wide">
+            <h3>Goal-met percentage by topic</h3>
+            <div className="chart dataset-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={program.goal_met_by_topic} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 16 }}><CartesianGrid stroke="#f3e8ed" horizontal={false} /><XAxis type="number" domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="topic" width={140} tick={{ fontSize: 10 }} /><Tooltip formatter={(value) => [`${value}%`, 'Weeks']} /><Bar dataKey="met_pct" name="Met" fill="#f65398" radius={[0, 6, 6, 0]} /><Bar dataKey="partly_pct" name="Partly met" fill="#82559a" radius={[0, 6, 6, 0]} /></BarChart></ResponsiveContainer></div>
+          </section>
+        </div>
+      </DatasetCard>
+    </BentoGrid>
+    <Heading eyebrow="Real coaching references" title="Real reference data" subtitle="Independent research sources, not Ellie patients." />
+    <BentoGrid className="top-gap">
+      <DatasetCard span={6} title="AnnoMI · expert-labelled counselling dialogues" kind={data.annomi.kind} citation={data.sources.annomi} population={`${data.annomi.high_quality.sessions} high-quality and ${data.annomi.low_quality.sessions} low-quality sessions.`} caveat={`Benchmark: ${data.annomi.benchmark_lines} ten-expert lines; experts agree ${data.annomi.benchmark_expert_agreement_pct}%.`}>
+        <div className="table-scroll"><table className="data-table">
+          <thead><tr><th>Measure</th><th>High quality</th><th>Low quality</th></tr></thead>
+          <tbody>{annomiMetrics.map(({ label, key, suffix }) => <tr key={key}><th>{label}</th><td>{data.annomi.high_quality[key]}{suffix}</td><td>{data.annomi.low_quality[key]}{suffix}</td></tr>)}</tbody>
+        </table></div>
+      </DatasetCard>
+      <DatasetCard span={6} title="UIC · health coaching text corpus" kind={data.text_coaching.kind} citation={data.sources.text_coaching} population={`${data.text_coaching.patients} patients · ${data.text_coaching.messages.toLocaleString()} messages.`} caveat={data.text_coaching.caveat}>
+        <div className="dataset-stats">{Object.entries(data.text_coaching.by_sender).map(([sender, messages]) => <Stat key={sender} value={messages.toLocaleString()} label={`${sender} messages`} />)}</div>
+        <h3 className="top-gap">Messages by week</h3>
+        <div className="chart dataset-chart compact-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={data.text_coaching.by_week} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}><CartesianGrid stroke="#f3e8ed" vertical={false} /><XAxis dataKey="week" tick={{ fontSize: 10 }} /><YAxis width={48} tick={{ fontSize: 10 }} /><Tooltip /><Bar dataKey="messages" name="Messages" fill="#82559a" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
+      </DatasetCard>
+    </BentoGrid>
+  </>;
+}
+
 export function C5Page() {
   const callsRemote = useRemote<Calls>('/api/c5/demo-calls');
+  const programCallsRemote = useDataset<ProgramCallsDataset>('c5_program_300_calls.json');
+  const coachingRemote = useDataset<C5CoachingDataset>('c5_coaching.json');
   const { state, update, createTask } = useDemoStore();
-  const calls = callsRemote.data?.calls ?? [];
+  const [callSource, setCallSource] = useState<'challenge' | 'program'>('challenge');
+  const calls = callSource === 'challenge' ? callsRemote.data?.calls ?? EMPTY_CALLS : programCallsRemote.data?.calls ?? EMPTY_CALLS;
+  const callLoading = callSource === 'challenge' ? callsRemote.loading : programCallsRemote.loading;
+  const callError = callSource === 'challenge' ? callsRemote.error : programCallsRemote.error;
+  const reloadCalls = callSource === 'challenge' ? callsRemote.reload : programCallsRemote.reload;
   const [callId, setCallId] = useState('');
   const [live, setLive] = useState(false);
   const [showGold, setShowGold] = useState(true);
@@ -239,11 +437,12 @@ export function C5Page() {
   const [liveError, setLiveError] = useState('');
   const [cues, setCues] = useState<Array<{ trigger: string; cue?: string; say?: string }>>([]);
   const selected = calls.find((call) => call.call_id === callId) ?? calls[0];
-  const review = state.reviews[selected?.call_id ?? ''] ?? { status: 'Pending' as const, note: '', acknowledged: [] };
+  const reviewKey = selected ? `${callSource === 'program' ? 'program:' : ''}${selected.call_id}` : '';
+  const review = state.reviews[reviewKey] ?? { status: 'Pending' as const, note: '', acknowledged: [] };
   const score = scoreCoaching(lines.map((line) => ({ speaker: line.speaker, tag: line.tag })));
   const flaggedLines = lines.filter((line) => line.flag);
   const expertTriggers = useMemo(() => {
-    if (live) return [];
+    if (live || selected?.labelled === 'no') return [];
     let lastCueAt = -99;
     const found: Array<{ trigger: string }> = [];
     lines.forEach((_, index) => {
@@ -252,15 +451,15 @@ export function C5Page() {
       if (result.trigger) found.unshift({ trigger: result.trigger });
     });
     return found.slice(0, 4);
-  }, [lines, live]);
+  }, [lines, live, selected?.labelled]);
   const recommendations: Array<{ trigger: string; cue?: string; say?: string }> = live ? cues : expertTriggers;
-  useEffect(() => { if (calls.length && !callId) setCallId(calls[0].call_id); }, [calls, callId]);
+  useEffect(() => { if (calls.length && !calls.some((call) => call.call_id === callId)) setCallId(calls[0].call_id); }, [calls, callId]);
   useEffect(() => {
     if (selected) { setLines(selected.lines.map(expertLine)); setCues([]); setLiveError(''); setLive(false); }
-  }, [selected?.call_id]);
+  }, [callSource, selected?.call_id]);
   const supervisorUpdate = (patch: Partial<typeof review>) => update((previous) => ({
     ...previous,
-    reviews: { ...previous.reviews, [selected.call_id]: { ...review, ...patch } },
+    reviews: { ...previous.reviews, [reviewKey]: { ...review, ...patch } },
     activity: patch.status && patch.status !== review.status
       ? [{ id: crypto.randomUUID(), at: new Date().toISOString(), type: 'Supervisor review', patientId: 'unassigned', message: `${selected.call_id} · ${patch.status}` }, ...previous.activity]
       : previous.activity,
@@ -304,16 +503,27 @@ export function C5Page() {
     } finally { setWorking(false); }
   };
   const showExpert = () => { if (selected) { setLive(false); setLines(selected.lines.map(expertLine)); setLiveError(''); setCues([]); } };
-  const createFollowup = () => createTask({ patientId: 'unassigned', title: `Supervisor follow-up · ${selected.call_id}`, source: `C5 · ${selected.call_id}`, assignee: 'Survivorship coordinator', dueDate: '', status: 'Open', outcome: '', shareWithPatient: false, patientMessage: '' });
+  const createFollowup = () => createTask({ patientId: 'unassigned', title: `Supervisor follow-up · ${selected.call_id}`, source: `C5 · ${callSource === 'program' ? 'synthetic program · ' : ''}${selected.call_id}`, assignee: 'Survivorship coordinator', dueDate: '', status: 'Open', outcome: '', shareWithPatient: false, patientMessage: '' });
   return <>
-    <Heading eyebrow="Challenge 05 · separate synthetic call cohort" title="Coach’s Co-pilot" subtitle="Review line-by-line expert labels, live classifications, coaching fidelity and human-review flags." action={callsRemote.data && <SourceBadge source={callsRemote.source} />} />
-    {callsRemote.error && <ErrorState message={callsRemote.error} retry={callsRemote.reload} />}
-    {callsRemote.loading && <LoadingTile title="Demo calls" />}
+    <Heading eyebrow="Challenge 05 · separate call cohorts" title="Coach’s Co-pilot" subtitle="Review line-by-line expert labels, live classifications, coaching fidelity and human-review flags." action={callSource === 'challenge' && callsRemote.data ? <SourceBadge source={callsRemote.source} /> : callSource === 'program' && programCallsRemote.data ? <Pill tone="pink">Synthetic</Pill> : undefined} />
+    <div className="c5-source-controls">
+      <label className="small" htmlFor="call-source">Call source</label>
+      <select id="call-source" value={callSource} onChange={(event) => { setCallSource(event.target.value as 'challenge' | 'program'); setCallId(''); setLines([]); setLive(false); setCues([]); setLiveError(''); }} className="switch">
+        <option value="challenge">Challenge demo calls{callsRemote.data ? ` (${callsRemote.data.calls.length})` : ''}</option>
+        <option value="program">Program dataset · {programCallsRemote.data?.calls.length ?? 'loading…'} synthetic calls</option>
+      </select>
+    </div>
+    {callLoading && <LoadingTile title={callSource === 'challenge' ? 'Challenge demo calls' : 'Synthetic program calls'} />}
+    {callError && <ErrorState message={callError} retry={reloadCalls} />}
+    {callSource === 'program' && programCallsRemote.data && <SourceNote kind="synthetic" citation={programCallsRemote.data.about} population={`${programCallsRemote.data.calls.length} calls in the supplied sample.`} caveat="Synthetic demo conversations; no real people." />}
     {selected && <>
       <div className="c5-controls">
-        <label className="small" htmlFor="call-picker">Demo call</label>
+        <label className="small" htmlFor="call-picker">Call · {selected.language} · {selected.goal_topic} · labelled {selected.labelled ?? 'yes'}</label>
         <select id="call-picker" value={selected.call_id} onChange={(event) => { setCallId(event.target.value); setLiveError(''); }} className="switch">
-          {calls.map((call) => <option key={call.call_id} value={call.call_id}>{call.demo_tag === 'safety' ? '⚠ ' : call.demo_tag === 'rough coach' ? '△ ' : ''}{call.call_id} · {call.language} · {call.goal_topic} · {call.demo_tag}</option>)}
+          {calls.map((call) => {
+            const demoTag = 'demo_tag' in call ? call.demo_tag : undefined;
+            return <option key={call.call_id} value={call.call_id}>{demoTag === 'safety' ? '⚠ ' : demoTag === 'rough coach' ? '△ ' : ''}{call.call_id} · {call.language} · {call.goal_topic} · labelled {call.labelled ?? 'yes'}{demoTag ? ` · ${demoTag}` : ''}</option>;
+          })}
         </select>
         <div className="mode-switch"><button className={!live ? 'active' : ''} onClick={showExpert}>Expert labels</button><button className={live ? 'active' : ''} onClick={runLive} disabled={working}>{working ? 'Classifying…' : 'Live classify (Clef via proxy)'}</button></div>
         <label className="small check-label"><input type="checkbox" checked={showGold} onChange={(event) => setShowGold(event.target.checked)} /> Show expert agreement</label>
@@ -321,17 +531,19 @@ export function C5Page() {
       {liveError && <div className="callout warning-note top-gap" role="alert">{liveError}</div>}
       <BentoGrid className="top-gap">
         <Tile span={8} title="Transcript" badge={<Pill tone="pink">{selected.language} · {selected.duration_min} min</Pill>}>
-          <div className="transcript" aria-live="polite">{lines.map((line) => <div className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? 'tagging…'}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag === 'needs_human' ? 'needs human review' : line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && !line.flag && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
+          <div className="transcript" aria-live="polite">{lines.map((line) => <div className={`transcript-line ${line.speaker} ${line.flag ? 'flagged' : ''}`} key={`${selected.call_id}-${line.line_number}`}><div className="line-who">{line.speaker === 'coach' ? 'Coach' : 'Participant'}<span>{line.time_in_call}</span></div><div className="line-content"><p>{line.text}</p><div className="tag-row"><span className={`coach-tag ${line.speaker === 'coach' ? COACH_FAMILY[line.tag ?? 'other'] ?? 'o' : line.tag === 'change' ? 'change' : line.tag === 'sustain' ? 'sustain' : 'neutral'}`}>{line.tag ?? (!live && selected.labelled === 'no' ? 'no expert label' : 'tagging…')}</span>{line.confidence !== undefined && <span className="tiny muted">{Math.round(line.confidence * 100)}% confidence</span>}{line.flag && <Pill tone={FLAG_TEXT[line.flag]?.level === 'danger' ? 'danger' : 'warn'}>{line.flag === 'needs_human' ? 'needs human review' : line.flag.replace('_', ' ')}</Pill>}{line.needs_human === 'yes' && !line.flag && <Pill tone="danger">Needs human review</Pill>}{showGold && live && line.gold && line.tag !== line.gold && <span className="gold-label">Expert: {line.gold}</span>}{showGold && live && line.gold && line.tag === line.gold && <span className="gold-label">✓ Expert agreement</span>}{line.reason && <span className="tiny muted">{line.reason}</span>}</div></div></div>)}</div>
         </Tile>
-        <Tile span={4} title="MI fidelity score" badge={<Pill tone={score.score === null ? 'neutral' : score.score >= 70 ? 'good' : score.score >= 50 ? 'warn' : 'danger'}>{score.score === null ? 'Need 4 tagged coach lines' : score.score >= 70 ? 'Good' : score.score >= 50 ? 'Review' : 'Low'}</Pill>}>
-          <div className="score-number">{score.score ?? '–'}{score.score !== null && <small>/100</small>}</div>
-          <div className="progress score-track"><span className={score.score !== null && score.score < 50 ? 'bad' : score.score !== null && score.score < 70 ? 'warn' : ''} style={{ width: `${score.score ?? 0}%` }} /></div>
-          <div className="metric-grid">{[
-            ['Open-question %', score.metrics.openQuestionPercent], ['Reflections / question', score.metrics.reflectionsPerQuestion],
-            ['Complex reflections', score.metrics.complexReflectionPercent], ['MI-consistent count', score.metrics.miConsistent],
-            ['Persuade / confront', score.metrics.persuadeConfront], ['Change-talk %', score.metrics.changeTalkPercent],
-          ].map(([label, value]) => <div className="metric-card" key={label}><span>{label}</span><b>{value}</b></div>)}</div>
-          <p className="tiny muted top-gap">Exact reference scoring: 30 reflection/question · 20 complex · 20 open question · 30 MI-consistent behavior.</p>
+        <Tile span={4} title="MI fidelity score" badge={<Pill tone={!live && selected.labelled === 'no' ? 'neutral' : score.score === null ? 'neutral' : score.score >= 70 ? 'good' : score.score >= 50 ? 'warn' : 'danger'}>{!live && selected.labelled === 'no' ? 'No expert labels' : score.score === null ? 'Need 4 tagged coach lines' : score.score >= 70 ? 'Good' : score.score >= 50 ? 'Review' : 'Low'}</Pill>}>
+          {!live && selected.labelled === 'no' ? <div className="empty-state"><p>No expert labels for this call — use live classification.</p><button className="btn primary" onClick={runLive} disabled={working}>Live classify</button></div> : <>
+            <div className="score-number">{score.score ?? '–'}{score.score !== null && <small>/100</small>}</div>
+            <div className="progress score-track"><span className={score.score !== null && score.score < 50 ? 'bad' : score.score !== null && score.score < 70 ? 'warn' : ''} style={{ width: `${score.score ?? 0}%` }} /></div>
+            <div className="metric-grid">{[
+              ['Open-question %', score.metrics.openQuestionPercent], ['Reflections / question', score.metrics.reflectionsPerQuestion],
+              ['Complex reflections', score.metrics.complexReflectionPercent], ['MI-consistent count', score.metrics.miConsistent],
+              ['Persuade / confront', score.metrics.persuadeConfront], ['Change-talk %', score.metrics.changeTalkPercent],
+            ].map(([label, value]) => <div className="metric-card" key={label}><span>{label}</span><b>{value}</b></div>)}</div>
+            <p className="tiny muted top-gap">Exact reference scoring: 30 reflection/question · 20 complex · 20 open question · 30 MI-consistent behavior.</p>
+          </>}
         </Tile>
         <Tile span={5} title="Coaching recommendations" badge={<Pill tone="pink">{live ? 'Live cue service' : 'Expert trigger rules'}</Pill>}>
           {recommendations.length ? recommendations.map((cue, index) => <div className="recommendation" key={`${cue.trigger}-${index}`}><p className="tiny muted">{cue.trigger}</p>{cue.cue && <b>{cue.cue}</b>}{cue.say && <p className="small">“{cue.say}”</p>}</div>) : <EmptyState>Quiet. Coaching prompts appear when a reference trigger fires.</EmptyState>}
@@ -345,6 +557,7 @@ export function C5Page() {
         </Tile>
       </BentoGrid>
     </>}
+    <C5ReferencePanels data={coachingRemote.data} loading={coachingRemote.loading} error={coachingRemote.error} reload={coachingRemote.reload} />
   </>;
 }
 

@@ -40,8 +40,7 @@ export default function AskScreen() {
 
   return <div className="patient-app-screen">
     <PageHeading title={messages.askHeading} subtitle={messages.askSub} language={language} />
-    <AppCard title={messages.assistantLabel} text={messages.assistantLabel} language={language} className="patient-app-assistant-label">
-      <p>{messages.assistantLabel}</p>
+    <AppCard title={messages.assistantLabel} language={language} className="patient-app-assistant-label">
       <label className="patient-app-auto-read"><input type="checkbox" checked={autoRead} onChange={(event) => setReadReplies(event.target.checked)} />{messages.autoRead}</label>
     </AppCard>
     <section className="patient-app-chat" aria-label={messages.askHeading} aria-live="polite">

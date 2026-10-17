@@ -3,6 +3,7 @@ import {
   CartesianGrid, ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { DataSource } from '../lib/api';
+import type { DatasetKind } from '../data/datasets';
 
 export function Orb() { return <span className="orb" aria-hidden="true" />; }
 
@@ -12,6 +13,35 @@ export function Pill({ children, tone = 'neutral' }: { children: ReactNode; tone
 
 export function SourceBadge({ source }: { source: DataSource }) {
   return <Pill tone={source === 'live' ? 'good' : source === 'snapshot' ? 'warn' : 'pink'}>{source === 'live' ? 'Live API' : source === 'snapshot' ? 'Snapshot' : 'Simulated'}</Pill>;
+}
+
+export function SourceNote({ kind, citation, population, caveat }: {
+  kind: DatasetKind;
+  citation: string;
+  population?: string;
+  caveat?: string;
+}) {
+  return <div className="dataset-source-note">
+    <div className="tag-row"><Pill tone={kind === 'real' ? 'good' : 'pink'}>{kind === 'real' ? 'Real research data' : 'Synthetic'}</Pill>{kind === 'real' && <span className="tiny muted">Not Ellie patients</span>}</div>
+    <p className="tiny dataset-citation">{citation}</p>
+    {population && <p className="tiny muted">{population}</p>}
+    {caveat && <p className="tiny muted">{caveat}</p>}
+  </div>;
+}
+
+export function DatasetCard({ title, kind, citation, population, caveat, children, span = 6 }: {
+  title: string;
+  kind: DatasetKind;
+  citation: string;
+  population?: string;
+  caveat?: string;
+  children: ReactNode;
+  span?: number;
+}) {
+  return <Tile span={span} title={title} className="dataset-card">
+    <SourceNote kind={kind} citation={citation} population={population} caveat={caveat} />
+    <div className="dataset-card-content">{children}</div>
+  </Tile>;
 }
 
 export function Tile({ children, className = '', span = 6, hero = false, title, actions, badge }: {

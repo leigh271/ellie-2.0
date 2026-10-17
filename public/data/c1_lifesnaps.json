@@ -1,0 +1,219 @@
+{
+ "source": "Yfantidou S, et al. LifeSnaps, a 4-month multi-modal dataset. Scientific Data, 2022. CC BY 4.0.",
+ "kind": "real",
+ "label": "Real research data (not Ellie patients)",
+ "population": "71 adults wearing a Fitbit for about 4 months. Not a cancer cohort.",
+ "people": 71,
+ "days": 7410,
+ "hourly_rows": 159508,
+ "day_to_day_variation": [
+  {
+   "metric": "steps",
+   "people": 67,
+   "typical_personal_average": 7608.8,
+   "typical_day_to_day_sd": 4182.7,
+   "typical_cv_pct": 55.8
+  },
+  {
+   "metric": "sleep_minutes",
+   "people": 58,
+   "typical_personal_average": 393.6,
+   "typical_day_to_day_sd": 85.8,
+   "typical_cv_pct": 21.9
+  },
+  {
+   "metric": "resting_heart_rate",
+   "people": 66,
+   "typical_personal_average": 65.7,
+   "typical_day_to_day_sd": 2.2,
+   "typical_cv_pct": 3.4
+  },
+  {
+   "metric": "hrv_rmssd_ms",
+   "people": 39,
+   "typical_personal_average": 36.3,
+   "typical_day_to_day_sd": 7.9,
+   "typical_cv_pct": 22.4
+  },
+  {
+   "metric": "sleep_efficiency_pct",
+   "people": 58,
+   "typical_personal_average": 94.9,
+   "typical_day_to_day_sd": 2.6,
+   "typical_cv_pct": 2.7
+  }
+ ],
+ "sensor_completeness": [
+  {
+   "field": "steps",
+   "days_present_pct": 64.5
+  },
+  {
+   "field": "resting_heart_rate",
+   "days_present_pct": 59.7
+  },
+  {
+   "field": "sleep_minutes",
+   "days_present_pct": 47.9
+  },
+  {
+   "field": "hrv_rmssd_ms",
+   "days_present_pct": 33.4
+  },
+  {
+   "field": "blood_oxygen_spo2_pct",
+   "days_present_pct": 17.1
+  },
+  {
+   "field": "fitbit_stress_score_0_to_100",
+   "days_present_pct": 25.3
+  },
+  {
+   "field": "skin_temp_change_c",
+   "days_present_pct": 44.6
+  },
+  {
+   "field": "any_mood_reported",
+   "days_present_pct": 30.9
+  }
+ ],
+ "hourly_profile": [
+  {
+   "hour": 0,
+   "steps": 179.0,
+   "avg_heart_rate": 74.1
+  },
+  {
+   "hour": 1,
+   "steps": 101.0,
+   "avg_heart_rate": 70.6
+  },
+  {
+   "hour": 2,
+   "steps": 54.0,
+   "avg_heart_rate": 67.4
+  },
+  {
+   "hour": 3,
+   "steps": 36.0,
+   "avg_heart_rate": 65.4
+  },
+  {
+   "hour": 4,
+   "steps": 25.0,
+   "avg_heart_rate": 64.2
+  },
+  {
+   "hour": 5,
+   "steps": 50.0,
+   "avg_heart_rate": 64.3
+  },
+  {
+   "hour": 6,
+   "steps": 137.0,
+   "avg_heart_rate": 66.7
+  },
+  {
+   "hour": 7,
+   "steps": 333.0,
+   "avg_heart_rate": 71.9
+  },
+  {
+   "hour": 8,
+   "steps": 431.0,
+   "avg_heart_rate": 76.7
+  },
+  {
+   "hour": 9,
+   "steps": 501.0,
+   "avg_heart_rate": 80.6
+  },
+  {
+   "hour": 10,
+   "steps": 531.0,
+   "avg_heart_rate": 82.3
+  },
+  {
+   "hour": 11,
+   "steps": 541.0,
+   "avg_heart_rate": 82.8
+  },
+  {
+   "hour": 12,
+   "steps": 631.0,
+   "avg_heart_rate": 83.7
+  },
+  {
+   "hour": 13,
+   "steps": 616.0,
+   "avg_heart_rate": 84.5
+  },
+  {
+   "hour": 14,
+   "steps": 517.0,
+   "avg_heart_rate": 84.1
+  },
+  {
+   "hour": 15,
+   "steps": 510.0,
+   "avg_heart_rate": 83.7
+  },
+  {
+   "hour": 16,
+   "steps": 562.0,
+   "avg_heart_rate": 83.8
+  },
+  {
+   "hour": 17,
+   "steps": 638.0,
+   "avg_heart_rate": 84.1
+  },
+  {
+   "hour": 18,
+   "steps": 750.0,
+   "avg_heart_rate": 85.2
+  },
+  {
+   "hour": 19,
+   "steps": 781.0,
+   "avg_heart_rate": 86.2
+  },
+  {
+   "hour": 20,
+   "steps": 642.0,
+   "avg_heart_rate": 85.5
+  },
+  {
+   "hour": 21,
+   "steps": 510.0,
+   "avg_heart_rate": 84.1
+  },
+  {
+   "hour": 22,
+   "steps": 370.0,
+   "avg_heart_rate": 81.2
+  },
+  {
+   "hour": 23,
+   "steps": 271.0,
+   "avg_heart_rate": 78.0
+  }
+ ],
+ "mood_checkin_days": [
+  {
+   "felt_tired": true,
+   "days": 880,
+   "steps": 9167.0,
+   "sleep_minutes": 389.9,
+   "resting_heart_rate": 65.0
+  },
+  {
+   "felt_tired": false,
+   "days": 1410,
+   "steps": 8599.0,
+   "sleep_minutes": 398.4,
+   "resting_heart_rate": 65.4
+  }
+ ],
+ "caveat": "Personal variation uses people with at least 14 days of that measure. Blank sensor days are left out."
+}

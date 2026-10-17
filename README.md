@@ -65,6 +65,29 @@ All proxy GETs use an 8-second timeout (advice and C5 review/cue use 20 seconds)
 | C5 turn classification, review and cue | Live proxied API only; no snapshot. Expert labels and local trigger rules remain available if the API fails. |
 | Ellie patient companion | Local keyword/rule-based responses; no LLM. Clinical and urgent concerns are routed to the care team / emergency guidance. |
 
+## Datasets
+
+The independent research cohorts below appear only in provider dashboards. They are never attached to fictional Ellie patients and are not shown in the patient dashboard or patient app. Supplied summary values are rendered as provided; raw source files are not committed.
+
+| Dataset | Kind | Placement | Citation |
+| --- | --- | --- | --- |
+| Rao fatigue study (`c1_fatigue_study.json`) | Real research data; adults with lupus/Sjögren’s and other backgrounds, not a cancer cohort | C3 · Real-world reference data | Rao C, et al. *Association of digital measures and self-reported fatigue*. Frontiers in Digital Health, 2023. |
+| LifeSnaps (`c1_lifesnaps.json`) | Real research data; not a cancer cohort | C3 · Real-world reference data | Yfantidou S, et al. *LifeSnaps, a 4-month multi-modal dataset*. Scientific Data, 2022. CC BY 4.0. |
+| NHANES 2011–2014 (`c2_nhanes.json`) | Real, survey-weighted population data | C4 · Population context | CDC National Health and Nutrition Examination Survey (NHANES), 2011–2014 cycles. |
+| AnnoMI coaching dialogues (`c5_coaching.json`) | Real research data | C5 · Real reference | Wu Z, et al. *Creation, Analysis and Evaluation of AnnoMI, a Dataset of Expert-Annotated Counselling Dialogues*. Future Internet, 2023. Public domain. |
+| UIC text coaching corpus (`c5_coaching.json`) | Real research data | C5 · Real reference | Gupta I, et al. *Human-Human Health Coaching via Text Messages: Corpus, Annotation, and Analysis*. SIGDIAL 2020. |
+| Synthetic coaching program (`c5_coaching.json`) | Synthetic | C5 · Program analytics | Synthetic coaching program made by the Crane Lab, Sylvester Comprehensive Cancer Center, for the Miami AI Hackathon. Nobody is real. |
+| Program calls (`c5_program_300_calls.json`) | Synthetic | C5 · Call source selector | Synthetic coaching program made by the Crane Lab, Sylvester Comprehensive Cancer Center, for the Miami AI Hackathon. Nobody is real. |
+| Live challenge APIs | Live API or bundled snapshot | Command center · Data sources; C3/C4/C5 modules | Challenge-provided endpoints and snapshots; see the integration table above. |
+
+To rebuild the JSON summaries, provide a directory containing the source CSVs and the unzipped C5 dataset folder:
+
+```sh
+python3 scripts/build_datasets.py <dir-with-csvs-and-unzipped-c5>
+```
+
+The build script requires pandas (and NumPy). Raw CSVs and unzipped source archives are not committed; only the source-labelled JSON summaries and the rebuild script are included.
+
 ## Safety and limitations
 
 This prototype uses fictional/synthetic information, is not clinically validated or HIPAA-compliant, and is not connected to a real messaging or EHR system. C4 patterns are observational and do not establish causation. AI-generated wording and other suggestions require human review. For an emergency, contact emergency services.

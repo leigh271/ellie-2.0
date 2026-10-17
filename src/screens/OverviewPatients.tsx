@@ -7,6 +7,8 @@ import { scoreCoaching } from '../lib/miScore';
 import { useRemote } from '../lib/useRemote';
 import { useDemoStore } from '../state/DemoStore';
 import { BentoGrid, EmptyState, ErrorState, LoadingTile, Pill, SourceBadge, Stat, Tile, TrendChart } from '../components/UI';
+import { useDataset } from '../data/datasets';
+import type { CoachingSummary, FatigueDataset, LifeSnapsDataset, NhanesDataset } from '../data/datasets';
 
 type ChallengeSurvivor = { survivorId: string; displayName: string; status: string; headline: string; urgent?: boolean };
 type CallLine = { speaker: 'coach' | 'participant'; coach_move?: string | null; participant_talk?: string | null };
@@ -22,6 +24,10 @@ export function CommandCenter() {
   const c3 = useRemote<ChallengeSurvivor[]>('/api/c3/survivors');
   const c4 = useRemote<ChallengeSurvivor[]>('/api/c4/survivors');
   const calls = useRemote<Calls>('/api/c5/demo-calls');
+  const fatigue = useDataset<FatigueDataset>('c1_fatigue_study.json');
+  const lifeSnaps = useDataset<LifeSnapsDataset>('c1_lifesnaps.json');
+  const nhanes = useDataset<NhanesDataset>('c2_nhanes.json');
+  const coaching = useDataset<CoachingSummary>('c5_coaching.json');
   const openTasks = state.tasks.filter((task) => task.status !== 'Done').length;
   const c3Alerts = c3.data?.filter((item) => item.status === 'alert' || item.urgent).length ?? 0;
   const c4Alerts = c4.data?.filter((item) => item.status === 'alert').length ?? 0;
@@ -46,6 +52,17 @@ export function CommandCenter() {
   const loop = state.careLoops.maria;
   const stages = ['detect', 'understand', 'review', 'act', 'followup'] as const;
   const stageLabels = ['Detect', 'Understand', 'Review', 'Act', 'Follow up'];
+  const sourceRows = [
+    { name: 'Rao fatigue study', kind: 'real', size: fatigue.data ? `${fatigue.data.people} people` : 'Loading…', href: '/modules/c3', module: 'C3', source: 'dataset' },
+    { name: 'LifeSnaps', kind: 'real', size: lifeSnaps.data ? `${lifeSnaps.data.people} people` : 'Loading…', href: '/modules/c3', module: 'C3', source: 'dataset' },
+    { name: 'NHANES 2011–2014', kind: 'real', size: nhanes.data ? `${nhanes.data.people.toLocaleString()} people · ${nhanes.data.survivors} survivors` : 'Loading…', href: '/modules/c4', module: 'C4', source: 'dataset' },
+    { name: 'AnnoMI', kind: 'real', size: coaching.data ? `${(coaching.data.annomi.high_quality.lines + coaching.data.annomi.low_quality.lines).toLocaleString()} labelled lines` : 'Loading…', href: '/modules/c5', module: 'C5', source: 'dataset' },
+    { name: 'UIC text coaching', kind: 'real', size: coaching.data ? `${coaching.data.text_coaching.messages.toLocaleString()} messages` : 'Loading…', href: '/modules/c5', module: 'C5', source: 'dataset' },
+    { name: 'Coaching program', kind: 'synthetic', size: coaching.data ? `${coaching.data.program.calls.toLocaleString()} calls` : 'Loading…', href: '/modules/c5', module: 'C5', source: 'dataset' },
+    { name: 'Live C3 API', kind: c3.data ? c3.source : 'live', size: c3.data ? `${c3.data.length} survivor records` : 'Loading…', href: '/modules/c3', module: 'C3', source: 'api' },
+    { name: 'Live C4 API', kind: c4.data ? c4.source : 'live', size: c4.data ? `${c4.data.length} survivor records` : 'Loading…', href: '/modules/c4', module: 'C4', source: 'api' },
+    { name: 'C5 calls API', kind: calls.data ? calls.source : 'live', size: calls.data ? `${calls.data.calls.length} calls` : 'Loading…', href: '/modules/c5', module: 'C5', source: 'api' },
+  ];
   return <>
     <Header eyebrow="Hospital command center" title="Good morning, care team." subtitle="Your patients, priorities, and lifestyle medicine insights in one place." action={<Link className="btn primary" to="/patients/maria">Open Maria’s Patient 360 →</Link>} />
     <BentoGrid>
@@ -73,6 +90,14 @@ export function CommandCenter() {
       </Tile>
       <Tile span={6} title="Recent activity" actions={<Link className="linkbtn" to="/activity">View all →</Link>}>
         {state.activity.slice(0, 4).map((item) => <div className="patient-row" key={item.id}><span className="activity-mark">✦</span><div className="grow"><b>{item.message}</b><p className="tiny muted">{item.type} · {new Date(item.at).toLocaleString()}</p></div></div>)}
+      </Tile>
+      <Tile span={12} title="Data sources" badge={<Pill tone="pink">Provider reference only</Pill>}>
+        <div className="data-source-list">{sourceRows.map((item) => {
+          const isDataset = item.source === 'dataset';
+          const label = item.kind === 'real' ? 'Real research data' : item.kind === 'synthetic' ? 'Synthetic' : item.kind === 'live' ? 'Live API' : item.kind === 'snapshot' ? 'Snapshot' : String(item.kind);
+          const tone = item.kind === 'real' || item.kind === 'live' ? 'good' : item.kind === 'snapshot' ? 'warn' : 'pink';
+          return <div className="data-source-row" key={item.name}><div className="grow"><b>{item.name}</b><small>{item.size}{isDataset && item.kind === 'real' ? ' · not Ellie patients' : ''}</small></div><Pill tone={tone}>{label}</Pill><Link className="btn" to={item.href}>{item.module}</Link></div>;
+        })}</div>
       </Tile>
     </BentoGrid>
   </>;

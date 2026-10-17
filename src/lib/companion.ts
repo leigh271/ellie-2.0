@@ -9,14 +9,18 @@ function normalized(message: string, language: PatientLanguage) {
 }
 
 function detectNeed(message: string, language: PatientLanguage): Need | undefined {
-  const text = normalized(message, language);
-  if (/(ride|transport|transporte|transpò|bus|car|taxi)/.test(text)) return 'rides';
-  if (/(money|cost|bill|dinero|costo|gasto|lajan|depans|bòdwo)/.test(text)) return 'costs';
-  if (/(food|hungry|comida|alimento|manje|grangou)/.test(text)) return 'food';
-  if (/(sad|worried|lonely|triste|preocup|sol|tris|enky|kè sere)/.test(text)) return 'emotional';
-  if (/(medicine|medication|side effect|medicamento|efecto secundario|medikaman|efè segondè)/.test(text)) return 'medications';
-  if (/(caregiver|home help|cuidador|ayuda en casa|moun k ap ede|èd lakay)/.test(text)) return 'caregiver';
-  if (/(symptom|something feels wrong|síntoma|me siento mal|sentòm|pa santi nòmal)/.test(text)) return 'symptoms';
+  const text = normalized(message, language).normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  const words = new Set(text.match(/\p{L}+/gu) ?? []);
+  const has = (...tokens: string[]) => tokens.some((token) => token.includes(' ')
+    ? token.split(' ').every((word) => words.has(word))
+    : words.has(token));
+  if (has('ride', 'rides', 'transport', 'transporte', 'transpo', 'bus', 'car', 'taxi', 'uber', 'lyft')) return 'rides';
+  if (has('money', 'cost', 'costs', 'bill', 'bills', 'dinero', 'costo', 'gasto', 'lajan', 'depans', 'bodwo')) return 'costs';
+  if (has('food', 'hungry', 'comida', 'alimento', 'manje', 'grangou')) return 'food';
+  if (has('sad', 'worried', 'worry', 'lonely', 'down', 'triste', 'tristeza', 'preocupado', 'preocupada', 'preocupacion', 'tris', 'enkyete', 'ke sere', 'pou kont mwen', 'siento sola', 'siento solo')) return 'emotional';
+  if (has('medicine', 'medication', 'medications', 'side effect', 'medicamento', 'medicamentos', 'efecto secundario', 'medikaman', 'efe segonde')) return 'medications';
+  if (has('caregiver', 'home help', 'cuidador', 'cuidadora', 'ayuda en casa', 'moun k ap ede', 'ed lakay')) return 'caregiver';
+  if (has('symptom', 'symptoms', 'something feels wrong', 'sintoma', 'sintomas', 'me siento mal', 'sentom', 'pa santi nomal')) return 'symptoms';
   return undefined;
 }
 

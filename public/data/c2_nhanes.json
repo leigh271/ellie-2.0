@@ -1,0 +1,307 @@
+{
+ "source": "CDC National Health and Nutrition Examination Survey (NHANES), 2011-2014 cycles.",
+ "kind": "real",
+ "label": "Real US survey data (not Ellie patients)",
+ "people": 11323,
+ "survivors": 808,
+ "survivor_median_age": 67.0,
+ "no_cancer_median_age": 47.0,
+ "weighting": "Survey-weighted means: exam weight for sensor, body and HbA1c; diet weight for meal timing and fiber; fasting weight for glucose. Two cycles pooled. Point estimates only; no design-based confidence intervals.",
+ "all_ages": [
+  {
+   "metric": "movement_per_day_mims",
+   "label": "Daily movement (wrist sensor)",
+   "unit": "MIMS/day",
+   "weight": "survey_weight_exam",
+   "survivors": 11578.94,
+   "survivors_n": 651,
+   "no_cancer": 13515.02,
+   "no_cancer_n": 7778
+  },
+  {
+   "metric": "sensor_sleep_hours_per_day",
+   "label": "Sleep (wrist sensor)",
+   "unit": "h/day",
+   "weight": "survey_weight_exam",
+   "survivors": 8.5,
+   "survivors_n": 651,
+   "no_cancer": 7.95,
+   "no_cancer_n": 7778
+  },
+  {
+   "metric": "bmi",
+   "label": "BMI",
+   "unit": "kg/m\u00b2",
+   "weight": "survey_weight_exam",
+   "survivors": 29.11,
+   "survivors_n": 757,
+   "no_cancer": 28.93,
+   "no_cancer_n": 9995
+  },
+  {
+   "metric": "hba1c_pct",
+   "label": "HbA1c",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 5.85,
+   "survivors_n": 710,
+   "no_cancer": 5.62,
+   "no_cancer_n": 9698
+  },
+  {
+   "metric": "prediabetes_or_more",
+   "label": "HbA1c 5.7% or higher",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 48.98,
+   "survivors_n": 710,
+   "no_cancer": 30.54,
+   "no_cancer_n": 9698
+  },
+  {
+   "metric": "diabetes_yes",
+   "label": "Diagnosed diabetes",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 18.29,
+   "survivors_n": 774,
+   "no_cancer": 9.02,
+   "no_cancer_n": 10122
+  },
+  {
+   "metric": "fasting_glucose_mg_dl",
+   "label": "Fasting glucose",
+   "unit": "mg/dL",
+   "weight": "survey_weight_fasting_lab",
+   "survivors": 110.1,
+   "survivors_n": 328,
+   "no_cancer": 104.91,
+   "no_cancer_n": 4376
+  },
+  {
+   "metric": "overnight_fast_hours_avg",
+   "label": "Overnight fast",
+   "unit": "h",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 12.13,
+   "survivors_n": 641,
+   "no_cancer": 12.12,
+   "no_cancer_n": 8144
+  },
+  {
+   "metric": "last_eating_hour_avg",
+   "label": "Last eating hour",
+   "unit": "hour of day",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 20.01,
+   "survivors_n": 641,
+   "no_cancer": 20.17,
+   "no_cancer_n": 8144
+  },
+  {
+   "metric": "fiber_g",
+   "label": "Fiber",
+   "unit": "g/day",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 16.14,
+   "survivors_n": 641,
+   "no_cancer": 17.76,
+   "no_cancer_n": 8144
+  }
+ ],
+ "age_60_plus": [
+  {
+   "metric": "movement_per_day_mims",
+   "label": "Daily movement (wrist sensor)",
+   "unit": "MIMS/day",
+   "weight": "survey_weight_exam",
+   "survivors": 10731.71,
+   "survivors_n": 472,
+   "no_cancer": 11487.1,
+   "no_cancer_n": 2424
+  },
+  {
+   "metric": "sensor_sleep_hours_per_day",
+   "label": "Sleep (wrist sensor)",
+   "unit": "h/day",
+   "weight": "survey_weight_exam",
+   "survivors": 8.79,
+   "survivors_n": 472,
+   "no_cancer": 8.53,
+   "no_cancer_n": 2424
+  },
+  {
+   "metric": "bmi",
+   "label": "BMI",
+   "unit": "kg/m\u00b2",
+   "weight": "survey_weight_exam",
+   "survivors": 28.84,
+   "survivors_n": 537,
+   "no_cancer": 28.98,
+   "no_cancer_n": 2855
+  },
+  {
+   "metric": "hba1c_pct",
+   "label": "HbA1c",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 5.97,
+   "survivors_n": 499,
+   "no_cancer": 5.96,
+   "no_cancer_n": 2800
+  },
+  {
+   "metric": "prediabetes_or_more",
+   "label": "HbA1c 5.7% or higher",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 60.02,
+   "survivors_n": 499,
+   "no_cancer": 55.67,
+   "no_cancer_n": 2800
+  },
+  {
+   "metric": "diabetes_yes",
+   "label": "Diagnosed diabetes",
+   "unit": "%",
+   "weight": "survey_weight_exam",
+   "survivors": 22.11,
+   "survivors_n": 548,
+   "no_cancer": 19.36,
+   "no_cancer_n": 2920
+  },
+  {
+   "metric": "fasting_glucose_mg_dl",
+   "label": "Fasting glucose",
+   "unit": "mg/dL",
+   "weight": "survey_weight_fasting_lab",
+   "survivors": 114.23,
+   "survivors_n": 228,
+   "no_cancer": 112.49,
+   "no_cancer_n": 1260
+  },
+  {
+   "metric": "overnight_fast_hours_avg",
+   "label": "Overnight fast",
+   "unit": "h",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 12.29,
+   "survivors_n": 452,
+   "no_cancer": 12.09,
+   "no_cancer_n": 2352
+  },
+  {
+   "metric": "last_eating_hour_avg",
+   "label": "Last eating hour",
+   "unit": "hour of day",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 19.86,
+   "survivors_n": 452,
+   "no_cancer": 19.93,
+   "no_cancer_n": 2352
+  },
+  {
+   "metric": "fiber_g",
+   "label": "Fiber",
+   "unit": "g/day",
+   "weight": "survey_weight_diet_2day",
+   "survivors": 17.13,
+   "survivors_n": 452,
+   "no_cancer": 17.52,
+   "no_cancer_n": 2352
+  }
+ ],
+ "survivor_cancer_types": [
+  {
+   "type": "breast",
+   "people": 168
+  },
+  {
+   "type": "prostate",
+   "people": 157
+  },
+  {
+   "type": "melanoma",
+   "people": 75
+  },
+  {
+   "type": "cervix",
+   "people": 70
+  },
+  {
+   "type": "colon",
+   "people": 68
+  },
+  {
+   "type": "other",
+   "people": 62
+  },
+  {
+   "type": "uterus",
+   "people": 40
+  },
+  {
+   "type": "lung",
+   "people": 35
+  }
+ ],
+ "survivors_hba1c_by_movement": [
+  {
+   "group": "lowest third",
+   "n": 200,
+   "range": [
+    1072.9,
+    9551.0
+   ],
+   "hba1c_pct": 5.98
+  },
+  {
+   "group": "middle third",
+   "n": 199,
+   "range": [
+    9577.7,
+    12803.1
+   ],
+   "hba1c_pct": 5.93
+  },
+  {
+   "group": "highest third",
+   "n": 200,
+   "range": [
+    12812.4,
+    27162.9
+   ],
+   "hba1c_pct": 5.62
+  }
+ ],
+ "all_hba1c_by_movement": [
+  {
+   "group": "lowest third",
+   "n": 2717,
+   "range": [
+    239.9,
+    11566.0
+   ],
+   "hba1c_pct": 5.85
+  },
+  {
+   "group": "middle third",
+   "n": 2716,
+   "range": [
+    11567.1,
+    14906.1
+   ],
+   "hba1c_pct": 5.63
+  },
+  {
+   "group": "highest third",
+   "n": 2717,
+   "range": [
+    14906.3,
+    36562.9
+   ],
+   "hba1c_pct": 5.5
+  }
+ ],
+ "caveat": "Cross-sectional snapshot. Differences are associations, not effects; survivors are older on average."
+}

@@ -1,0 +1,605 @@
+{
+ "sources": {
+  "annomi": "Wu Z, et al. Creation, Analysis and Evaluation of AnnoMI, a Dataset of Expert-Annotated Counselling Dialogues. Future Internet, 2023. Public domain.",
+  "text_coaching": "Gupta I, et al. Human-Human Health Coaching via Text Messages: Corpus, Annotation, and Analysis. SIGDIAL 2020.",
+  "synthetic": "Synthetic coaching program made by the Crane Lab, Sylvester Comprehensive Cancer Center, for the Miami AI Hackathon. Nobody is real."
+ },
+ "annomi": {
+  "kind": "real",
+  "label": "Real expert-labelled demonstration sessions",
+  "high_quality": {
+   "sessions": 110,
+   "lines": 8839,
+   "reflections_per_question": 1.01,
+   "open_question_pct": 56.6,
+   "complex_reflection_pct": 45.8,
+   "info_or_advice_pct_of_counsellor_lines": 10.5,
+   "change_talk_pct": 69.9
+  },
+  "low_quality": {
+   "sessions": 23,
+   "lines": 860,
+   "reflections_per_question": 0.3,
+   "open_question_pct": 63.6,
+   "complex_reflection_pct": 30.4,
+   "info_or_advice_pct_of_counsellor_lines": 32.9,
+   "change_talk_pct": 53.3
+  },
+  "benchmark_lines": 428,
+  "benchmark_expert_agreement_pct": 83.9,
+  "topics": [
+   {
+    "topic": "reducing alcohol consumption",
+    "sessions": 23
+   },
+   {
+    "topic": "smoking cessation",
+    "sessions": 19
+   },
+   {
+    "topic": "taking medicine / following medical procedure",
+    "sessions": 8
+   },
+   {
+    "topic": "more exercise / increasing activity",
+    "sessions": 7
+   },
+   {
+    "topic": "reducing recidivism",
+    "sessions": 7
+   },
+   {
+    "topic": "reducing drug use",
+    "sessions": 7
+   },
+   {
+    "topic": "weight loss",
+    "sessions": 6
+   },
+   {
+    "topic": "unidentifiable",
+    "sessions": 5
+   }
+  ]
+ },
+ "text_coaching": {
+  "kind": "real",
+  "label": "Real coach-patient texts (UIC, 2019)",
+  "patients": 26,
+  "messages": 3665,
+  "by_sender": {
+   "coach": 2131,
+   "patient": 1534
+  },
+  "by_week": [
+   {
+    "week": 1,
+    "messages": 94
+   },
+   {
+    "week": 2,
+    "messages": 67
+   },
+   {
+    "week": 3,
+    "messages": 66
+   },
+   {
+    "week": 4,
+    "messages": 82
+   },
+   {
+    "week": 5,
+    "messages": 34
+   },
+   {
+    "week": 6,
+    "messages": 46
+   },
+   {
+    "week": 7,
+    "messages": 47
+   },
+   {
+    "week": 8,
+    "messages": 57
+   },
+   {
+    "week": 9,
+    "messages": 8
+   }
+  ],
+  "caveat": "Conversation-step labels came from the researchers' model, not people."
+ },
+ "program": {
+  "kind": "synthetic",
+  "label": "Synthetic coaching program (made-up people)",
+  "coaches": 14,
+  "participants": 1000,
+  "calls": 5570,
+  "labelled_calls": 1363,
+  "transcript_lines": 288273,
+  "texts": 62869,
+  "calls_by_language": {
+   "English": 3696,
+   "Spanish": 1874
+  },
+  "participants_by_cancer_type": [
+   {
+    "type": "breast",
+    "people": 228
+   },
+   {
+    "type": "lymphoma",
+    "people": 122
+   },
+   {
+    "type": "thyroid",
+    "people": 115
+   },
+   {
+    "type": "kidney",
+    "people": 115
+   },
+   {
+    "type": "colorectal",
+    "people": 109
+   },
+   {
+    "type": "endometrial",
+    "people": 105
+   },
+   {
+    "type": "lung",
+    "people": 104
+   },
+   {
+    "type": "prostate",
+    "people": 102
+   }
+  ],
+  "coach_scorecard": [
+   {
+    "coach_id": "C01",
+    "first_name": "Ana",
+    "role": "dietitian",
+    "languages": "English, Spanish",
+    "years_experience": 9,
+    "calls": 441,
+    "labelled_calls": 111,
+    "mi_score": 83.0,
+    "rated_calls": 53,
+    "supervisor_overall": 4.28,
+    "supervisor_empathy": 3.77
+   },
+   {
+    "coach_id": "C02",
+    "first_name": "Marisol",
+    "role": "health coach",
+    "languages": "English, Spanish",
+    "years_experience": 4,
+    "calls": 558,
+    "labelled_calls": 121,
+    "mi_score": 70.4,
+    "rated_calls": 46,
+    "supervisor_overall": 3.4,
+    "supervisor_empathy": 2.98
+   },
+   {
+    "coach_id": "C03",
+    "first_name": "Kendra",
+    "role": "exercise coach",
+    "languages": "English",
+    "years_experience": 6,
+    "calls": 253,
+    "labelled_calls": 63,
+    "mi_score": 77.7,
+    "rated_calls": 31,
+    "supervisor_overall": 3.76,
+    "supervisor_empathy": 3.58
+   },
+   {
+    "coach_id": "C04",
+    "first_name": "Luis",
+    "role": "exercise coach",
+    "languages": "English, Spanish",
+    "years_experience": 2,
+    "calls": 598,
+    "labelled_calls": 138,
+    "mi_score": 51.6,
+    "rated_calls": 50,
+    "supervisor_overall": 2.42,
+    "supervisor_empathy": 2.23
+   },
+   {
+    "coach_id": "C05",
+    "first_name": "Rachel",
+    "role": "dietitian",
+    "languages": "English",
+    "years_experience": 11,
+    "calls": 278,
+    "labelled_calls": 64,
+    "mi_score": 67.3,
+    "rated_calls": 34,
+    "supervisor_overall": 3.31,
+    "supervisor_empathy": 2.81
+   },
+   {
+    "coach_id": "C06",
+    "first_name": "Daniela",
+    "role": "health coach",
+    "languages": "English, Spanish",
+    "years_experience": 3,
+    "calls": 561,
+    "labelled_calls": 135,
+    "mi_score": 65.9,
+    "rated_calls": 62,
+    "supervisor_overall": 3.0,
+    "supervisor_empathy": 2.65
+   },
+   {
+    "coach_id": "C07",
+    "first_name": "Marcus",
+    "role": "exercise coach",
+    "languages": "English",
+    "years_experience": 5,
+    "calls": 247,
+    "labelled_calls": 58,
+    "mi_score": 52.3,
+    "rated_calls": 28,
+    "supervisor_overall": 2.2,
+    "supervisor_empathy": 2.07
+   },
+   {
+    "coach_id": "C08",
+    "first_name": "Yolanda",
+    "role": "health coach",
+    "languages": "English, Spanish",
+    "years_experience": 14,
+    "calls": 580,
+    "labelled_calls": 144,
+    "mi_score": 83.7,
+    "rated_calls": 55,
+    "supervisor_overall": 4.21,
+    "supervisor_empathy": 3.9
+   },
+   {
+    "coach_id": "C09",
+    "first_name": "Jean",
+    "role": "health coach",
+    "languages": "English, Haitian Creole",
+    "years_experience": 1,
+    "calls": 285,
+    "labelled_calls": 72,
+    "mi_score": 62.3,
+    "rated_calls": 36,
+    "supervisor_overall": 3.01,
+    "supervisor_empathy": 2.61
+   },
+   {
+    "coach_id": "C10",
+    "first_name": "Camila",
+    "role": "dietitian",
+    "languages": "English, Spanish",
+    "years_experience": 7,
+    "calls": 500,
+    "labelled_calls": 127,
+    "mi_score": 76.6,
+    "rated_calls": 58,
+    "supervisor_overall": 3.8,
+    "supervisor_empathy": 3.36
+   },
+   {
+    "coach_id": "C11",
+    "first_name": "Tanya",
+    "role": "health coach",
+    "languages": "English",
+    "years_experience": 2,
+    "calls": 242,
+    "labelled_calls": 56,
+    "mi_score": 68.3,
+    "rated_calls": 17,
+    "supervisor_overall": 3.44,
+    "supervisor_empathy": 3.29
+   },
+   {
+    "coach_id": "C12",
+    "first_name": "Jorge",
+    "role": "exercise coach",
+    "languages": "English, Spanish",
+    "years_experience": 8,
+    "calls": 494,
+    "labelled_calls": 138,
+    "mi_score": 67.3,
+    "rated_calls": 68,
+    "supervisor_overall": 3.21,
+    "supervisor_empathy": 2.93
+   },
+   {
+    "coach_id": "C13",
+    "first_name": "Beth",
+    "role": "dietitian",
+    "languages": "English",
+    "years_experience": 20,
+    "calls": 275,
+    "labelled_calls": 68,
+    "mi_score": 68.1,
+    "rated_calls": 34,
+    "supervisor_overall": 3.26,
+    "supervisor_empathy": 2.93
+   },
+   {
+    "coach_id": "C14",
+    "first_name": "Pierre",
+    "role": "exercise coach",
+    "languages": "English, Haitian Creole",
+    "years_experience": 3,
+    "calls": 258,
+    "labelled_calls": 68,
+    "mi_score": 66.6,
+    "rated_calls": 28,
+    "supervisor_overall": 2.88,
+    "supervisor_empathy": 2.62
+   }
+  ],
+  "mi_score_by_month": [
+   {
+    "month": "2025-01",
+    "mi_score": 70.7,
+    "labelled_calls": 21
+   },
+   {
+    "month": "2025-02",
+    "mi_score": 69.9,
+    "labelled_calls": 58
+   },
+   {
+    "month": "2025-03",
+    "mi_score": 69.5,
+    "labelled_calls": 66
+   },
+   {
+    "month": "2025-04",
+    "mi_score": 69.3,
+    "labelled_calls": 113
+   },
+   {
+    "month": "2025-05",
+    "mi_score": 71.0,
+    "labelled_calls": 79
+   },
+   {
+    "month": "2025-06",
+    "mi_score": 69.8,
+    "labelled_calls": 87
+   },
+   {
+    "month": "2025-07",
+    "mi_score": 69.2,
+    "labelled_calls": 96
+   },
+   {
+    "month": "2025-08",
+    "mi_score": 69.0,
+    "labelled_calls": 69
+   },
+   {
+    "month": "2025-09",
+    "mi_score": 70.5,
+    "labelled_calls": 98
+   },
+   {
+    "month": "2025-10",
+    "mi_score": 69.3,
+    "labelled_calls": 98
+   },
+   {
+    "month": "2025-11",
+    "mi_score": 69.5,
+    "labelled_calls": 74
+   },
+   {
+    "month": "2025-12",
+    "mi_score": 69.9,
+    "labelled_calls": 114
+   },
+   {
+    "month": "2026-01",
+    "mi_score": 66.3,
+    "labelled_calls": 93
+   },
+   {
+    "month": "2026-02",
+    "mi_score": 68.7,
+    "labelled_calls": 92
+   },
+   {
+    "month": "2026-03",
+    "mi_score": 69.4,
+    "labelled_calls": 97
+   },
+   {
+    "month": "2026-04",
+    "mi_score": 68.6,
+    "labelled_calls": 72
+   },
+   {
+    "month": "2026-05",
+    "mi_score": 69.6,
+    "labelled_calls": 28
+   },
+   {
+    "month": "2026-06",
+    "mi_score": 68.9,
+    "labelled_calls": 8
+   }
+  ],
+  "supervisor_agreement": {
+   "calls_rated_by_both": 600,
+   "exact_overall_pct": 44.3,
+   "within_one_point_pct": 94.0
+  },
+  "mi_score_vs_supervisor": {
+   "calls": 600,
+   "spearman": 0.82
+  },
+  "checklist_done_pct": [
+   {
+    "item": "set_agenda",
+    "pct": 67.2
+   },
+   {
+    "item": "checked_feelings",
+    "pct": 80.8
+   },
+   {
+    "item": "reviewed_last_goal",
+    "pct": 76.7
+   },
+   {
+    "item": "set_new_goal",
+    "pct": 82.8
+   },
+   {
+    "item": "planned_for_barriers",
+    "pct": 67.1
+   },
+   {
+    "item": "summarized",
+    "pct": 62.3
+   },
+   {
+    "item": "set_next_contact",
+    "pct": 89.4
+   }
+  ],
+  "safety": {
+   "labelled_calls_with_needs_human": 20,
+   "needs_human_lines": 20,
+   "labelled_texts": 11493,
+   "texts_needs_human": 17,
+   "text_intents": {
+    "check in": 3305,
+    "reminder": 1986,
+    "encouragement": 1955,
+    "progress report": 1482,
+    "barrier": 875,
+    "nudge": 667,
+    "thanks": 543,
+    "answer": 249,
+    "question": 249,
+    "minor symptom": 107,
+    "scheduling": 46,
+    "concern": 17,
+    "escalation": 12
+   }
+  },
+  "goal_met_by_topic": [
+   {
+    "topic": "after_dinner",
+    "weeks": 1257,
+    "met_pct": 36.4,
+    "partly_pct": 31.1
+   },
+   {
+    "topic": "alcohol",
+    "weeks": 973,
+    "met_pct": 37.4,
+    "partly_pct": 29.8
+   },
+   {
+    "topic": "cooking",
+    "weeks": 1157,
+    "met_pct": 39.2,
+    "partly_pct": 30.2
+   },
+   {
+    "topic": "fasting",
+    "weeks": 1275,
+    "met_pct": 36.9,
+    "partly_pct": 29.6
+   },
+   {
+    "topic": "sleep",
+    "weeks": 994,
+    "met_pct": 35.5,
+    "partly_pct": 30.3
+   },
+   {
+    "topic": "soda",
+    "weeks": 1036,
+    "met_pct": 37.9,
+    "partly_pct": 29.4
+   },
+   {
+    "topic": "strength",
+    "weeks": 1112,
+    "met_pct": 34.1,
+    "partly_pct": 29.8
+   },
+   {
+    "topic": "veggies",
+    "weeks": 1348,
+    "met_pct": 38.8,
+    "partly_pct": 30.0
+   },
+   {
+    "topic": "walking",
+    "weeks": 1729,
+    "met_pct": 34.8,
+    "partly_pct": 31.3
+   }
+  ],
+  "goal_met_by_week": [
+   {
+    "week": 1,
+    "met_pct": 35.1
+   },
+   {
+    "week": 2,
+    "met_pct": 34.5
+   },
+   {
+    "week": 3,
+    "met_pct": 34.0
+   },
+   {
+    "week": 4,
+    "met_pct": 36.0
+   },
+   {
+    "week": 5,
+    "met_pct": 38.6
+   },
+   {
+    "week": 6,
+    "met_pct": 37.5
+   },
+   {
+    "week": 7,
+    "met_pct": 37.8
+   },
+   {
+    "week": 8,
+    "met_pct": 38.6
+   },
+   {
+    "week": 9,
+    "met_pct": 35.7
+   },
+   {
+    "week": 10,
+    "met_pct": 38.0
+   },
+   {
+    "week": 11,
+    "met_pct": 36.2
+   },
+   {
+    "week": 12,
+    "met_pct": 39.4
+   }
+  ],
+  "caveat": "MI score uses Ellie's 30/20/20/30 formula on supervisor-labelled calls only (about 1 in 4)."
+ }
+}
